@@ -1,14 +1,15 @@
-from six import iteritems
 import numpy as np
-
 from openmdao.api import Group, IndepVarComp
-from openmdao.utils.options_dictionary import OptionsDictionary
+from six import iteritems
 
+import openode.schemes.scheme as schemes
+from openode.components.time_comp import TimeComp
+from openode.schemes.scheme import GLMScheme
+from openode.schemes.runge_kutta import RK4
 from openode.ode import ODE
 from openode.utils.var_names import get_Y_name, get_F_name, get_y_old_name, get_y_new_name, \
     get_step_name
-import openode.utils.schemes as schemes
-from openode.components.time_comp import TimeComp
+
 
 
 class Integrator(Group):
@@ -22,7 +23,7 @@ class Integrator(Group):
         self.metadata.declare('initial_conditions', type_=dict)
         self.metadata.declare('start_time', values=(None,), type_=(int, float))
         self.metadata.declare('end_time', values=(None,), type_=(int, float))
-        self.metadata.declare('scheme', default='forward Euler', type_=str)
+        self.metadata.declare('scheme', default=RK4(), type_=GLMScheme)
 
     def setup(self):
         ode = self.metadata['ode']
@@ -129,7 +130,6 @@ class Integrator(Group):
         return states, time_units, time_spacing
 
     def _get_scheme(self):
-        get_scheme = getattr(schemes, self.metadata['scheme'])
-        glm_A, glm_B, glm_U, glm_V, num_stages, num_step_vars = get_scheme()
+        scheme = self.metadata['scheme']
 
-        return glm_A, glm_B, glm_U, glm_V, num_stages, num_step_vars
+        return scheme.A, scheme.B, scheme.U, scheme.V, scheme.num_stages, scheme.num_values
