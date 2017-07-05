@@ -2,7 +2,7 @@ import numpy as np
 
 from openmdao.api import ExplicitComponent, Problem
 
-from openode.api import ODE, ExplicitTimeMarchingIntegrator, ExplicitRelaxedIntegrator
+from openode.api import ODE, ExplicitTimeMarchingIntegrator, RK4, ForwardEuler
 
 
 class Comp(ExplicitComponent):
@@ -18,7 +18,7 @@ class Comp(ExplicitComponent):
         self.declare_partials('dy_dt', 'y', val=np.eye(num))
 
     def compute(self, inputs, outputs):
-        outputs['dy_dt'] = inputs['y']
+        outputs['dy_dt'] = 1*inputs['y']
 
 
 num = 20
@@ -29,7 +29,7 @@ ode.declare_state('y', rate_target='dy_dt', state_targets='y')
 # intgr = ExplicitRelaxedIntegrator(
 intgr = ExplicitTimeMarchingIntegrator(
     ode=ode, time_spacing=np.arange(num),
-    scheme='kutta_third_order', initial_conditions={'y': 1.}, start_time=0., end_time=1.)
+    scheme=RK4(), initial_conditions={'y': 1.}, start_time=0., end_time=1.)
 
 prob = Problem(intgr)
 prob.setup()
