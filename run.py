@@ -26,8 +26,8 @@ num = 20
 ode = ODE(Comp)
 ode.declare_state('y', rate_target='dy_dt', state_targets='y')
 
-# intgr = ExplicitTimeMarchingIntegrator(
-intgr = ExplicitRelaxedIntegrator(
+# intgr = ExplicitRelaxedIntegrator(
+intgr = ExplicitTimeMarchingIntegrator(
     ode=ode, time_spacing=np.arange(num),
     scheme='kutta_third_order', initial_conditions={'y': 1.}, start_time=0., end_time=1.)
 
@@ -36,7 +36,7 @@ prob.setup()
 prob.run_model()
 # prob.check_partials(compact_print=True)
 
-# print(prob['output_comp.y'])
+print(prob['output_comp.y'])
 
 from openmdao.api import view_model
 
