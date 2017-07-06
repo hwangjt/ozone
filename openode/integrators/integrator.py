@@ -4,6 +4,7 @@ from six import iteritems
 
 import openode.schemes.scheme as schemes
 from openode.components.time_comp import TimeComp
+from openode.components.starting_comp import StartingComp
 from openode.schemes.scheme import GLMScheme
 from openode.schemes.runge_kutta import RK4
 from openode.ode import ODE
@@ -27,6 +28,7 @@ class Integrator(Group):
 
     def setup(self):
         ode = self.metadata['ode']
+        states = ode._states
 
         # Ensure that all initial_conditions are valid
         for state_name, value in iteritems(self.metadata['initial_conditions']):
@@ -74,6 +76,12 @@ class Integrator(Group):
         self.connect('time_interval.start_time', 'time_comp.start_time')
         self.connect('time_interval.end_time', 'time_comp.end_time')
 
+        # Starting method
+        self.add_subsystem('starting_comp', StartingComp(states=states))
+        self._connect_states(
+            'initial_conditions', 'state_name',
+            'starting_comp', 'state_name')
+
     def _connect_states(self, src_comp, src_type, tgt_comp, tgt_type,
             src_stage=None, tgt_stage=None, src_step=None, tgt_step=None):
 
@@ -92,7 +100,7 @@ class Integrator(Group):
             elif src_type == 'rate_target':
                 src_name = state['rate_target']
             else:
-                raise ValueError('Invalid src_string given')
+                src_name = src_type + ':' + state_name
 
             if tgt_type == 'state_name':
                 tgt_names = [state_name]
@@ -109,7 +117,7 @@ class Integrator(Group):
             elif tgt_type == 'step_name':
                 tgt_names = [get_step_name(tgt_step, state_name)]
             else:
-                raise ValueError('Invalid tgt_string given')
+                tgt_names = [tgt_type + ':' + state_name]
 
             for tgt_name in tgt_names:
                 self.connect(

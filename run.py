@@ -2,7 +2,8 @@ import numpy as np
 
 from openmdao.api import ExplicitComponent, Problem
 
-from openode.api import ODE, ExplicitTimeMarchingIntegrator, RK4, ForwardEuler
+from openode.api import ODE, ExplicitTimeMarchingIntegrator, RK4, ForwardEuler, ExplicitMidpoint, \
+    ExplicitRelaxedIntegrator, BackwardEuler, ImplicitMidpoint
 
 
 class Comp(ExplicitComponent):
@@ -21,7 +22,7 @@ class Comp(ExplicitComponent):
         outputs['dy_dt'] = 1*inputs['y']
 
 
-num = 20
+num = 50
 
 ode = ODE(Comp)
 ode.declare_state('y', rate_target='dy_dt', state_targets='y')
@@ -29,14 +30,18 @@ ode.declare_state('y', rate_target='dy_dt', state_targets='y')
 # intgr = ExplicitRelaxedIntegrator(
 intgr = ExplicitTimeMarchingIntegrator(
     ode=ode, time_spacing=np.arange(num),
-    scheme=RK4(), initial_conditions={'y': 1.}, start_time=0., end_time=1.)
+    scheme=ExplicitMidpoint(), initial_conditions={'y': 1.}, start_time=0., end_time=1.)
 
 prob = Problem(intgr)
 prob.setup()
 prob.run_model()
 # prob.check_partials(compact_print=True)
 
-print(prob['output_comp.y'])
+if isinstance(intgr, ExplicitRelaxedIntegrator):
+    print(prob['vectorized_step_comp.y:y'])
+    print(prob['vectorized_step_comp.y:y'].shape)
+else:
+    print(prob['output_comp.y'])
 
 from openmdao.api import view_model
 

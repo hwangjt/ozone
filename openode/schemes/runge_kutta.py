@@ -10,7 +10,7 @@ class RungeKutta(GLMScheme):
 
         U = np.ones((A.shape[0], 1))
         V = np.array([[1.]])
-        
+
         super(RungeKutta, self).__init__(A=A, B=B, U=U, V=V, abscissa=np.sum(A, 1))
 
     def starting_method(self, y0):
@@ -118,3 +118,13 @@ class RK4(ExplicitRungeKutta):
                 [1 / 6, 1 / 3, 1 / 3, 1 / 6],
             ])
         )
+
+
+class BackwardEuler(ImplicitRungeKutta):
+    def __init__(self):
+        super(BackwardEuler, self).__init__(A=1., B=1.)
+
+
+class ImplicitMidpoint(ImplicitRungeKutta):
+    def __init__(self):
+        super(ImplicitMidpoint, self).__init__(A=1/2, B=1.)

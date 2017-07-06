@@ -22,12 +22,6 @@ class ExplicitTimeMarchingIntegrator(Integrator):
         states, time_units, time_spacing = self._get_meta()
         glm_A, glm_B, glm_U, glm_V, num_stages, num_step_vars = self._get_scheme()
 
-        # Starting method
-        self.add_subsystem('starting_comp', StartingComp(states=states))
-        self._connect_states(
-            'initial_conditions', 'state_name',
-            'starting_comp', 'state_name')
-
         for i_step in range(len(time_spacing) - 1):
 
             step_comp_old_name = 'step_comp_%i' % (i_step - 1)
