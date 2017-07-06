@@ -67,17 +67,6 @@ class VectorizedStepComp(ImplicitComponent):
 
             # -----------------
 
-            # AIJ(size, num_time_steps - 1, num_stages)
-            data = np.ones((size, num_time_steps - 1, num_stages)).flatten()
-            rows = F_arange.flatten()
-            cols = np.einsum('ik,j->ijk', np.ones((size, num_stages), int), h_arange).flatten()
-
-            h_mtx[state_name] = scipy.sparse.csc_matrix(
-                (data, (rows, cols)),
-                shape=(size * (num_time_steps - 1) * num_stages, num_time_steps - 1))
-
-            # -----------------
-
             # AIJ(size, num_time_steps, num_step_vars)
             data1 = np.ones(size * num_time_steps * num_step_vars)
             rows1 = np.arange(size * num_time_steps * num_step_vars)
@@ -152,21 +141,8 @@ class VectorizedStepComp(ImplicitComponent):
 
             residuals[y_name] = out_vec # y term
             residuals[y_name][:, 0, :] -= inputs[y0_name] # y0 term
-            residuals[y_name][:, 1:, :] += np.einsum('kl,j,ijl->ijk',
-                glm_B, inputs['h_vec'], inputs[F_name])
-
-            # in_vec = outputs[y_name].reshape((size * num_time_steps * num_step_vars))
-            # out_vec_y = dy_dy[state_name].dot(in_vec)
-            #
-            # in_vec = inputs[F_name].reshape((size * (num_time_steps - 1) * num_stages))
-            # in_vec = in_vec * h_mtx[state_name].dot(inputs['h_vec'])
-            # out_vec_hF = dy_dhF[state_name].dot(in_vec)
-            #
-            # in_vec = inputs[y0_name].reshape((size * num_step_vars))
-            # out_vec_y0 = dy_dy0[state_name].dot(in_vec)
-            #
-            # residuals[y_name] = (out_vec_y + out_vec_hF + out_vec_y0).reshape(
-            #     (size, num_time_steps, num_step_vars))
+            residuals[y_name][:, 1:, :] -= np.einsum('kl,j,ijl->ijk',
+                glm_B, inputs['h_vec'], inputs[F_name]) # hF term
 
     def solve_nonlinear(self, inputs, outputs):
         time_units = self.metadata['time_units']
@@ -189,16 +165,12 @@ class VectorizedStepComp(ImplicitComponent):
             y0_name = 'y0:%s' % state_name
             y_name = 'y:%s' % state_name
 
-            in_vec = inputs[F_name].reshape((size * (num_time_steps - 1) * num_stages))
-            in_vec = in_vec * h_mtx[state_name].dot(inputs['h_vec'])
-            out_vec_hF = dy_dhF[state_name].dot(in_vec)
+            vec = np.zeros((size, num_time_steps, num_step_vars))
+            vec[:, 0, :] += inputs[y0_name] # y0 term
+            vec[:, 1:, :] += np.einsum('kl,j,ijl->ijk',
+                glm_B, inputs['h_vec'], inputs[F_name]) # hF term
 
-            in_vec = inputs[y0_name].reshape((size * num_step_vars))
-            out_vec_y0 = dy_dy0[state_name].dot(in_vec)
-
-            rhs_vec = -(out_vec_hF + out_vec_y0)
-
-            outputs[y_name] = dy_dy_inv[state_name].solve(rhs_vec, 'N').reshape(
+            outputs[y_name] = dy_dy_inv[state_name].solve(vec.flatten(), 'N').reshape(
                 (size, num_time_steps, num_step_vars))
 
     def linearize(self, inputs, outputs, partials):
@@ -222,8 +194,6 @@ class VectorizedStepComp(ImplicitComponent):
             F_name = 'F:%s' % state_name
             y0_name = 'y0:%s' % state_name
             y_name = 'y:%s' % state_name
-
-            # ----------------------------------
 
             # (size, num_time_steps - 1, num_step_vars, num_stages)
             partials[y_name, F_name] = np.einsum(
