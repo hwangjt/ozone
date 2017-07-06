@@ -13,6 +13,11 @@ class ExplicitRelaxedIntegrator(Integrator):
     Integrate an explicit scheme with a relaxed time-marching approach.
     """
 
+    def initialize(self):
+        super(ExplicitRelaxedIntegrator, self).initialize()
+
+        self.metadata.declare('formulation', default='MDF', values=['MDF', 'SAND'])
+
     def setup(self):
         super(ExplicitRelaxedIntegrator, self).setup()
 
@@ -62,14 +67,15 @@ class ExplicitRelaxedIntegrator(Integrator):
                 'vectorized_stage_comp.y:%s' % state_name,
             )
 
-            src_indices = np.arange((num_time_steps - 1) * num_stages * size).reshape(
-                ((num_time_steps - 1) * num_stages,) + shape)
-            self.connect(
-                'vectorized_stage_comp.Y_out:%s' % state_name,
-                ['ode_comp.%s' % tgt for tgt in state['state_targets']],
-                # src_indices=src_indices,
-            )
+            if self.metadata['formulation'] == 'MDF':
+                src_indices = np.arange((num_time_steps - 1) * num_stages * size).reshape(
+                    ((num_time_steps - 1) * num_stages,) + shape)
+                self.connect(
+                    'vectorized_stage_comp.Y_out:%s' % state_name,
+                    ['ode_comp.%s' % tgt for tgt in state['state_targets']],
+                    # src_indices=src_indices,
+                )
 
-        self.nonlinear_solver = NewtonSolver(iprint=2, maxiter=100)
-        self.linear_solver = ScipyIterativeSolver(iprint=2)
-        self.linear_solver = DirectSolver()
+        if self.metadata['formulation'] == 'MDF':
+            self.nonlinear_solver = NewtonSolver(iprint=2, maxiter=100)
+            self.linear_solver = DirectSolver()
