@@ -27,8 +27,8 @@ num = 50
 ode = ODE(Comp)
 ode.declare_state('y', rate_target='dy_dt', state_targets='y')
 
-# intgr = ExplicitRelaxedIntegrator(
-intgr = ExplicitTimeMarchingIntegrator(
+intgr = ExplicitRelaxedIntegrator(
+# intgr = ExplicitTimeMarchingIntegrator(
     ode=ode, time_spacing=np.arange(num),
     scheme=ExplicitMidpoint(), initial_conditions={'y': 1.}, start_time=0., end_time=1.)
 

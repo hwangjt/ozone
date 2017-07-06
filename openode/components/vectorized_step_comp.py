@@ -73,8 +73,10 @@ class VectorizedStepComp(ImplicitComponent):
             # (num_time_steps - 1, num_step_vars, num_step_vars,) + shape
             data2 = np.einsum('i...,jk->ijk...',
                 np.ones((num_time_steps - 1,) + shape), -glm_V).flatten()
-            rows2 = np.einsum('ij...,k->ijk...', y_arange[1:, :, :], np.ones(num_step_vars)).flatten()
-            cols2 = np.einsum('ik...,j->ijk...', y_arange[:-1, :, :], np.ones(num_step_vars)).flatten()
+            rows2 = np.einsum('ij...,k->ijk...',
+                y_arange[1:, :, :], np.ones(num_step_vars)).flatten()
+            cols2 = np.einsum('ik...,j->ijk...',
+                y_arange[:-1, :, :], np.ones(num_step_vars)).flatten()
 
             data = np.concatenate([data1, data2])
             rows = np.concatenate([rows1, rows2])

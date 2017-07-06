@@ -36,9 +36,10 @@ class VectorizedStageComp(ExplicitComponent):
             size = np.prod(state['shape'])
             shape = state['shape']
 
-            Y_name = 'Y:%s' % state_name
             F_name = 'F:%s' % state_name
             y_name = 'y:%s' % state_name
+            Y_out_name = 'Y_out:%s' % state_name
+            Y_in_name = 'Y_in:%s' % state_name
 
             Y_arange = np.arange((num_time_steps - 1) * num_stages * size).reshape(
                 (num_time_steps - 1, num_stages,) + shape)
@@ -57,9 +58,19 @@ class VectorizedStageComp(ExplicitComponent):
                 shape=(num_time_steps, num_step_vars,) + shape,
                 units=state['units'])
 
-            self.add_output(Y_name,
+            self.add_input(Y_in_name, val=0.,
                 shape=(num_time_steps - 1, num_stages,) + shape,
-                units=get_rate_units(state['units'], time_units))
+                units=state['units'])
+
+            self.add_output(Y_out_name,
+                shape=(num_time_steps - 1, num_stages,) + shape,
+                units=state['units'])
+
+            # -----------------
+
+            ones = -np.ones((num_time_steps - 1) * num_stages * size)
+            arange = np.arange((num_time_steps - 1) * num_stages * size)
+            self.declare_partials(Y_out_name, Y_in_name, val=ones, rows=arange, cols=arange)
 
             # -----------------
 
@@ -68,10 +79,10 @@ class VectorizedStageComp(ExplicitComponent):
 
             cols = np.einsum('jk...,i->ijk...',
                 np.ones((num_stages, num_stages,) + shape), h_arange).flatten()
-            self.declare_partials(Y_name, 'h_vec', rows=rows, cols=cols)
+            self.declare_partials(Y_out_name, 'h_vec', rows=rows, cols=cols)
 
             cols = np.einsum('ik...,j->ijk...', F_arange, np.ones(num_stages)).flatten()
-            self.declare_partials(Y_name, F_name, rows=rows, cols=cols)
+            self.declare_partials(Y_out_name, F_name, rows=rows, cols=cols)
 
             # -----------------
 
@@ -81,7 +92,7 @@ class VectorizedStageComp(ExplicitComponent):
             rows = np.einsum('ij...,k->ijk...', Y_arange, np.ones(num_step_vars)).flatten()
             cols = np.einsum('ikl,j->ijk...', y_arange[:-1, :, :], np.ones(num_stages)).flatten()
 
-            self.declare_partials(Y_name, y_name, val=data, rows=rows, cols=cols)
+            self.declare_partials(Y_out_name, y_name, val=data, rows=rows, cols=cols)
 
     def compute(self, inputs, outputs):
         glm_A = self.metadata['glm_A']
@@ -91,12 +102,13 @@ class VectorizedStageComp(ExplicitComponent):
             size = np.prod(state['shape'])
             shape = state['shape']
 
-            Y_name = 'Y:%s' % state_name
             F_name = 'F:%s' % state_name
             y_name = 'y:%s' % state_name
+            Y_out_name = 'Y_out:%s' % state_name
+            Y_in_name = 'Y_in:%s' % state_name
 
-            outputs[Y_name] = \
-                np.einsum('jk,i,ik...->ij...', glm_A, inputs['h_vec'], inputs[F_name]) \
+            outputs[Y_out_name] = -inputs[Y_in_name] \
+                + np.einsum('jk,i,ik...->ij...', glm_A, inputs['h_vec'], inputs[F_name]) \
                 + np.einsum('jk,ik...->ij...', glm_U, inputs[y_name][:-1, :, :])
 
     def compute_partials(self, inputs, outputs, partials):
@@ -111,14 +123,15 @@ class VectorizedStageComp(ExplicitComponent):
             size = np.prod(state['shape'])
             shape = state['shape']
 
-            Y_name = 'Y:%s' % state_name
             F_name = 'F:%s' % state_name
             y_name = 'y:%s' % state_name
+            Y_out_name = 'Y_out:%s' % state_name
+            Y_in_name = 'Y_in:%s' % state_name
 
             # (num_time_steps - 1, num_stages, num_stages,) + shape
 
-            partials[Y_name, F_name] = np.einsum(
+            partials[Y_out_name, F_name] = np.einsum(
                 '...,jk,i->ijk...', np.ones(shape), glm_A, inputs['h_vec']).flatten()
 
-            partials[Y_name, 'h_vec'] = np.einsum(
+            partials[Y_out_name, 'h_vec'] = np.einsum(
                 'jk,ik...->ijk...', glm_A, inputs[F_name]).flatten()

@@ -65,7 +65,7 @@ class ExplicitRelaxedIntegrator(Integrator):
             src_indices = np.arange((num_time_steps - 1) * num_stages * size).reshape(
                 ((num_time_steps - 1) * num_stages,) + shape)
             self.connect(
-                'vectorized_stage_comp.Y:%s' % state_name,
+                'vectorized_stage_comp.Y_out:%s' % state_name,
                 ['ode_comp.%s' % tgt for tgt in state['state_targets']],
                 # src_indices=src_indices,
             )
