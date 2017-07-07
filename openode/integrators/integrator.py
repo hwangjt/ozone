@@ -71,8 +71,10 @@ class Integrator(Group):
             self.add_subsystem('time_interval', comp)
 
         # Time comp
+        abscissa = self.metadata['scheme'].abscissa
         self.add_subsystem('time_comp',
-            TimeComp(time_spacing=time_spacing, time_units=time_units))
+            TimeComp(time_spacing=time_spacing, time_units=time_units,
+                     glm_abscissa=abscissa))
         self.connect('time_interval.start_time', 'time_comp.start_time')
         self.connect('time_interval.end_time', 'time_comp.end_time')
 

@@ -20,7 +20,14 @@ class ExplicitTimeMarchingIntegrator(Integrator):
         super(ExplicitTimeMarchingIntegrator, self).setup()
 
         states, time_units, time_spacing = self._get_meta()
-        glm_A, glm_B, glm_U, glm_V, num_stages, num_step_vars = self._get_scheme()
+        scheme = self.metadata['scheme']
+        glm_A = scheme.A
+        glm_B = scheme.B
+        glm_U = scheme.U
+        glm_V = scheme.V
+        num_stages = scheme.num_stages
+        num_step_vars = scheme.num_values
+        ode =  self.metadata['ode']
 
         for i_step in range(len(time_spacing) - 1):
 
@@ -30,6 +37,12 @@ class ExplicitTimeMarchingIntegrator(Integrator):
             for i_stage in range(num_stages):
                 stage_comp_name = 'stage_comp_%i_%i' % (i_step, i_stage)
                 ode_comp_name = 'ode_comp_%i_%i' % (i_step, i_stage)
+
+                self.connect('time_comp.abscissa_times',
+                             ['.'.join((ode_comp_name, t)) for t in
+                              ode._time_options['targets']],
+                             src_indices=i_step * (num_stages) + i_stage
+                             )
 
                 comp = StageComp(
                     states=states, time_units=time_units,
