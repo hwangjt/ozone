@@ -14,17 +14,22 @@ class Comp(ExplicitComponent):
         num = self.metadata['num']
 
         self.add_input('y', shape=(num, 1))
+        self.add_input('t', shape=(num, 1))
         self.add_output('dy_dt', shape=(num, 1))
-        self.declare_partials('dy_dt', 'y', val=np.eye(num))
+        self.declare_partials('dy_dt', 'y', dependent=False)
 
     def compute(self, inputs, outputs):
-        outputs['dy_dt'] = 1*inputs['y']
+        outputs['dy_dt'] = np.sin(2*np.pi*inputs['t'])
+
+    def compute_partials(self, inputs, outputs, partials):
+        partials['dy_dt', 't'] = 2*np.pi*np.cos(2*np.pi*inputs['t'])
 
 
-num = 20
+num = 10
 
 ode = ODE(Comp)
 ode.declare_state('y', rate_target='dy_dt', state_targets='y')
+ode.declare_time('t', 't')
 
 # intgr = ExplicitRelaxedIntegrator(
 intgr = ExplicitTimeMarchingIntegrator(

@@ -20,7 +20,13 @@ class ExplicitTimeMarchingIntegrator(Integrator):
         super(ExplicitTimeMarchingIntegrator, self).setup()
 
         states, time_units, time_spacing = self._get_meta()
-        glm_A, glm_B, glm_U, glm_V, num_stages, num_step_vars = self._get_scheme()
+        scheme = self.metadata['scheme']
+        glm_A = scheme.A
+        glm_B = scheme.B
+        glm_U = scheme.U
+        glm_V = scheme.V
+        num_stages = scheme.num_stages
+        num_step_vars = scheme.num_values
 
         # Starting method
         self.add_subsystem('starting_comp', StartingComp(states=states))
