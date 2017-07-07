@@ -17,7 +17,7 @@ class Comp(ExplicitComponent):
         self.add_input('t', shape=(num, 1))
         self.add_output('dy_dt', shape=(num, 1))
 
-        self.declare_partials('dy_dt', 'y', val=1.)
+        self.declare_partials('dy_dt', 'y', val=np.eye(num))
 
     def compute(self, inputs, outputs):
         # True solution: e^t + sin(2*pi*t)
