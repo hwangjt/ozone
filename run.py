@@ -34,7 +34,7 @@ class Comp(ExplicitComponent):
             * (((2*np.pi)**2)*np.sin(two_pi_t) - 2*np.pi*np.cos(two_pi_t))
 
 
-num = 501
+num = 51
 formulation = 'SAND'
 formulation = 'MDF'
 
@@ -47,7 +47,7 @@ intgr = VectorizedIntegrator(
 # intgr = ExplicitTMIntegrator(
 # intgr = ImplicitTMIntegrator(
     ode_function=ode_function, time_spacing=np.arange(num),
-    scheme=BackwardEuler(), initial_conditions={'y': 1.}, start_time=0., end_time=1.,
+    scheme=ForwardEuler(), initial_conditions={'y': 1.}, start_time=0., end_time=1.,
     # formulation=formulation,
 )
 

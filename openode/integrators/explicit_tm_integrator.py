@@ -7,7 +7,7 @@ from openode.integrators.integrator import Integrator
 from openode.components.starting_comp import StartingComp
 from openode.components.explicit_tm_stage_comp import ExplicitTMStageComp
 from openode.components.explicit_tm_step_comp import ExplicitTMStepComp
-from openode.components.explicit_tm_output_comp import ExplicitTMOutputComp
+from openode.components.tm_output_comp import TMOutputComp
 from openode.utils.var_names import get_y_new_name
 
 
@@ -98,7 +98,7 @@ class ExplicitTMIntegrator(Integrator):
                     step_comp_old_name, 'y_new_name',
                     step_comp_new_name, 'y_old_name')
 
-        comp = ExplicitTMOutputComp(states=states, time_spacing=time_spacing)
+        comp = TMOutputComp(states=states, time_spacing=time_spacing)
         self.add_subsystem('output_comp', comp)
 
         for i_step in range(len(time_spacing)):
