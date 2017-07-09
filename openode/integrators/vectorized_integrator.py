@@ -8,18 +8,18 @@ from openode.components.vectorized_step_comp import VectorizedStepComp
 from openode.components.vectorized_stage_comp import VectorizedStageComp
 
 
-class ExplicitRelaxedIntegrator(Integrator):
+class VectorizedIntegrator(Integrator):
     """
     Integrate an explicit scheme with a relaxed time-marching approach.
     """
 
     def initialize(self):
-        super(ExplicitRelaxedIntegrator, self).initialize()
+        super(VectorizedIntegrator, self).initialize()
 
         self.metadata.declare('formulation', default='MDF', values=['MDF', 'SAND'])
 
     def setup(self):
-        super(ExplicitRelaxedIntegrator, self).setup()
+        super(VectorizedIntegrator, self).setup()
 
         coupled_group = Group()
         self.add_subsystem('coupled_group', coupled_group)

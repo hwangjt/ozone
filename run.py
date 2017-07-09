@@ -3,7 +3,7 @@ import numpy as np
 from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp, pyOptSparseDriver
 
 from openode.api import ODEFunction, ExplicitTMIntegrator, RK4, ForwardEuler, ExplicitMidpoint, \
-    ExplicitRelaxedIntegrator, BackwardEuler, ImplicitMidpoint
+    VectorizedIntegrator, BackwardEuler, ImplicitMidpoint
 
 
 class Comp(ExplicitComponent):
@@ -42,11 +42,11 @@ ode_function.set_system(Comp)
 ode_function.declare_state('y', rate_target='dy_dt', state_targets='y')
 ode_function.declare_time('t')
 
-intgr = ExplicitRelaxedIntegrator(
-# intgr = ExplicitTMIntegrator(
+# intgr = VectorizedIntegrator(
+intgr = ExplicitTMIntegrator(
     ode_function=ode_function, time_spacing=np.arange(num),
     scheme=ForwardEuler(), initial_conditions={'y': 1.}, start_time=0., end_time=1.,
-    formulation=formulation,
+    # formulation=formulation,
 )
 
 prob = Problem(intgr)
@@ -69,7 +69,7 @@ else:
     prob.run_model()
 # prob.check_partials(compact_print=True)
 
-if isinstance(intgr, ExplicitRelaxedIntegrator):
+if isinstance(intgr, VectorizedIntegrator):
     print(prob['coupled_group.vectorized_step_comp.y:y'][:, 0, :])
     # print(intgr.get_subsystem('coupled_group')._jacobian._int_mtx._matrix)
     # print(intgr.get_subsystem('coupled_group').list_outputs())
