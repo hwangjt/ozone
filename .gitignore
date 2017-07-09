@@ -3,5 +3,5 @@
 *egg-info*
 *.html
 \.idea/inspectionProfiles/
-
 \.idea/
+*.out
