@@ -6,6 +6,7 @@ from openmdao.api import Group, IndepVarComp, NewtonSolver, DirectSolver, DenseJ
 from openode.integrators.integrator import Integrator
 from openode.components.vectorized_step_comp import VectorizedStepComp
 from openode.components.vectorized_stage_comp import VectorizedStageComp
+from openode.components.vectorized_output_comp import VectorizedOutputComp
 
 
 class VectorizedIntegrator(Integrator):
@@ -64,6 +65,16 @@ class VectorizedIntegrator(Integrator):
         )
         coupled_group.add_subsystem('vectorized_stage_comp', comp)
         self.connect('time_comp.h_vec', 'coupled_group.vectorized_stage_comp.h_vec')
+
+        comp = VectorizedOutputComp(states=states,
+            num_time_steps=num_time_steps, num_step_vars=num_step_vars,
+        )
+        self.add_subsystem('output_comp', comp)
+        for state_name, state in iteritems(states):
+            self.connect(
+                'coupled_group.vectorized_step_comp.y:%s' % state_name,
+                'output_comp.y:%s' % state_name,
+            )
 
         for state_name, state in iteritems(states):
             size = np.prod(state['shape'])

@@ -71,14 +71,7 @@ else:
     prob.run_model()
 # prob.check_partials(compact_print=True)
 
-if isinstance(intgr, VectorizedIntegrator):
-    print(prob['coupled_group.vectorized_step_comp.y:y'][:, 0, :])
-    # print(intgr.get_subsystem('coupled_group')._jacobian._int_mtx._matrix)
-    # print(intgr.get_subsystem('coupled_group').list_outputs())
-elif isinstance(intgr, ExplicitTMIntegrator):
-    print(prob['output_comp.y'])
-elif isinstance(intgr, ImplicitTMIntegrator):
-    print(prob['output_comp.y'])
+print(prob['output_comp.y'])
 
 from openmdao.api import view_model
 
