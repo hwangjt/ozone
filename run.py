@@ -30,11 +30,11 @@ class Comp(ExplicitComponent):
 
     def compute_partials(self, inputs, outputs, partials):
         two_pi_t = 2*np.pi*inputs['t']
-        partials['dy_dt', 't'] = -self.eye \
-            * (((2*np.pi)**2)*np.sin(two_pi_t) - 2*np.pi*np.cos(two_pi_t))
+        partials['dy_dt', 't'] = self.eye \
+            * (-(2*np.pi)**2 * np.sin(two_pi_t) - 2*np.pi*np.cos(two_pi_t))
 
 
-num = 51
+num = 3
 formulation = 'SAND'
 formulation = 'MDF'
 
@@ -43,11 +43,11 @@ ode_function.set_system(Comp)
 ode_function.declare_state('y', rate_target='dy_dt', state_targets='y')
 ode_function.declare_time('t')
 
-intgr = VectorizedIntegrator(
+# intgr = VectorizedIntegrator(
 # intgr = ExplicitTMIntegrator(
-# intgr = ImplicitTMIntegrator(
+intgr = ImplicitTMIntegrator(
     ode_function=ode_function, time_spacing=np.arange(num),
-    scheme=ForwardEuler(), initial_conditions={'y': 1.}, start_time=0., end_time=1.,
+    scheme=ExplicitMidpoint(), initial_conditions={'y': 1.}, start_time=0., end_time=1.,
     # formulation=formulation,
 )
 
@@ -69,9 +69,10 @@ if formulation == 'SAND':
     prob.run_driver()
 else:
     prob.run_model()
-# prob.check_partials(compact_print=True)
+prob.check_partials(compact_print=True)
+# prob.check_partials(compact_print=False)
 
-print(prob['output_comp.y'])
+# print(prob['output_comp.y'])
 
 from openmdao.api import view_model
 
