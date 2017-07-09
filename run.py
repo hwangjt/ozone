@@ -33,9 +33,9 @@ class Comp(ExplicitComponent):
             * (((2*np.pi)**2)*np.sin(two_pi_t) - 2*np.pi*np.cos(two_pi_t))
 
 
-num = 31
+num = 501
 formulation = 'SAND'
-# formulation = 'MDF'
+formulation = 'MDF'
 
 ode = ODE(Comp)
 ode.declare_state('y', rate_target='dy_dt', state_targets='y')
@@ -44,7 +44,7 @@ ode.declare_time('t')
 intgr = ExplicitRelaxedIntegrator(
 # intgr = ExplicitTimeMarchingIntegrator(
     ode=ode, time_spacing=np.arange(num),
-    scheme=ImplicitMidpoint(), initial_conditions={'y': 1.}, start_time=0., end_time=1.,
+    scheme=BackwardEuler(), initial_conditions={'y': 1.}, start_time=0., end_time=1.,
     formulation=formulation,
 )
 
@@ -69,8 +69,9 @@ else:
 # prob.check_partials(compact_print=True)
 
 if isinstance(intgr, ExplicitRelaxedIntegrator):
-    print(prob['vectorized_step_comp.y:y'])
-    print(prob['vectorized_step_comp.y:y'].shape)
+    print(prob['coupled_group.vectorized_step_comp.y:y'][:, 0, :])
+    # print(intgr.get_subsystem('coupled_group')._jacobian._int_mtx._matrix)
+    # print(intgr.get_subsystem('coupled_group').list_outputs())
 else:
     print(prob['output_comp.y'])
 
