@@ -78,7 +78,7 @@ class VectorizedStageComp(ExplicitComponent):
             rows = np.einsum('ij...,k->ijk...', Y_arange, np.ones(num_stages)).flatten()
 
             cols = np.einsum('jk...,i->ijk...',
-                np.ones((num_stages, num_stages,) + shape), h_arange).flatten()
+                np.ones((num_stages, num_stages,) + shape, int), h_arange).flatten()
             self.declare_partials(Y_out_name, 'h_vec', rows=rows, cols=cols)
 
             cols = np.einsum('ik...,j->ijk...', F_arange, np.ones(num_stages)).flatten()

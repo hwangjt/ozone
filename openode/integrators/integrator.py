@@ -109,6 +109,8 @@ class Integrator(Group):
                 tgt_names = [get_F_name(tgt_stage, state_name)]
             elif tgt_type == 'Y_name':
                 tgt_names = [get_Y_name(tgt_stage, state_name)]
+            elif tgt_type == 'y_name':
+                tgt_names = ['y:%s' % state_name]
             elif tgt_type == 'y_old_name':
                 tgt_names = [get_y_old_name(state_name)]
             elif tgt_type == 'y_new_name':
