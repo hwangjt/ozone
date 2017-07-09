@@ -11,6 +11,7 @@ setup(name='openode',
         'openode',
         'openode/components',
         'openode/integrators',
+        'openode/schemes',
         'openode/utils',
     ],
     install_requires=[

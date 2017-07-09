@@ -7,10 +7,9 @@ from openode.components.time_comp import TimeComp
 from openode.components.starting_comp import StartingComp
 from openode.schemes.scheme import GLMScheme
 from openode.schemes.runge_kutta import RK4
-from openode.ode import ODE
+from openode.ode_function import ODEFunction
 from openode.utils.var_names import get_Y_name, get_F_name, get_y_old_name, get_y_new_name, \
     get_step_name
-
 
 
 class Integrator(Group):
@@ -19,7 +18,7 @@ class Integrator(Group):
     """
 
     def initialize(self):
-        self.metadata.declare('ode', type_=ODE, required=True)
+        self.metadata.declare('ode_function', type_=ODEFunction, required=True)
         self.metadata.declare('time_spacing', type_=np.ndarray, required=True)
         self.metadata.declare('initial_conditions', type_=dict)
         self.metadata.declare('start_time', values=(None,), type_=(int, float))
@@ -27,19 +26,19 @@ class Integrator(Group):
         self.metadata.declare('scheme', default=RK4(), type_=GLMScheme)
 
     def setup(self):
-        ode = self.metadata['ode']
-        states = ode._states
+        ode_function = self.metadata['ode_function']
+        states = ode_function._states
 
         # Ensure that all initial_conditions are valid
         for state_name, value in iteritems(self.metadata['initial_conditions']):
-            assert state_name in ode._states, \
+            assert state_name in ode_function._states, \
                 'State name %s is not valid in the initial conditions' % state_name
 
             if np.isscalar(value):
-                assert ode._states[state_name]['shape'] == (1,), \
+                assert ode_function._states[state_name]['shape'] == (1,), \
                     'The initial condition for state %s has the wrong shape' % state_name
             else:
-                assert ode._states[state_name]['shape'] == value.shape, \
+                assert ode_function._states[state_name]['shape'] == value.shape, \
                     'The initial condition for state %s has the wrong shape' % state_name
 
         # Normalize time_spacing
@@ -50,14 +49,14 @@ class Integrator(Group):
         start_time = self.metadata['start_time']
         end_time = self.metadata['end_time']
 
-        time_units = ode._time_options['units']
+        time_units = ode_function._time_options['units']
         time_spacing = self.metadata['time_spacing']
 
         # Initial conditions
         if len(initial_conditions) > 0:
             comp = IndepVarComp()
             for state_name, value in iteritems(initial_conditions):
-                state = ode._states[state_name]
+                state = ode_function._states[state_name]
                 comp.add_output(state_name, val=value, units=state['units'])
             self.add_subsystem('initial_conditions', comp)
 
@@ -87,7 +86,7 @@ class Integrator(Group):
     def _connect_states(self, src_comp, src_type, tgt_comp, tgt_type,
             src_stage=None, tgt_stage=None, src_step=None, tgt_step=None):
 
-        for state_name, state in iteritems(self.metadata['ode']._states):
+        for state_name, state in iteritems(self.metadata['ode_function']._states):
 
             if src_type == 'state_name':
                 src_name = state_name
@@ -127,14 +126,14 @@ class Integrator(Group):
                     '%s.%s' % (tgt_comp, tgt_name))
 
     def _create_ode(self, num):
-        ode = self.metadata['ode']
-        return ode._system_class(num=num, **ode._system_init_kwargs)
+        ode_function = self.metadata['ode_function']
+        return ode_function._system_class(num=num, **ode_function._system_init_kwargs)
 
     def _get_meta(self):
-        ode = self.metadata['ode']
+        ode_function = self.metadata['ode_function']
 
-        states = ode._states
-        time_units = ode._time_options['units']
+        states = ode_function._states
+        time_units = ode_function._time_options['units']
         time_spacing = self.metadata['time_spacing']
 
         return states, time_units, time_spacing

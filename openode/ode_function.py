@@ -7,7 +7,7 @@ import numpy as np
 from openmdao.utils.options_dictionary import OptionsDictionary
 
 
-class ODE(object):
+class ODEFunction(object):
     """
     Define an ODE of the form y' = f(t, x, y).
 
@@ -25,19 +25,12 @@ class ODE(object):
         Dictionary of options dictionaries for each parameter.
     """
 
-    def __init__(self, system_class, system_init_kwargs=None):
+    def __init__(self):
         """
-        Instantiate the ODE object and initialize class attributes.
-
-        Parameters
-        ----------
-        _system_class : System
-            OpenMDAO Group or Component class defining our ODE.
-        _system_init_kwargs : dict or None
-            Dictionary of kwargs that should be passed in when instantiating system_class.
+        Initialize class attributes.
         """
-        self._system_class = system_class
-        self._system_init_kwargs = system_init_kwargs if system_init_kwargs is not None else {}
+        self._system_class = None
+        self._system_init_kwargs = {}
 
         time_options = OptionsDictionary()
         time_options.declare('targets', default=[], type_=Iterable)
@@ -54,6 +47,21 @@ class ODE(object):
         Optional method that calls declare_time, declare_state, and/or declare_parameter.
         """
         pass
+
+    def set_system(self, system_class, system_init_kwargs=None):
+        """
+        Set the OpenMDAO System that computes the ODE function.
+
+        Parameters
+        ----------
+        system_class : System
+            OpenMDAO Group or Component class defining our ODE.
+        system_init_kwargs : dict or None
+            Dictionary of kwargs that should be passed in when instantiating system_class.
+        """
+        self._system_class = system_class
+        if system_init_kwargs is not None:
+            self._system_init_kwargs = system_init_kwargs
 
     def declare_time(self, targets=None, units=None):
         """

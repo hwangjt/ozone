@@ -8,7 +8,7 @@ from openode.utils.var_names import get_F_name, get_y_old_name, get_y_new_name
 from openode.utils.units import get_rate_units
 
 
-class StepComp(ExplicitComponent):
+class ExplicitTMStepComp(ExplicitComponent):
 
     def initialize(self):
         self.metadata.declare('states', type_=dict, required=True)

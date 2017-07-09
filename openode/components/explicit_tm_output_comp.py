@@ -9,7 +9,7 @@ from openmdao.api import ExplicitComponent
 from openode.utils.var_names import get_y_new_name, get_step_name
 
 
-class OutputComp(ExplicitComponent):
+class ExplicitTMOutputComp(ExplicitComponent):
 
     def initialize(self):
         self.metadata.declare('states', type_=dict, required=True)

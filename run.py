@@ -2,7 +2,7 @@ import numpy as np
 
 from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp, pyOptSparseDriver
 
-from openode.api import ODE, ExplicitTimeMarchingIntegrator, RK4, ForwardEuler, ExplicitMidpoint, \
+from openode.api import ODEFunction, ExplicitTMIntegrator, RK4, ForwardEuler, ExplicitMidpoint, \
     ExplicitRelaxedIntegrator, BackwardEuler, ImplicitMidpoint
 
 
@@ -33,18 +33,19 @@ class Comp(ExplicitComponent):
             * (((2*np.pi)**2)*np.sin(two_pi_t) - 2*np.pi*np.cos(two_pi_t))
 
 
-num = 501
+num = 51
 formulation = 'SAND'
 formulation = 'MDF'
 
-ode = ODE(Comp)
-ode.declare_state('y', rate_target='dy_dt', state_targets='y')
-ode.declare_time('t')
+ode_function = ODEFunction()
+ode_function.set_system(Comp)
+ode_function.declare_state('y', rate_target='dy_dt', state_targets='y')
+ode_function.declare_time('t')
 
 intgr = ExplicitRelaxedIntegrator(
-# intgr = ExplicitTimeMarchingIntegrator(
-    ode=ode, time_spacing=np.arange(num),
-    scheme=BackwardEuler(), initial_conditions={'y': 1.}, start_time=0., end_time=1.,
+# intgr = ExplicitTMIntegrator(
+    ode_function=ode_function, time_spacing=np.arange(num),
+    scheme=ForwardEuler(), initial_conditions={'y': 1.}, start_time=0., end_time=1.,
     formulation=formulation,
 )
 
