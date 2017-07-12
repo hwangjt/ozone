@@ -56,11 +56,13 @@ class ExplicitTMStageComp(ExplicitComponent):
             vals = vals.flatten()
             rows = rows.flatten()
 
-            mtx = scipy.sparse.csc_matrix(
-                (vals, (rows, cols)),
-                shape=(size, num_step_vars * size))
-            mtx = mtx.todense()
-            self.declare_partials(Y_name, y_old_name, val=mtx)
+            self.declare_partials(Y_name, y_old_name, val=vals, rows=rows, cols=cols)
+
+            for j_stage in range(i_stage):
+                F_name = get_F_name(j_stage, state_name)
+
+                arange = np.arange(size)
+                self.declare_partials(Y_name, F_name, rows=arange, cols=arange)
 
     def compute(self, inputs, outputs):
         num_stages = self.metadata['num_stages']
@@ -94,11 +96,11 @@ class ExplicitTMStageComp(ExplicitComponent):
 
             Y_name = get_Y_name(i_stage, state_name)
 
-            partials[Y_name, 'h'] = np.zeros((size, 1))
+            partials[Y_name, 'h'][:, 0] = 0.
 
             for j_stage in range(i_stage):
                 F_name = get_F_name(j_stage, state_name)
 
-                partials[Y_name, F_name] = inputs['h'] * glm_A[i_stage, j_stage] * np.eye(size)
+                partials[Y_name, F_name] = inputs['h'] * glm_A[i_stage, j_stage]
 
-                partials[Y_name, 'h'] += glm_A[i_stage, j_stage] * inputs[F_name]
+                partials[Y_name, 'h'][:, 0] += glm_A[i_stage, j_stage] * inputs[F_name].flatten()

@@ -42,12 +42,7 @@ class TMOutputComp(ExplicitComponent):
 
                 rows = full_rows[i_step, :]
 
-                mtx = scipy.sparse.csc_matrix(
-                    (vals, (rows, cols)),
-                    shape=(num_time_steps * size, size))
-                mtx = mtx.todense()
-
-                self.declare_partials(state_name, name, val=mtx)
+                self.declare_partials(state_name, name, val=vals, rows=rows, cols=cols)
 
     def compute(self, inputs, outputs):
         time_spacing = self.metadata['time_spacing']
