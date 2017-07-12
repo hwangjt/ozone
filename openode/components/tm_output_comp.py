@@ -21,6 +21,8 @@ class TMOutputComp(ExplicitComponent):
 
         num_time_steps = len(time_spacing)
 
+        self.declare_partials('*', '*', dependent=False)
+
         for state_name, state in iteritems(self.metadata['states']):
             size = np.prod(state['shape'])
 

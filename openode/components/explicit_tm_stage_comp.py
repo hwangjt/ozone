@@ -27,6 +27,8 @@ class ExplicitTMStageComp(ExplicitComponent):
         glm_A = self.metadata['glm_A']
         glm_U = self.metadata['glm_U']
 
+        self.declare_partials('*', '*', dependent=False)
+
         self.add_input('h', units=time_units)
 
         for state_name, state in iteritems(self.metadata['states']):
@@ -55,6 +57,8 @@ class ExplicitTMStageComp(ExplicitComponent):
                 rows[i_step, :] = np.arange(size)
             vals = vals.flatten()
             rows = rows.flatten()
+
+            self.declare_partials(Y_name, 'h', dependent=True)
 
             self.declare_partials(Y_name, y_old_name, val=vals, rows=rows, cols=cols)
 

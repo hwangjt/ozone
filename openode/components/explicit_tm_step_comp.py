@@ -27,6 +27,8 @@ class ExplicitTMStepComp(ExplicitComponent):
 
         self.dy_dF = dy_dF = {}
 
+        self.declare_partials('*', '*', dependent=False)
+
         self.add_input('h', units=time_units)
 
         for state_name, state in iteritems(self.metadata['states']):
@@ -46,6 +48,8 @@ class ExplicitTMStepComp(ExplicitComponent):
 
             self.add_output(y_new_name, shape=(num_step_vars,) + state['shape'],
                 units=state['units'])
+
+            self.declare_partials(y_new_name, 'h', dependent=True)
 
             vals = np.zeros((num_step_vars, num_step_vars, size))
             rows = np.zeros((num_step_vars, num_step_vars * size), int)

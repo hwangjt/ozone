@@ -34,16 +34,16 @@ class Comp(ExplicitComponent):
             * (-(2*np.pi)**2 * np.sin(two_pi_t) - 2*np.pi*np.cos(two_pi_t))
 
 
-num = 3
+num = 2
 
 formulation = 'SAND'
-formulation = 'MDF'
+# formulation = 'MDF'
 
 scheme = RK4()
 
-# integrator_name = 'vectorized'
+integrator_name = 'vectorized'
 # integrator_name = 'explicit'
-integrator_name = 'implicit'
+# integrator_name = 'implicit'
 
 ode_function = ODEFunction()
 ode_function.set_system(Comp)
