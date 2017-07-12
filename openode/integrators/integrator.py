@@ -1,3 +1,5 @@
+from __future__ import division
+
 import numpy as np
 from openmdao.api import Group, IndepVarComp
 from six import iteritems
