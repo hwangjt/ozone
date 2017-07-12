@@ -1,6 +1,6 @@
 import numpy as np
 
-from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp, pyOptSparseDriver
+from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp
 
 from openode.api import ODEFunction, ExplicitTMIntegrator, ImplicitTMIntegrator, \
     RK4, ForwardEuler, ExplicitMidpoint, \
@@ -70,7 +70,6 @@ elif integrator_name == 'implicit':
 prob = Problem(integrator)
 
 if formulation == 'SAND':
-    # prob.driver = pyOptSparseDriver()
     prob.driver = ScipyOptimizer()
     prob.driver.options['optimizer'] = 'SLSQP'
     prob.driver.options['tol'] = 1e-9
