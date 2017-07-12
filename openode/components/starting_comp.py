@@ -23,7 +23,9 @@ class StartingComp(ExplicitComponent):
             self.add_input(state_name, shape=state['shape'], units=state['units'])
             self.add_output(y_new_name, shape=(1,) + state['shape'], units=state['units'])
 
-            self.declare_partials(y_new_name, state_name, val=np.eye(size))
+            ones = np.ones(size)
+            arange = np.arange(size)
+            self.declare_partials(y_new_name, state_name, val=ones, rows=arange, cols=arange)
 
     def compute(self, inputs, outputs):
         for state_name, state in iteritems(self.metadata['states']):
