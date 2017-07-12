@@ -39,10 +39,10 @@ num = 2
 formulation = 'SAND'
 # formulation = 'MDF'
 
-scheme = RK4()
+scheme = ForwardEuler()
 
-integrator_name = 'vectorized'
-# integrator_name = 'explicit'
+# integrator_name = 'vectorized'
+integrator_name = 'explicit'
 # integrator_name = 'implicit'
 
 ode_function = ODEFunction()
@@ -69,7 +69,7 @@ elif integrator_name == 'implicit':
 
 prob = Problem(integrator)
 
-if formulation == 'SAND':
+if formulation == 'SAND' and integrator_name == 'vectorized':
     prob.driver = ScipyOptimizer()
     prob.driver.options['optimizer'] = 'SLSQP'
     prob.driver.options['tol'] = 1e-9
@@ -80,7 +80,7 @@ if formulation == 'SAND':
 
 prob.setup()
 
-if formulation == 'SAND':
+if formulation == 'SAND' and integrator_name == 'vectorized':
     prob.run_driver()
 else:
     prob.run_model()

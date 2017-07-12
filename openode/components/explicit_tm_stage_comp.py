@@ -81,7 +81,7 @@ class ExplicitTMStageComp(ExplicitComponent):
             y_old_name = get_y_old_name(state_name)
             Y_name = get_Y_name(i_stage, state_name)
 
-            outputs[Y_name] = np.einsum('i,ij...->j...', glm_U[i_stage, :], inputs[y_old_name])
+            outputs[Y_name][0, :] = np.einsum('i,i...->...', glm_U[i_stage, :], inputs[y_old_name])
 
             for j_stage in range(i_stage):
                 F_name = get_F_name(j_stage, state_name)
