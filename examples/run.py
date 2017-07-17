@@ -34,12 +34,12 @@ class Comp(ExplicitComponent):
             * (-(2*np.pi)**2 * np.sin(two_pi_t) - 2*np.pi*np.cos(two_pi_t))
 
 
-num = 2
+num = 50
 
 formulation = 'SAND'
 # formulation = 'MDF'
 
-scheme = ForwardEuler()
+scheme = RK4()
 
 # integrator_name = 'vectorized'
 integrator_name = 'explicit'
@@ -84,10 +84,10 @@ if formulation == 'SAND' and integrator_name == 'vectorized':
     prob.run_driver()
 else:
     prob.run_model()
-prob.check_partials(compact_print=True)
+# prob.check_partials(compact_print=True)
 # prob.check_partials(compact_print=False)
 
-# print(prob['output_comp.y'])
+print(prob['output_comp.y'])
 
 from openmdao.api import view_model
 

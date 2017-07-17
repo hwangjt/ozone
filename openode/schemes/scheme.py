@@ -1,4 +1,5 @@
 from __future__ import division
+import numpy as np
 
 class GLMScheme(object):
     """
@@ -36,6 +37,10 @@ class GLMScheme(object):
         self.B = B
         self.U = U
         self.V = V
+
+        lower = np.tril(A, -1)
+        err = np.linalg.norm(lower - A) / np.linalg.norm(A)
+        self.explicit = err < 1e-15
 
     def starting_method(self, y0):
         """

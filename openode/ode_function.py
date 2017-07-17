@@ -25,9 +25,14 @@ class ODEFunction(object):
         Dictionary of options dictionaries for each parameter.
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         """
         Initialize class attributes.
+
+        Parameters
+        ----------
+        kwargs : dict
+            Keyword arguments that will be passed to the initialize method.
         """
         self._system_class = None
         self._system_init_kwargs = {}
@@ -40,11 +45,16 @@ class ODEFunction(object):
         self._states = {}
         self._parameters = {}
 
-        self.initialize()
+        self.initialize(**kwargs)
 
-    def initialize(self):
+    def initialize(self, **kwargs):
         """
         Optional method that calls declare_time, declare_state, and/or declare_parameter.
+
+        Parameters
+        ----------
+        kwargs : dict
+            Keyword arguments passed in during instantiation.
         """
         pass
 
