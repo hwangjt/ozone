@@ -21,10 +21,8 @@ class Integrator(Group):
 
     def initialize(self):
         self.metadata.declare('ode_function', type_=ODEFunction, required=True)
-        self.metadata.declare('time_spacing', type_=np.ndarray, required=True)
+        self.metadata.declare('times', type_=np.ndarray, required=True)
         self.metadata.declare('initial_conditions', type_=dict)
-        self.metadata.declare('start_time', values=(None,), type_=(int, float))
-        self.metadata.declare('end_time', values=(None,), type_=(int, float))
         self.metadata.declare('scheme', default=RK4(), type_=GLMScheme)
 
     def setup(self):
@@ -43,16 +41,9 @@ class Integrator(Group):
                 assert ode_function._states[state_name]['shape'] == value.shape, \
                     'The initial condition for state %s has the wrong shape' % state_name
 
-        # Normalize time_spacing
-        spacing = self.metadata['time_spacing']
-        self.metadata['time_spacing'] = (spacing - spacing[0]) / (spacing[-1] - spacing[0])
-
         initial_conditions = self.metadata['initial_conditions']
-        start_time = self.metadata['start_time']
-        end_time = self.metadata['end_time']
-
+        times = self.metadata['times']
         time_units = ode_function._time_options['units']
-        time_spacing = self.metadata['time_spacing']
 
         # Initial conditions
         if len(initial_conditions) > 0:
@@ -63,21 +54,16 @@ class Integrator(Group):
             self.add_subsystem('initial_conditions', comp)
 
         # Start and end times
-        if start_time is not None or end_time is not None:
+        if times is not None:
             comp = IndepVarComp()
-            if start_time is not None:
-                comp.add_output('start_time', val=start_time, units=time_units)
-            if end_time is not None:
-                comp.add_output('end_time', val=end_time, units=time_units)
-            self.add_subsystem('time_interval', comp)
+            comp.add_output('times', val=times, units=time_units)
+            self.add_subsystem('inputs_t', comp)
 
         # Time comp
         abscissa = self.metadata['scheme'].abscissa
         self.add_subsystem('time_comp',
-            TimeComp(time_spacing=time_spacing, time_units=time_units,
-                     glm_abscissa=abscissa))
-        self.connect('time_interval.start_time', 'time_comp.start_time')
-        self.connect('time_interval.end_time', 'time_comp.end_time')
+            TimeComp(time_units=time_units, glm_abscissa=abscissa, num_time_steps=len(times)))
+        self.connect('inputs_t.times', 'time_comp.times')
 
         # Starting method
         self.add_subsystem('starting_comp', StartingComp(states=states))
@@ -138,9 +124,9 @@ class Integrator(Group):
 
         states = ode_function._states
         time_units = ode_function._time_options['units']
-        time_spacing = self.metadata['time_spacing']
+        times = self.metadata['times']
 
-        return states, time_units, time_spacing
+        return states, time_units, times
 
     def _get_scheme(self):
         scheme = self.metadata['scheme']

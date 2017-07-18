@@ -13,13 +13,13 @@ class TMOutputComp(ExplicitComponent):
 
     def initialize(self):
         self.metadata.declare('states', type_=dict, required=True)
-        self.metadata.declare('time_spacing', type_=np.ndarray, required=True)
+        self.metadata.declare('times', type_=np.ndarray, required=True)
         self.metadata.declare('num_stages', type_=int, required=True)
 
     def setup(self):
-        time_spacing = self.metadata['time_spacing']
+        times = self.metadata['times']
 
-        num_time_steps = len(time_spacing)
+        num_time_steps = len(times)
 
         self.declare_partials('*', '*', dependent=False)
 
@@ -47,9 +47,9 @@ class TMOutputComp(ExplicitComponent):
                 self.declare_partials(state_name, name, val=vals, rows=rows, cols=cols)
 
     def compute(self, inputs, outputs):
-        time_spacing = self.metadata['time_spacing']
+        times = self.metadata['times']
 
-        num_time_steps = len(time_spacing)
+        num_time_steps = len(times)
 
         for state_name, state in iteritems(self.metadata['states']):
 

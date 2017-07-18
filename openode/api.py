@@ -16,7 +16,7 @@ def _get_class(name, classes, label):
         return classes[name]
 
 
-def ode_integrator_group(ode_function, integrator_name, scheme_name, **kwargs):
+def ODEIntegrator(ode_function, integrator_name, scheme_name, **kwargs):
     scheme_classes = {
         'forward Euler': ForwardEuler,
         'backward Euler': BackwardEuler,

@@ -2,11 +2,11 @@ import numpy as np
 
 from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp, view_model
 
-from openode.api import ODEFunction, ode_integrator_group
+from openode.api import ODEFunction, ODEIntegrator
 from openode.tests.ode_functions.simple_ode import SimpleODEFunction
 
 
-num = 5
+num = 20
 
 scheme_name = 'RK4'
 
@@ -16,8 +16,8 @@ integrator_name = 'MDF'
 
 ode_function = SimpleODEFunction()
 
-integrator = ode_integrator_group(ode_function, integrator_name, scheme_name,
-    time_spacing=np.arange(num), initial_conditions={'y': 1.}, start_time=0., end_time=1.,)
+integrator = ODEIntegrator(ode_function, integrator_name, scheme_name,
+    times=np.linspace(0., 1., num), initial_conditions={'y': 1.},)
 
 prob = Problem(integrator)
 
@@ -32,7 +32,7 @@ if integrator_name == 'SAND':
 
 prob.setup()
 prob.run_driver()
-# prob.check_partials(compact_print=True)
+prob.check_partials(compact_print=True)
 # prob.check_partials(compact_print=False)
 
 print(prob['output_comp.y'])

@@ -28,10 +28,10 @@ class VectorizedIntegrator(Integrator):
         formulation = self.metadata['formulation']
         ode_function = self.metadata['ode_function']
 
-        states, time_units, time_spacing = self._get_meta()
+        states, time_units, times = self._get_meta()
         glm_A, glm_B, glm_U, glm_V, num_stages, num_step_vars = self._get_scheme()
 
-        num_time_steps = len(time_spacing)
+        num_time_steps = len(times)
 
         if formulation == 'SAND':
             comp = IndepVarComp()

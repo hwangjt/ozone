@@ -52,19 +52,19 @@ ode_function.declare_time('t')
 
 if integrator_name == 'vectorized':
     integrator = VectorizedIntegrator(
-        ode_function=ode_function, time_spacing=np.arange(num),
-        scheme=scheme, initial_conditions={'y': 1.}, start_time=0., end_time=1.,
+        ode_function=ode_function, times=np.linspace(0., 1., num),
+        scheme=scheme, initial_conditions={'y': 1.},
         formulation=formulation,
     )
 elif integrator_name == 'explicit':
     integrator = ExplicitTMIntegrator(
-        ode_function=ode_function, time_spacing=np.arange(num),
-        scheme=scheme, initial_conditions={'y': 1.}, start_time=0., end_time=1.,
+        ode_function=ode_function, times=np.linspace(0., 1., num),
+        scheme=scheme, initial_conditions={'y': 1.},
     )
 elif integrator_name == 'implicit':
     integrator = ImplicitTMIntegrator(
-        ode_function=ode_function, time_spacing=np.arange(num),
-        scheme=scheme, initial_conditions={'y': 1.}, start_time=0., end_time=1.,
+        ode_function=ode_function, times=np.linspace(0., 1., num),
+        scheme=scheme, initial_conditions={'y': 1.},
     )
 
 prob = Problem(integrator)

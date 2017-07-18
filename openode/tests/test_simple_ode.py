@@ -6,7 +6,7 @@ from six import iteritems, itervalues
 
 from openmdao.api import Problem, ScipyOptimizer, IndepVarComp
 
-from openode.api import ode_integrator_group
+from openode.api import ODEIntegrator
 from openode.tests.ode_functions.simple_ode import SimpleODEFunction
 from openode.utils.suppress_printing import suppress_stdout_stderr
 
@@ -17,17 +17,13 @@ class Test(unittest.TestCase):
         pass
 
     def run_ode(self, integrator_name, scheme_name):
-        num = 20
-        time_spacing = np.arange(num)
-        start_time = 0.
-        end_time = 1.
+        times = np.linspace(0., 1., 20)
         y0 = 1.
 
         ode_function = SimpleODEFunction()
 
-        integrator = ode_integrator_group(ode_function, integrator_name, scheme_name,
-            time_spacing=time_spacing, initial_conditions={'y': y0},
-            start_time=start_time, end_time=end_time,)
+        integrator = ODEIntegrator(ode_function, integrator_name, scheme_name,
+            times=times, initial_conditions={'y': y0},)
 
         prob = Problem(integrator)
 

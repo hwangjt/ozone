@@ -19,7 +19,7 @@ class ExplicitTMIntegrator(Integrator):
     def setup(self):
         super(ExplicitTMIntegrator, self).setup()
 
-        states, time_units, time_spacing = self._get_meta()
+        states, time_units, times = self._get_meta()
         scheme = self.metadata['scheme']
         glm_A = scheme.A
         glm_B = scheme.B
@@ -29,7 +29,7 @@ class ExplicitTMIntegrator(Integrator):
         num_step_vars = scheme.num_values
         ode_function =  self.metadata['ode_function']
 
-        for i_step in range(len(time_spacing) - 1):
+        for i_step in range(len(times) - 1):
 
             step_comp_old_name = 'step_comp_%i' % (i_step - 1)
             step_comp_new_name = 'step_comp_%i' % (i_step)
@@ -98,10 +98,10 @@ class ExplicitTMIntegrator(Integrator):
                     step_comp_old_name, 'y_new_name',
                     step_comp_new_name, 'y_old_name')
 
-        comp = TMOutputComp(states=states, time_spacing=time_spacing)
+        comp = TMOutputComp(states=states, times=times)
         self.add_subsystem('output_comp', comp)
 
-        for i_step in range(len(time_spacing)):
+        for i_step in range(len(times)):
             if i_step == 0:
                 step_comp_name = 'starting_comp'
             else:
