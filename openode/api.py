@@ -18,14 +18,14 @@ def _get_class(name, classes, label):
 
 def ODEIntegrator(ode_function, integrator_name, scheme_name, **kwargs):
     scheme_classes = {
-        'forward Euler': ForwardEuler,
-        'backward Euler': BackwardEuler,
-        'explicit midpoint': ExplicitMidpoint,
-        'implicit midpoint': ImplicitMidpoint,
-        'Kutta third order': KuttaThirdOrder,
+        'ForwardEuler': ForwardEuler,
+        'BackwardEuler': BackwardEuler,
+        'ExplicitMidpoint': ExplicitMidpoint,
+        'ImplicitMidpoint': ImplicitMidpoint,
+        'KuttaThirdOrder': KuttaThirdOrder,
         'RK4': RK4,
-        'Ralstons method': RalstonsMethod,
-        'Heuns method': HeunsMethod,
+        'RalstonsMethod': RalstonsMethod,
+        'HeunsMethod': HeunsMethod,
     }
     scheme_class = _get_class(scheme_name, scheme_classes, 'Scheme')
     explicit = scheme_class().explicit
