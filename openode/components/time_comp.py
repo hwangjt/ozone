@@ -10,30 +10,56 @@ from openmdao.api import ExplicitComponent
 class TimeComp(ExplicitComponent):
 
     def initialize(self):
-        self.metadata.declare('time_spacing', type_=np.ndarray, required=True)
         self.metadata.declare('time_units', values=(None,), type_=str, required=True)
+        self.metadata.declare('glm_abscissa', type_=np.ndarray, required=True)
+        self.metadata.declare('num_time_steps', type_=int, required=True)
 
     def setup(self):
-        time_spacing = self.metadata['time_spacing']
         time_units = self.metadata['time_units']
+        abscissa = self.metadata['glm_abscissa']
+        num_time_steps = self.metadata['num_time_steps']
+        num_abscissa = len(abscissa)
+        num_h_vec = num_time_steps - 1
 
-        self.add_input('start_time', val=-1., units=time_units)
-        self.add_input('end_time', val=1., units=time_units)
+        self.add_input('times', shape=num_time_steps, units=time_units)
+        self.add_output('h_vec', shape=num_h_vec, units=time_units)
+        self.add_output('abscissa_times', shape=num_h_vec * num_abscissa)
 
-        self.add_output('times', shape=len(time_spacing), units=time_units)
-        self.add_output('h_vec', shape=len(time_spacing) - 1, units=time_units)
+        arange_h = np.arange(num_h_vec)
 
-        self.declare_partials('times', 'start_time', val=1 - time_spacing)
-        self.declare_partials('times', 'end_time', val=time_spacing)
+        data1 = np.ones(num_h_vec)
+        rows1 = arange_h
+        cols1 = arange_h + 1
 
-        self.declare_partials('h_vec', 'start_time', val=1 - time_spacing[1:] + time_spacing[:-1])
-        self.declare_partials('h_vec', 'end_time', val=time_spacing[1:] - time_spacing[:-1])
+        data2 = -np.ones(num_h_vec)
+        rows2 = arange_h
+        cols2 = arange_h
+
+        data = np.concatenate([data1, data2])
+        rows = np.concatenate([rows1, rows2])
+        cols = np.concatenate([cols1, cols2])
+
+        self.declare_partials('h_vec', 'times', val=data, rows=rows, cols=cols)
+
+        arange_a = np.arange(num_h_vec * num_abscissa)
+
+        data1 = np.tile(abscissa, num_h_vec)
+        rows1 = arange_a
+        cols1 = np.repeat(arange_h, num_abscissa) + 1
+
+        data2 = np.tile(1 - abscissa, num_h_vec)
+        rows2 = arange_a
+        cols2 = np.repeat(arange_h, num_abscissa)
+
+        data = np.concatenate([data1, data2])
+        rows = np.concatenate([rows1, rows2])
+        cols = np.concatenate([cols1, cols2])
+
+        self.declare_partials('abscissa_times', 'times', val=data, rows=rows, cols=cols)
 
     def compute(self, inputs, outputs):
-        time_spacing = self.metadata['time_spacing']
+        abscissa = self.metadata['glm_abscissa']
 
-        outputs['times'] = inputs['start_time'] \
-            + (inputs['end_time'] - inputs['start_time']) * time_spacing
-
-        outputs['h_vec'] = inputs['start_time'] \
-            + (inputs['end_time'] - inputs['start_time']) * (time_spacing[1:] - time_spacing[:-1])
+        outputs['h_vec'] = h_vec = inputs['times'][1:] - inputs['times'][:-1]
+        outputs['abscissa_times'] = (inputs['times'][:-1, np.newaxis]
+            + np.outer(h_vec, abscissa)).ravel()

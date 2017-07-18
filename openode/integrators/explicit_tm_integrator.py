@@ -5,30 +5,31 @@ from openmdao.api import Group, IndepVarComp
 
 from openode.integrators.integrator import Integrator
 from openode.components.starting_comp import StartingComp
-from openode.components.stage_comp import StageComp
-from openode.components.step_comp import StepComp
-from openode.components.output_comp import OutputComp
+from openode.components.explicit_tm_stage_comp import ExplicitTMStageComp
+from openode.components.explicit_tm_step_comp import ExplicitTMStepComp
+from openode.components.tm_output_comp import TMOutputComp
 from openode.utils.var_names import get_y_new_name
 
 
-class ExplicitTimeMarchingIntegrator(Integrator):
+class ExplicitTMIntegrator(Integrator):
     """
     Integrate an explicit scheme with a time-marching approach.
     """
 
     def setup(self):
-        super(ExplicitTimeMarchingIntegrator, self).setup()
+        super(ExplicitTMIntegrator, self).setup()
 
-        states, time_units, time_spacing = self._get_meta()
-        glm_A, glm_B, glm_U, glm_V, num_stages, num_step_vars = self._get_scheme()
+        states, time_units, times = self._get_meta()
+        scheme = self.metadata['scheme']
+        glm_A = scheme.A
+        glm_B = scheme.B
+        glm_U = scheme.U
+        glm_V = scheme.V
+        num_stages = scheme.num_stages
+        num_step_vars = scheme.num_values
+        ode_function =  self.metadata['ode_function']
 
-        # Starting method
-        self.add_subsystem('starting_comp', StartingComp(states=states))
-        self._connect_states(
-            'initial_conditions', 'state_name',
-            'starting_comp', 'state_name')
-
-        for i_step in range(len(time_spacing) - 1):
+        for i_step in range(len(times) - 1):
 
             step_comp_old_name = 'step_comp_%i' % (i_step - 1)
             step_comp_new_name = 'step_comp_%i' % (i_step)
@@ -37,7 +38,13 @@ class ExplicitTimeMarchingIntegrator(Integrator):
                 stage_comp_name = 'stage_comp_%i_%i' % (i_step, i_stage)
                 ode_comp_name = 'ode_comp_%i_%i' % (i_step, i_stage)
 
-                comp = StageComp(
+                self.connect('time_comp.abscissa_times',
+                             ['.'.join((ode_comp_name, t)) for t in
+                              ode_function._time_options['targets']],
+                             src_indices=i_step * (num_stages) + i_stage
+                             )
+
+                comp = ExplicitTMStageComp(
                     states=states, time_units=time_units,
                     num_stages=num_stages, num_step_vars=num_step_vars,
                     glm_A=glm_A, glm_U=glm_U, i_stage=i_stage,
@@ -68,7 +75,7 @@ class ExplicitTimeMarchingIntegrator(Integrator):
                     ode_comp_name, 'state_targets',
                     src_stage=i_stage)
 
-            comp = StepComp(
+            comp = ExplicitTMStepComp(
                 states=states, time_units=time_units,
                 num_stages=num_stages, num_step_vars=num_step_vars,
                 glm_B=glm_B, glm_V=glm_V,
@@ -91,10 +98,10 @@ class ExplicitTimeMarchingIntegrator(Integrator):
                     step_comp_old_name, 'y_new_name',
                     step_comp_new_name, 'y_old_name')
 
-        comp = OutputComp(states=states, time_spacing=time_spacing)
+        comp = TMOutputComp(states=states, times=times)
         self.add_subsystem('output_comp', comp)
 
-        for i_step in range(len(time_spacing)):
+        for i_step in range(len(times)):
             if i_step == 0:
                 step_comp_name = 'starting_comp'
             else:

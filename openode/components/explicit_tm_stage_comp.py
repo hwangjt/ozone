@@ -8,7 +8,7 @@ from openode.utils.var_names import get_F_name, get_y_old_name, get_Y_name
 from openode.utils.units import get_rate_units
 
 
-class StageComp(ExplicitComponent):
+class ExplicitTMStageComp(ExplicitComponent):
 
     def initialize(self):
         self.metadata.declare('states', type_=dict, required=True)
@@ -26,6 +26,8 @@ class StageComp(ExplicitComponent):
         i_stage = self.metadata['i_stage']
         glm_A = self.metadata['glm_A']
         glm_U = self.metadata['glm_U']
+
+        self.declare_partials('*', '*', dependent=False)
 
         self.add_input('h', units=time_units)
 
@@ -56,11 +58,15 @@ class StageComp(ExplicitComponent):
             vals = vals.flatten()
             rows = rows.flatten()
 
-            mtx = scipy.sparse.csc_matrix(
-                (vals, (rows, cols)),
-                shape=(size, num_step_vars * size))
-            mtx = mtx.todense()
-            self.declare_partials(Y_name, y_old_name, val=mtx)
+            self.declare_partials(Y_name, 'h', dependent=True)
+
+            self.declare_partials(Y_name, y_old_name, val=vals, rows=rows, cols=cols)
+
+            for j_stage in range(i_stage):
+                F_name = get_F_name(j_stage, state_name)
+
+                arange = np.arange(size)
+                self.declare_partials(Y_name, F_name, rows=arange, cols=arange)
 
     def compute(self, inputs, outputs):
         num_stages = self.metadata['num_stages']
@@ -75,7 +81,7 @@ class StageComp(ExplicitComponent):
             y_old_name = get_y_old_name(state_name)
             Y_name = get_Y_name(i_stage, state_name)
 
-            outputs[Y_name] = np.einsum('i,ij...->j...', glm_U[i_stage, :], inputs[y_old_name])
+            outputs[Y_name][0, :] = np.einsum('i,i...->...', glm_U[i_stage, :], inputs[y_old_name])
 
             for j_stage in range(i_stage):
                 F_name = get_F_name(j_stage, state_name)
@@ -94,11 +100,11 @@ class StageComp(ExplicitComponent):
 
             Y_name = get_Y_name(i_stage, state_name)
 
-            partials[Y_name, 'h'] = np.zeros((size, 1))
+            partials[Y_name, 'h'][:, 0] = 0.
 
             for j_stage in range(i_stage):
                 F_name = get_F_name(j_stage, state_name)
 
-                partials[Y_name, F_name] = inputs['h'] * glm_A[i_stage, j_stage] * np.eye(size)
+                partials[Y_name, F_name] = inputs['h'] * glm_A[i_stage, j_stage]
 
-                partials[Y_name, 'h'] += glm_A[i_stage, j_stage] * inputs[F_name]
+                partials[Y_name, 'h'][:, 0] += glm_A[i_stage, j_stage] * inputs[F_name].flatten()

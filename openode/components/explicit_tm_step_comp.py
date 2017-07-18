@@ -8,7 +8,7 @@ from openode.utils.var_names import get_F_name, get_y_old_name, get_y_new_name
 from openode.utils.units import get_rate_units
 
 
-class StepComp(ExplicitComponent):
+class ExplicitTMStepComp(ExplicitComponent):
 
     def initialize(self):
         self.metadata.declare('states', type_=dict, required=True)
@@ -26,6 +26,8 @@ class StepComp(ExplicitComponent):
         glm_V = self.metadata['glm_V']
 
         self.dy_dF = dy_dF = {}
+
+        self.declare_partials('*', '*', dependent=False)
 
         self.add_input('h', units=time_units)
 
@@ -47,6 +49,8 @@ class StepComp(ExplicitComponent):
             self.add_output(y_new_name, shape=(num_step_vars,) + state['shape'],
                 units=state['units'])
 
+            self.declare_partials(y_new_name, 'h', dependent=True)
+
             vals = np.zeros((num_step_vars, num_step_vars, size))
             rows = np.zeros((num_step_vars, num_step_vars * size), int)
             cols = np.zeros((num_step_vars, num_step_vars * size), int)
@@ -59,11 +63,7 @@ class StepComp(ExplicitComponent):
             rows = rows.flatten()
             cols = cols.flatten()
 
-            mtx = scipy.sparse.csc_matrix(
-                (vals, (rows, cols)),
-                shape=(num_step_vars * size, num_step_vars * size))
-            mtx = mtx.todense()
-            self.declare_partials(y_new_name, y_old_name, val=mtx)
+            self.declare_partials(y_new_name, y_old_name, val=vals, rows=rows, cols=cols)
 
             for j_stage in range(num_stages):
                 vals = np.zeros((num_step_vars, 1, size))
@@ -75,10 +75,8 @@ class StepComp(ExplicitComponent):
                 vals = vals.flatten()
                 cols = cols.flatten()
 
-                mtx = scipy.sparse.csc_matrix(
-                    (vals, (rows, cols)),
-                    shape=(num_step_vars * size, 1 * size))
-                dy_dF[state_name, j_stage] = mtx.todense()
+                self.declare_partials(y_new_name, F_name, rows=rows, cols=cols)
+                dy_dF[state_name, j_stage] = vals
 
     def compute(self, inputs, outputs):
         num_stages = self.metadata['num_stages']
@@ -116,11 +114,12 @@ class StepComp(ExplicitComponent):
 
             y_new_name = get_y_new_name(state_name)
 
-            partials[y_new_name, 'h'] = np.zeros((num_step_vars * size, 1))
+            partials[y_new_name, 'h'][:, 0] = 0.
 
             for j_stage in range(num_stages):
                 F_name = get_F_name(j_stage, state_name)
 
                 partials[y_new_name, F_name] = inputs['h'] * dy_dF[state_name, j_stage]
 
-                partials[y_new_name, 'h'] += glm_B[i_step, j_stage] * inputs[F_name]
+                partials[y_new_name, 'h'][:, 0] += glm_B[i_step, j_stage] \
+                    * inputs[F_name].flatten()
