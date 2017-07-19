@@ -45,13 +45,16 @@ class Integrator(Group):
         times = self.metadata['times']
         time_units = ode_function._time_options['units']
 
+        promotes = []
         # Initial conditions
         if len(initial_conditions) > 0:
-            comp = IndepVarComp()
+            ivcomp = IndepVarComp()
+
             for state_name, value in iteritems(initial_conditions):
                 state = ode_function._states[state_name]
-                comp.add_output(state_name, val=value, units=state['units'])
-            self.add_subsystem('initial_conditions', comp)
+                ivcomp.add_output(state_name, val=value, units=state['units'])
+                promotes.append((state_name, 'IC:{}'.format(state_name)))
+            self.add_subsystem('initial_conditions', ivcomp, promotes_outputs=promotes)
 
         # Start and end times
         if times is not None:
@@ -66,10 +69,10 @@ class Integrator(Group):
         self.connect('inputs_t.times', 'time_comp.times')
 
         # Starting method
-        self.add_subsystem('starting_comp', StartingComp(states=states))
-        self._connect_states(
-            'initial_conditions', 'state_name',
-            'starting_comp', 'state_name')
+        self.add_subsystem('starting_comp', StartingComp(states=states), promotes_inputs=promotes)
+        # self._connect_states(
+        #     'initial_conditions', 'state_name',
+        #     'starting_comp', 'state_name')
 
     def _connect_states(self, src_comp, src_type, tgt_comp, tgt_type,
             src_stage=None, tgt_stage=None, src_step=None, tgt_step=None):

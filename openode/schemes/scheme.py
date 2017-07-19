@@ -39,7 +39,7 @@ class GLMScheme(object):
         self.V = V
 
         lower = np.tril(A, -1)
-        err = np.linalg.norm(lower - A) / np.linalg.norm(A)
+        err = np.linalg.norm(lower - A)
         self.explicit = err < 1e-15
 
     def starting_method(self, y0):

@@ -46,6 +46,8 @@ def simple_ode_func(y, t):
 
     return dy_dt
 
+def simple_ode_sol(t):
+    return np.exp(t) + np.sin(2*np.pi*t)
 
 def simple_ode_dfunc(y, t):
     return np.ones((1, 1))

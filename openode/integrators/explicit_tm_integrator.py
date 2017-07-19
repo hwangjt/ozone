@@ -8,7 +8,7 @@ from openode.components.starting_comp import StartingComp
 from openode.components.explicit_tm_stage_comp import ExplicitTMStageComp
 from openode.components.explicit_tm_step_comp import ExplicitTMStepComp
 from openode.components.tm_output_comp import TMOutputComp
-from openode.utils.var_names import get_y_new_name
+from openode.utils.var_names import get_y_new_name, get_y_old_name
 
 
 class ExplicitTMIntegrator(Integrator):
@@ -49,7 +49,10 @@ class ExplicitTMIntegrator(Integrator):
                     num_stages=num_stages, num_step_vars=num_step_vars,
                     glm_A=glm_A, glm_U=glm_U, i_stage=i_stage,
                 )
-                self.add_subsystem(stage_comp_name, comp)
+                if i_step == 0:
+                    self.add_subsystem(stage_comp_name, comp, promotes_inputs=[(get_y_old_name(y), 'IC:{}'.format(y)) for y in states])
+                else:
+                    self.add_subsystem(stage_comp_name, comp)
                 self.connect('time_comp.h_vec', '%s.h' % stage_comp_name, src_indices=i_step)
 
                 for j_stage in range(i_stage):
@@ -59,11 +62,7 @@ class ExplicitTMIntegrator(Integrator):
                         stage_comp_name, 'F_name',
                         tgt_stage=j_stage)
 
-                if i_step == 0:
-                    self._connect_states(
-                        'starting_comp', 'y_new_name',
-                        stage_comp_name, 'y_old_name')
-                else:
+                if i_step > 0:
                     self._connect_states(
                         step_comp_old_name, 'y_new_name',
                         stage_comp_name, 'y_old_name')
