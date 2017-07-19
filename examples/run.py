@@ -2,10 +2,7 @@ import numpy as np
 
 from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp
 
-from openode.api import ODEFunction, ExplicitTMIntegrator, ImplicitTMIntegrator, \
-    RK4, ForwardEuler, ExplicitMidpoint, \
-    VectorizedIntegrator, BackwardEuler, ImplicitMidpoint, RK4
-
+from openode.api import ODEFunction, ODEIntegrator
 
 class Comp(ExplicitComponent):
 
@@ -19,76 +16,79 @@ class Comp(ExplicitComponent):
         self.add_input('t', shape=(num, 1))
         self.add_output('dy_dt', shape=(num, 1))
 
-        self.declare_partials('dy_dt', 'y', val=np.eye(num))
+        # self.declare_partials('dy_dt', 'y', val=np.eye(num))
+        self.declare_partials('dy_dt', 't', rows=np.arange(num), cols=np.arange(num))
+        self.declare_partials('dy_dt', 'y', rows=np.arange(num), cols=np.arange(num))
 
         self.eye = np.eye(num)
 
     def compute(self, inputs, outputs):
-        # True solution: e^t + sin(2*pi*t)
-        two_pi_t = 2*np.pi*inputs['t']
-        outputs['dy_dt'] = inputs['y'] + 2*np.pi*np.cos(two_pi_t) - np.sin(two_pi_t)
+        # True solution: 2 / (2*C1 - x^2)
+        outputs['dy_dt'] = inputs['t'] * np.square(inputs['y'])
 
     def compute_partials(self, inputs, outputs, partials):
-        two_pi_t = 2*np.pi*inputs['t']
-        partials['dy_dt', 't'] = self.eye \
-            * (-(2*np.pi)**2 * np.sin(two_pi_t) - 2*np.pi*np.cos(two_pi_t))
-
-
-num = 50
-
-formulation = 'SAND'
-# formulation = 'MDF'
-
-scheme = RK4()
-
-# integrator_name = 'vectorized'
-integrator_name = 'explicit'
-# integrator_name = 'implicit'
+        partials['dy_dt', 'y'] = (2*inputs['t']*inputs['y']).squeeze()
+        partials['dy_dt', 't'] = np.square(inputs['y']).squeeze()
 
 ode_function = ODEFunction()
 ode_function.set_system(Comp)
 ode_function.declare_state('y', rate_target='dy_dt', state_targets='y')
 ode_function.declare_time('t')
 
-if integrator_name == 'vectorized':
-    integrator = VectorizedIntegrator(
-        ode_function=ode_function, times=np.linspace(0., 1., num),
-        scheme=scheme, initial_conditions={'y': 1.},
-        formulation=formulation,
-    )
-elif integrator_name == 'explicit':
-    integrator = ExplicitTMIntegrator(
-        ode_function=ode_function, times=np.linspace(0., 1., num),
-        scheme=scheme, initial_conditions={'y': 1.},
-    )
-elif integrator_name == 'implicit':
-    integrator = ImplicitTMIntegrator(
-        ode_function=ode_function, times=np.linspace(0., 1., num),
-        scheme=scheme, initial_conditions={'y': 1.},
-    )
+# nums = [11, 16, 21, 26]
+nums = [5]
+# nums = [11, 21, 31, 51]
 
-prob = Problem(integrator)
+# scheme_name = 'ForwardEuler'
+scheme_name = 'RK4'
+# scheme_name = 'ImplicitMidpoint'
+# scheme_name = 'GaussLegendre4'
 
-if formulation == 'SAND' and integrator_name == 'vectorized':
-    prob.driver = ScipyOptimizer()
-    prob.driver.options['optimizer'] = 'SLSQP'
-    prob.driver.options['tol'] = 1e-9
-    prob.driver.options['disp'] = True
+integrator_name = 'SAND'
+# integrator_name = 'MDF'
+# integrator_name = 'TM'
 
-    integrator.add_subsystem('dummy_comp', IndepVarComp('dummy_var', val=1.0))
-    integrator.add_objective('dummy_comp.dummy_var')
+C1 = -1e-2
+t1 = 1
 
-prob.setup()
-
-if formulation == 'SAND' and integrator_name == 'vectorized':
-    prob.run_driver()
+if C1 >
+    assert 2*C1 > t1**2
 else:
-    prob.run_model()
-# prob.check_partials(compact_print=True)
-# prob.check_partials(compact_print=False)
+    assert C1 != 0.
 
-print(prob['output_comp.y'])
+errs = np.zeros(len(nums))
+for i, num in enumerate(nums):
+    integrator = ODEIntegrator(ode_function, integrator_name, scheme_name,
+        times=np.linspace(0., t1, num), initial_conditions={'y': 1./C1},)
 
-from openmdao.api import view_model
+    prob = Problem(integrator)
 
-# view_model(prob)
+    if integrator_name == 'SAND':
+        prob.driver = ScipyOptimizer()
+        prob.driver.options['optimizer'] = 'SLSQP'
+        prob.driver.options['tol'] = 1e-9
+        prob.driver.options['disp'] = True
+
+        integrator.add_subsystem('dummy_comp', IndepVarComp('dummy_var', val=1.0))
+        integrator.add_objective('dummy_comp.dummy_var')
+
+        prob.setup()
+        prob.run_driver()
+    else:
+        prob.setup()
+        # prob.check_partials(compact_print=True)
+        prob.run_model()
+
+
+    errs[i] = np.abs(prob['output_comp.y'][-1][0] - (2 / (2*C1 - t1**2)))
+    print(prob['output_comp.y'])
+
+
+print('-'*40)
+print('| {:10s} | {:10s} | {:10s} |'.format('h', 'Error', 'Rate'))
+print('-'*40)
+for i, (n, err) in enumerate(zip(nums, errs)):
+    print('| {:.4e} | {:.4e} | {:.4e} |'.format(1./(n-1), err, 0. if i == 0 else
+        np.log(errs[i] / errs[i-1]) / np.log((1./(n-1)) / (1./(nums[i-1]-1)))))
+
+

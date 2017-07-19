@@ -49,7 +49,7 @@ class Test(unittest.TestCase):
 
     def test_tm(self):
         scheme_names = [
-            'forward Euler', 'backward Euler', 'RK4', 'explicit midpoint', 'implicit midpoint']
+            'ForwardEuler', 'BackwardEuler', 'RK4', 'ExplicitMidpoint', 'ImplicitMidpoint']
 
         for scheme_name in scheme_names:
             y_ref = self.run_ode('TM', scheme_name)['output_comp.y']
@@ -61,7 +61,7 @@ class Test(unittest.TestCase):
                     integrator_name, scheme_name))
 
         for integrator_name in ['TM', 'MDF', 'SAND']:
-            prob = self.run_ode(integrator_name, 'forward Euler')
+            prob = self.run_ode(integrator_name, 'ForwardEuler')
             with suppress_stdout_stderr():
                 jac = prob.check_partials(compact_print=True)
             for comp_name, jac_comp in iteritems(jac):
@@ -76,7 +76,7 @@ class Test(unittest.TestCase):
                     rel_fwd = jac_partial['rel error'].forward
                     rel_rev = jac_partial['rel error'].reverse
 
-                    non_zero = mag_fd > 1e-16 or mag_fwd > 1e-16 or mag_rev > 1e-16
+                    non_zero = np.max([mag_fd, mag_fwd, mag_rev]) > 1e-12
                     if non_zero:
                         print('%16.9e %16.9e %5s %s %s' % (
                             jac_partial['rel error'].forward,
