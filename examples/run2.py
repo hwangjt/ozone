@@ -3,7 +3,7 @@ import numpy as np
 from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp, view_model
 
 from openode.api import ODEFunction, ODEIntegrator
-from openode.tests.ode_functions.simple_ode import SimpleODEFunction
+from openode.tests.ode_functions.simple_ode import LinearODEFunction
 
 
 num = 20
@@ -14,7 +14,7 @@ scheme_name = 'RK4'
 integrator_name = 'MDF'
 # integrator_name = 'TM'
 
-ode_function = SimpleODEFunction()
+ode_function = LinearODEFunction()
 
 integrator = ODEIntegrator(ode_function, integrator_name, scheme_name,
     times=np.linspace(0., 1., num), initial_conditions={'y': 1.},)

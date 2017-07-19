@@ -35,8 +35,8 @@ ode_function.set_system(Comp)
 ode_function.declare_state('y', rate_target='dy_dt', state_targets='y')
 ode_function.declare_time('t')
 
-# nums = [11, 16, 21, 26]
-nums = [5]
+nums = [11, 16, 21, 26]
+# nums = [5]
 # nums = [11, 21, 31, 51]
 
 # scheme_name = 'ForwardEuler'
@@ -81,7 +81,7 @@ for i, num in enumerate(nums):
 
 
     errs[i] = np.abs(prob['output_comp.y'][-1][0] - (2 / (2*C1 - t1**2)))
-    print(prob['output_comp.y'])
+    # print(prob['output_comp.y'])
 
 
 print('-'*40)

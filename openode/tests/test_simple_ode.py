@@ -3,11 +3,13 @@ import numpy as np
 import unittest
 import scipy.integrate
 from six import iteritems, itervalues
+from itertools import product
+from parameterized import parameterized
 
 from openmdao.api import Problem, ScipyOptimizer, IndepVarComp
 
 from openode.api import ODEIntegrator
-from openode.tests.ode_functions.simple_ode import SimpleODEFunction
+from openode.tests.ode_functions.simple_ode import LinearODEFunction, NonlinearODEFunction
 from openode.utils.suppress_printing import suppress_stdout_stderr
 
 
@@ -16,11 +18,9 @@ class Test(unittest.TestCase):
     def setUp(self):
         pass
 
-    def run_ode(self, integrator_name, scheme_name):
+    def run_ode(self, integrator_name, scheme_name, ode_function):
         times = np.linspace(0., 1., 20)
         y0 = 1.
-
-        ode_function = SimpleODEFunction()
 
         integrator = ODEIntegrator(ode_function, integrator_name, scheme_name,
             times=times, initial_conditions={'y': y0},)
@@ -42,49 +42,53 @@ class Test(unittest.TestCase):
 
         return prob
 
-    def compute_diff(self, integrator_name, scheme_name, y_ref):
-        y = self.run_ode(integrator_name, scheme_name)['output_comp.y']
+    def compute_diff(self, integrator_name, scheme_name, ode_function, y_ref):
+        y = self.run_ode(integrator_name, scheme_name, ode_function)['output_comp.y']
 
         return np.linalg.norm(y - y_ref) / np.linalg.norm(y_ref)
 
-    def test_tm(self):
-        scheme_names = [
-            'ForwardEuler', 'BackwardEuler', 'RK4', 'ExplicitMidpoint', 'ImplicitMidpoint']
+    @parameterized.expand(product(
+        ['ForwardEuler', 'BackwardEuler', 'ExplicitMidpoint', 'ImplicitMidpoint'],  # scheme
+        [LinearODEFunction(), NonlinearODEFunction()],  # ODE Function
+        ['TM', 'MDF', 'SAND']
+    ))
+    def test_tm(self, scheme_name, ode_function, integrator_name):
 
-        for scheme_name in scheme_names:
-            y_ref = self.run_ode('TM', scheme_name)['output_comp.y']
+        y_ref = self.run_ode('TM', scheme_name, ode_function)['output_comp.y']
+        diff = self.compute_diff(integrator_name, scheme_name, ode_function, y_ref)
+        print('%20s %5s %16.9e' % (scheme_name, integrator_name, diff))
+        self.assertTrue(diff < 1e-10, 'Error when integrating with %s %s' % (
+            integrator_name, scheme_name))
 
-            for integrator_name in ['TM', 'MDF', 'SAND']:
-                diff = self.compute_diff(integrator_name, scheme_name, y_ref)
-                print('%20s %5s %16.9e' % (scheme_name, integrator_name, diff))
-                self.assertTrue(diff < 1e-10, 'Error when integrating with %s %s' % (
-                    integrator_name, scheme_name))
+    @parameterized.expand(product(
+        ['TM', 'MDF', 'SAND']
+    ))
+    def test_derivs(self, integrator_name):
+        ode_function = NonlinearODEFunction()
+        prob = self.run_ode(integrator_name, 'ForwardEuler', ode_function)
+        with suppress_stdout_stderr():
+            jac = prob.check_partials(compact_print=True)
+        for comp_name, jac_comp in iteritems(jac):
+            for partial_name, jac_partial in iteritems(jac_comp):
+                mag_fd = jac_partial['magnitude'].fd
+                mag_fwd = jac_partial['magnitude'].forward
+                mag_rev = jac_partial['magnitude'].reverse
 
-        for integrator_name in ['TM', 'MDF', 'SAND']:
-            prob = self.run_ode(integrator_name, 'ForwardEuler')
-            with suppress_stdout_stderr():
-                jac = prob.check_partials(compact_print=True)
-            for comp_name, jac_comp in iteritems(jac):
-                for partial_name, jac_partial in iteritems(jac_comp):
-                    mag_fd = jac_partial['magnitude'].fd
-                    mag_fwd = jac_partial['magnitude'].forward
-                    mag_rev = jac_partial['magnitude'].reverse
+                abs_fwd = jac_partial['abs error'].forward
+                abs_rev = jac_partial['abs error'].reverse
 
-                    abs_fwd = jac_partial['abs error'].forward
-                    abs_rev = jac_partial['abs error'].reverse
+                rel_fwd = jac_partial['rel error'].forward
+                rel_rev = jac_partial['rel error'].reverse
 
-                    rel_fwd = jac_partial['rel error'].forward
-                    rel_rev = jac_partial['rel error'].reverse
-
-                    non_zero = np.max([mag_fd, mag_fwd, mag_rev]) > 1e-12
-                    if non_zero:
-                        print('%16.9e %16.9e %5s %s %s' % (
-                            jac_partial['rel error'].forward,
-                            jac_partial['rel error'].reverse,
-                            integrator_name, comp_name, partial_name,
-                        ))
-                        self.assertTrue(rel_fwd < 1e-3 or abs_fwd < 1e-3)
-                        self.assertTrue(rel_rev < 1e-3 or abs_rev < 1e-3)
+                non_zero = np.max([mag_fd, mag_fwd, mag_rev]) > 1e-12
+                if non_zero:
+                    # print('%16.9e %16.9e %5s %s %s' % (
+                    #     jac_partial['rel error'].forward,
+                    #     jac_partial['rel error'].reverse,
+                    #     integrator_name, comp_name, partial_name,
+                    # ))
+                    self.assertTrue(rel_fwd < 1e-3 or abs_fwd < 1e-3)
+                    self.assertTrue(rel_rev < 1e-3 or abs_rev < 1e-3)
 
 
 
