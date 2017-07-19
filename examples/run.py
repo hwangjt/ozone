@@ -44,14 +44,14 @@ scheme_name = 'RK4'
 # scheme_name = 'ImplicitMidpoint'
 # scheme_name = 'GaussLegendre4'
 
-integrator_name = 'SAND'
+# integrator_name = 'SAND'
 # integrator_name = 'MDF'
-# integrator_name = 'TM'
+integrator_name = 'TM'
 
 C1 = -1e-2
 t1 = 1
 
-if C1 >
+if C1 > 0.:
     assert 2*C1 > t1**2
 else:
     assert C1 != 0.
