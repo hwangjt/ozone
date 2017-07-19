@@ -20,7 +20,7 @@ class Test(unittest.TestCase):
 
     def run_ode(self, integrator_name, scheme_name, ode_function):
         times = np.linspace(0., 1., 20)
-        y0 = 1.
+        y0 = -1.
 
         integrator = ODEIntegrator(ode_function, integrator_name, scheme_name,
             times=times, initial_conditions={'y': y0},)
