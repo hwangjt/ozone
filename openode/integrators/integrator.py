@@ -10,8 +10,7 @@ from openode.components.starting_comp import StartingComp
 from openode.schemes.scheme import GLMScheme
 from openode.schemes.runge_kutta import RK4
 from openode.ode_function import ODEFunction
-from openode.utils.var_names import get_Y_name, get_F_name, get_y_old_name, get_y_new_name, \
-    get_step_name, get_name
+from openode.utils.var_names import get_name
 
 
 class Integrator(Group):

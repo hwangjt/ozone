@@ -8,7 +8,6 @@ from openode.components.starting_comp import StartingComp
 from openode.components.explicit_tm_stage_comp import ExplicitTMStageComp
 from openode.components.explicit_tm_step_comp import ExplicitTMStepComp
 from openode.components.tm_output_comp import TMOutputComp
-from openode.utils.var_names import get_y_new_name, get_y_old_name
 
 
 class ExplicitTMIntegrator(Integrator):

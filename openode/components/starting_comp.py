@@ -6,7 +6,7 @@ from openmdao.utils.options_dictionary import OptionsDictionary
 
 from openmdao.api import ExplicitComponent
 
-from openode.utils.var_names import get_y_new_name, get_name
+from openode.utils.var_names import get_name
 
 
 class StartingComp(ExplicitComponent):
