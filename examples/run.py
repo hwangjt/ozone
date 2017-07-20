@@ -40,13 +40,14 @@ nums = [11, 16, 21, 26]
 # nums = [11, 21, 31, 51]
 
 # scheme_name = 'ForwardEuler'
-scheme_name = 'RK4'
+# scheme_name = 'RK4'
+scheme_name = 'BDF2'
 # scheme_name = 'ImplicitMidpoint'
 # scheme_name = 'GaussLegendre4'
 
 # integrator_name = 'SAND'
-# integrator_name = 'MDF'
-integrator_name = 'TM'
+integrator_name = 'MDF'
+# integrator_name = 'TM'
 
 C1 = -1e-2
 t1 = 1
@@ -90,3 +91,4 @@ print('-'*40)
 for i, (n, err) in enumerate(zip(nums, errs)):
     print('| {:.4e} | {:.4e} | {:.4e} |'.format(1./(n-1), err, 0. if i == 0 else
         np.log(errs[i] / errs[i-1]) / np.log((1./(n-1)) / (1./(nums[i-1]-1)))))
+print('-'*40)

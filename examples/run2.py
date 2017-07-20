@@ -3,7 +3,7 @@ import numpy as np
 from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp, view_model
 
 from openode.api import ODEFunction, ODEIntegrator
-from openode.tests.ode_functions.simple_ode import LinearODEFunction, SimpleODEFunction
+from openode.tests.ode_functions.simple_ode import LinearODEFunction, NonlinearODEFunction
 
 
 num = 7
@@ -15,10 +15,10 @@ scheme_name = 'BDF4'
 integrator_name = 'MDF'
 # integrator_name = 'TM'
 
-ode_function = SimpleODEFunction()
+ode_function = NonlinearODEFunction()
 
 integrator = ODEIntegrator(ode_function, integrator_name, scheme_name,
-    times=np.linspace(0., num, num+1), initial_conditions={'y': -1.})
+    times=np.linspace(0., 1, num+1), initial_conditions={'y': -100.})
 
 prob = Problem(integrator)
 

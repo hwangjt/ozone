@@ -24,7 +24,7 @@ class Integrator(Group):
         self.metadata.declare('times', type_=np.ndarray, required=True)
         self.metadata.declare('initial_conditions', type_=dict)
         self.metadata.declare('scheme', default=RK4(), type_=GLMScheme)
-        self.metadata.declare('starting_coeffs', values=(None,), type_=np.ndarray)
+        self.metadata.declare('starting_coeffs', type_=(np.ndarray, type(None)))
 
     def setup(self):
         ode_function = self.metadata['ode_function']
