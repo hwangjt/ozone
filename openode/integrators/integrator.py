@@ -145,6 +145,8 @@ class Integrator(Group):
         states = ode_function._states
         time_units = ode_function._time_options['units']
 
+        print(times[:start_time_index+1], times[start_time_index:])
+
         return states, time_units, times[:start_time_index+1], times[start_time_index:]
 
     def _get_scheme(self):

@@ -1,6 +1,6 @@
 from openode.schemes.runge_kutta import ForwardEuler, BackwardEuler, ExplicitMidpoint, \
     ImplicitMidpoint, KuttaThirdOrder, RK4, RalstonsMethod, HeunsMethod
-from openode.schemes.bdf import BDF2
+from openode.schemes.bdf import BDF2, BDF4
 
 
 def _get_class(name, classes, label):
@@ -24,6 +24,7 @@ def get_scheme(scheme_name):
         'RalstonsMethod': RalstonsMethod,
         'HeunsMethod': HeunsMethod,
         'BDF2': BDF2,
+        'BDF4': BDF4,
     }
     return _get_class(scheme_name, scheme_classes, 'Scheme')
 
@@ -32,7 +33,7 @@ def get_integrator(integrator_name, explicit):
     from openode.integrators.explicit_tm_integrator import ExplicitTMIntegrator
     from openode.integrators.implicit_tm_integrator import ImplicitTMIntegrator
     from openode.integrators.vectorized_integrator import VectorizedIntegrator
-    
+
     integrator_classes = {
         'SAND': VectorizedIntegrator,
         'MDF': VectorizedIntegrator,
