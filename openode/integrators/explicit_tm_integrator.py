@@ -47,66 +47,73 @@ class ExplicitTMIntegrator(Integrator):
                 comp = ExplicitTMStageComp(
                     states=states, time_units=time_units,
                     num_stages=num_stages, num_step_vars=num_step_vars,
-                    glm_A=glm_A, glm_U=glm_U, i_stage=i_stage,
+                    glm_A=glm_A, glm_U=glm_U, i_stage=i_stage, i_step=i_step,
                 )
-                if i_step == 0:
-                    self.add_subsystem(stage_comp_name, comp, promotes_inputs=[(get_y_old_name(y), 'IC:{}'.format(y)) for y in states])
-                else:
-                    self.add_subsystem(stage_comp_name, comp)
+                self.add_subsystem(stage_comp_name, comp)
                 self.connect('time_comp.h_vec', '%s.h' % stage_comp_name, src_indices=i_step)
 
                 for j_stage in range(i_stage):
                     ode_comp_tmp_name = 'ode_comp_%i_%i' % (i_step, j_stage)
                     self._connect_states(
-                        ode_comp_tmp_name, 'rate_target',
-                        stage_comp_name, 'F_name',
-                        tgt_stage=j_stage)
-
-                if i_step > 0:
-                    self._connect_states(
-                        step_comp_old_name, 'y_new_name',
-                        stage_comp_name, 'y_old_name')
+                        self._get_names(ode_comp_tmp_name, 'rate_target'),
+                        self._get_names(stage_comp_name, 'F', i_step=i_step, i_stage=i_stage, j_stage=j_stage),
+                    )
 
                 comp = self._create_ode(1)
                 self.add_subsystem(ode_comp_name, comp)
                 self._connect_states(
-                    stage_comp_name, 'Y_name',
-                    ode_comp_name, 'state_targets',
-                    src_stage=i_stage)
+                    self._get_names(stage_comp_name, 'Y', i_step=i_step, i_stage=i_stage),
+                    self._get_names(ode_comp_name, 'state_targets'),
+                )
 
             comp = ExplicitTMStepComp(
                 states=states, time_units=time_units,
                 num_stages=num_stages, num_step_vars=num_step_vars,
-                glm_B=glm_B, glm_V=glm_V,
+                glm_B=glm_B, glm_V=glm_V, i_step=i_step,
             )
             self.add_subsystem(step_comp_new_name, comp)
             self.connect('time_comp.h_vec', '%s.h' % step_comp_new_name, src_indices=i_step)
             for j_stage in range(num_stages):
                 ode_comp_tmp_name = 'ode_comp_%i_%i' % (i_step, j_stage)
                 self._connect_states(
-                    ode_comp_tmp_name, 'rate_target',
-                    step_comp_new_name, 'F_name',
-                    tgt_stage=j_stage)
+                    self._get_names(ode_comp_tmp_name, 'rate_target'),
+                    self._get_names(step_comp_new_name, 'F', i_step=i_step, j_stage=j_stage),
+                )
 
             if i_step == 0:
                 self._connect_states(
-                    'starting_comp', 'y_new_name',
-                    step_comp_new_name, 'y_old_name')
+                    self._get_names('starting_comp', 'y_new'),
+                    self._get_names(step_comp_new_name, 'y_old', i_step=i_step),
+                )
+                for i_stage in range(num_stages):
+                    stage_comp_name = 'stage_comp_%i_%i' % (i_step, i_stage)
+                    self._connect_states(
+                        self._get_names('starting_comp', 'y_new'),
+                        self._get_names(stage_comp_name, 'y_old', i_step=i_step, i_stage=i_stage),
+                    )
             else:
                 self._connect_states(
-                    step_comp_old_name, 'y_new_name',
-                    step_comp_new_name, 'y_old_name')
+                    self._get_names(step_comp_old_name, 'y_new', i_step=i_step - 1),
+                    self._get_names(step_comp_new_name, 'y_old', i_step=i_step),
+                )
+                for i_stage in range(num_stages):
+                    stage_comp_name = 'stage_comp_%i_%i' % (i_step, i_stage)
+                    self._connect_states(
+                        self._get_names(step_comp_old_name, 'y_new', i_step=i_step - 1),
+                        self._get_names(stage_comp_name, 'y_old', i_step=i_step, i_stage=i_stage),
+                    )
 
         comp = TMOutputComp(states=states, times=times)
         self.add_subsystem('output_comp', comp)
 
         for i_step in range(len(times)):
             if i_step == 0:
-                step_comp_name = 'starting_comp'
+                self._connect_states(
+                    self._get_names('starting_comp', 'y_new'),
+                    self._get_names('output_comp', 'y', i_step=i_step),
+                )
             else:
-                step_comp_name = 'step_comp_%i' % (i_step - 1)
-
-            self._connect_states(
-                step_comp_name, 'y_new_name',
-                'output_comp', 'step_name',
-                tgt_step=i_step)
+                self._connect_states(
+                    self._get_names('step_comp_%i' % (i_step - 1), 'y_new', i_step=i_step - 1),
+                    self._get_names('output_comp', 'y', i_step=i_step),
+                )

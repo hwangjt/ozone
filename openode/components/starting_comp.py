@@ -6,7 +6,7 @@ from openmdao.utils.options_dictionary import OptionsDictionary
 
 from openmdao.api import ExplicitComponent
 
-from openode.utils.var_names import get_y_new_name
+from openode.utils.var_names import get_y_new_name, get_name
 
 
 class StartingComp(ExplicitComponent):
@@ -20,7 +20,7 @@ class StartingComp(ExplicitComponent):
         for state_name, state in iteritems(self.metadata['states']):
             size = np.prod(state['shape'])
 
-            y_new_name = get_y_new_name(state_name)
+            y_new_name = get_name('y_new', state_name)
 
             self.add_input(state_name, shape=state['shape'], units=state['units'])
             self.add_output(y_new_name, shape=(1,) + state['shape'], units=state['units'])
@@ -31,6 +31,6 @@ class StartingComp(ExplicitComponent):
 
     def compute(self, inputs, outputs):
         for state_name, state in iteritems(self.metadata['states']):
-            y_new_name = get_y_new_name(state_name)
+            y_new_name = get_name('y_new', state_name)
 
             outputs[y_new_name] = inputs[state_name].reshape((1,) + state['shape'])

@@ -7,6 +7,7 @@ from openode.integrators.integrator import Integrator
 from openode.components.vectorized_step_comp import VectorizedStepComp
 from openode.components.vectorized_stage_comp import VectorizedStageComp
 from openode.components.vectorized_output_comp import VectorizedOutputComp
+from openode.utils.var_names import get_name
 
 
 class VectorizedIntegrator(Integrator):
@@ -56,8 +57,9 @@ class VectorizedIntegrator(Integrator):
         coupled_group.add_subsystem('vectorized_step_comp', comp)
         self.connect('time_comp.h_vec', 'coupled_group.vectorized_step_comp.h_vec')
         self._connect_states(
-            'starting_comp', 'y_new_name',
-            'coupled_group.vectorized_step_comp', 'y0')
+            self._get_names('starting_comp', 'y_new'),
+            self._get_names('coupled_group.vectorized_step_comp', 'y0'),
+        )
 
         comp = VectorizedStageComp(states=states, time_units=time_units,
             num_time_steps=num_time_steps, num_stages=num_stages, num_step_vars=num_step_vars,
@@ -70,11 +72,10 @@ class VectorizedIntegrator(Integrator):
             num_time_steps=num_time_steps, num_step_vars=num_step_vars,
         )
         self.add_subsystem('output_comp', comp)
-        for state_name, state in iteritems(states):
-            self.connect(
-                'coupled_group.vectorized_step_comp.y:%s' % state_name,
-                'output_comp.y:%s' % state_name,
-            )
+        self._connect_states(
+            self._get_names('coupled_group.vectorized_step_comp', 'y'),
+            self._get_names('output_comp', 'y'),
+        )
 
         for state_name, state in iteritems(states):
             size = np.prod(state['shape'])
@@ -83,36 +84,36 @@ class VectorizedIntegrator(Integrator):
             src_indices = np.arange((num_time_steps - 1) * num_stages * size)
             coupled_group.connect(
                 'ode_comp.%s' % state['rate_target'],
-                'vectorized_step_comp.F:%s' % state_name,
+                'vectorized_step_comp.{}'.format(get_name('F', state_name)),
                 src_indices=src_indices,
             )
             coupled_group.connect(
                 'ode_comp.%s' % state['rate_target'],
-                'vectorized_stage_comp.F:%s' % state_name,
+                'vectorized_stage_comp.{}'.format(get_name('F', state_name)),
                 src_indices=src_indices,
             )
 
-            coupled_group.connect(
-                'vectorized_step_comp.y:%s' % state_name,
-                'vectorized_stage_comp.y:%s' % state_name,
-            )
+        ###
+        self._connect_states(
+            self._get_names('coupled_group.vectorized_step_comp', 'y'),
+            self._get_names('coupled_group.vectorized_stage_comp', 'y'),
+        )
 
-            src_indices = np.arange((num_time_steps - 1) * num_stages * size).reshape(
-                ((num_time_steps - 1) * num_stages,) + shape)
-            if formulation == 'MDF':
-                coupled_group.connect(
-                    'vectorized_stage_comp.Y_out:%s' % state_name,
-                    ['ode_comp.%s' % tgt for tgt in state['state_targets']],
-                )
-            elif formulation == 'SAND':
-                coupled_group.connect(
-                    'desvars_comp.Y:%s' % state_name,
-                    ['ode_comp.%s' % tgt for tgt in state['state_targets']],
-                )
-                coupled_group.connect(
-                    'desvars_comp.Y:%s' % state_name,
-                    'vectorized_stage_comp.Y_in:%s' % state_name,
-                )
+        if formulation == 'MDF':
+            self._connect_states(
+                self._get_names('coupled_group.vectorized_stage_comp', 'Y_out'),
+                self._get_names('coupled_group.ode_comp', 'state_targets'),
+            )
+        elif formulation == 'SAND':
+            self._connect_states(
+                self._get_names('coupled_group.desvars_comp', 'Y'),
+                self._get_names('coupled_group.ode_comp', 'state_targets'),
+            )
+            self._connect_states(
+                self._get_names('coupled_group.desvars_comp', 'Y'),
+                self._get_names('coupled_group.vectorized_stage_comp', 'Y_in'),
+            )
+            for state_name, state in iteritems(states):
                 coupled_group.add_constraint('vectorized_stage_comp.Y_out:%s' % state_name, equals=0.)
 
         if formulation == 'MDF':

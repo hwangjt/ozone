@@ -6,7 +6,7 @@ from openmdao.utils.options_dictionary import OptionsDictionary
 
 from openmdao.api import ExplicitComponent
 
-from openode.utils.var_names import get_y_new_name, get_step_name
+from openode.utils.var_names import get_y_new_name, get_step_name, get_name
 
 
 class VectorizedOutputComp(ExplicitComponent):
@@ -24,7 +24,7 @@ class VectorizedOutputComp(ExplicitComponent):
             size = np.prod(state['shape'])
             shape = state['shape']
 
-            y_name = 'y:%s' % state_name
+            y_name = get_name('y', state_name)
 
             self.add_input(y_name,
                 shape=(num_time_steps, num_step_vars,) + shape,
@@ -48,6 +48,6 @@ class VectorizedOutputComp(ExplicitComponent):
 
     def compute(self, inputs, outputs):
         for state_name, state in iteritems(self.metadata['states']):
-            y_name = 'y:%s' % state_name
+            y_name = get_name('y', state_name)
 
             outputs[state_name] = inputs[y_name][:, 0, :]
