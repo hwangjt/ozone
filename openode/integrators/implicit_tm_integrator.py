@@ -45,7 +45,7 @@ class ImplicitTMIntegrator(Integrator):
             comp = ImplicitTMStageComp(
                 states=states, time_units=time_units,
                 num_stages=num_stages, num_step_vars=num_step_vars,
-                glm_A=glm_A, glm_U=glm_U,
+                glm_A=glm_A, glm_U=glm_U, i_step=i_step,
             )
             group.add_subsystem('stage_comp', comp)
             self.connect('time_comp.h_vec', group_new_name + '.stage_comp.h', src_indices=i_step)
@@ -53,42 +53,44 @@ class ImplicitTMIntegrator(Integrator):
             comp = ImplicitTMStepComp(
                 states=states, time_units=time_units,
                 num_stages=num_stages, num_step_vars=num_step_vars,
-                glm_B=glm_B, glm_V=glm_V,
+                glm_B=glm_B, glm_V=glm_V, i_step=i_step,
             )
             group.add_subsystem('step_comp', comp)
             self.connect('time_comp.h_vec', group_new_name + '.step_comp.h', src_indices=i_step)
 
-            for state_name, state in iteritems(self.metadata['ode_function']._states):
-                tgt = state['rate_target']
-                self.connect(
-                    group_new_name + '.ode_comp.%s' % (tgt),
-                    group_new_name + '.step_comp.%s' % ('F:%s' % state_name),
-                )
-                self.connect(
-                    group_new_name + '.ode_comp.%s' % (tgt),
-                    group_new_name + '.stage_comp.%s' % ('F:%s' % state_name),
-                )
+            self._connect_states(
+                self._get_names(group_new_name + '.ode_comp', 'rate_target'),
+                self._get_names(group_new_name + '.step_comp', 'F', i_step=i_step),
+            )
 
-                for tgt in state['state_targets']:
-                    self.connect(
-                        group_new_name + '.%s.%s' % ('stage_comp', 'Y:%s' % state_name),
-                        group_new_name + '.%s.%s' % ('ode_comp', tgt),
-                    )
+            self._connect_states(
+                self._get_names(group_new_name + '.ode_comp', 'rate_target'),
+                self._get_names(group_new_name + '.stage_comp', 'F', i_step=i_step),
+            )
+
+            self._connect_states(
+                self._get_names(group_new_name + '.stage_comp', 'Y', i_step=i_step),
+                self._get_names(group_new_name + '.ode_comp', 'state_targets'),
+            )
 
             if i_step == 0:
                 self._connect_states(
-                    'starting_comp', 'y_new_name',
-                    group_new_name + '.step_comp', 'y_old_name')
+                    self._get_names('starting_comp', 'y_new'),
+                    self._get_names(group_new_name + '.step_comp', 'y_old', i_step=i_step),
+                )
                 self._connect_states(
-                    'starting_comp', 'y_new_name',
-                    group_new_name + '.stage_comp', 'y_name')
+                    self._get_names('starting_comp', 'y_new'),
+                    self._get_names(group_new_name + '.stage_comp', 'y_old', i_step=i_step),
+                )
             else:
                 self._connect_states(
-                    group_old_name + '.step_comp', 'y_new_name',
-                    group_new_name + '.step_comp', 'y_old_name')
+                    self._get_names(group_old_name + '.step_comp', 'y_new', i_step=i_step - 1),
+                    self._get_names(group_new_name + '.step_comp', 'y_old', i_step=i_step),
+                )
                 self._connect_states(
-                    group_old_name + '.step_comp', 'y_new_name',
-                    group_new_name + '.stage_comp', 'y_name')
+                    self._get_names(group_old_name + '.step_comp', 'y_new', i_step=i_step - 1),
+                    self._get_names(group_new_name + '.stage_comp', 'y_old', i_step=i_step),
+                )
 
             group.nonlinear_solver = NewtonSolver(iprint=2, maxiter=100)
             group.linear_solver = DirectSolver()
@@ -99,11 +101,12 @@ class ImplicitTMIntegrator(Integrator):
 
         for i_step in range(len(times)):
             if i_step == 0:
-                step_comp_name = 'starting_comp'
+                self._connect_states(
+                    self._get_names('starting_comp', 'y_new'),
+                    self._get_names('output_comp', 'y', i_step=i_step),
+                )
             else:
-                step_comp_name = 'step_%i' % (i_step - 1) + '.step_comp'
-
-            self._connect_states(
-                step_comp_name, 'y_new_name',
-                'output_comp', 'step_name',
-                tgt_step=i_step)
+                self._connect_states(
+                    self._get_names('step_%i' % (i_step - 1) + '.step_comp', 'y_new', i_step=i_step - 1),
+                    self._get_names('output_comp', 'y', i_step=i_step),
+                )

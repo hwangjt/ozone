@@ -6,7 +6,7 @@ from openmdao.utils.options_dictionary import OptionsDictionary
 
 from openmdao.api import ExplicitComponent
 
-from openode.utils.var_names import get_y_new_name, get_step_name
+from openode.utils.var_names import get_y_new_name, get_step_name, get_name
 
 
 class TMOutputComp(ExplicitComponent):
@@ -27,9 +27,9 @@ class TMOutputComp(ExplicitComponent):
             size = np.prod(state['shape'])
 
             for i_step in range(num_time_steps):
-                name = get_step_name(i_step, state_name)
+                y_name = get_name('y', state_name, i_step=i_step)
 
-                self.add_input(name, src_indices=np.arange(size).reshape(state['shape']),
+                self.add_input(y_name, src_indices=np.arange(size).reshape(state['shape']),
                     units=state['units'])
 
             self.add_output(state_name, shape=(num_time_steps,) + state['shape'],
@@ -40,11 +40,11 @@ class TMOutputComp(ExplicitComponent):
             cols = np.arange(size)
 
             for i_step in range(num_time_steps):
-                name = get_step_name(i_step, state_name)
+                y_name = get_name('y', state_name, i_step=i_step)
 
                 rows = full_rows[i_step, :]
 
-                self.declare_partials(state_name, name, val=vals, rows=rows, cols=cols)
+                self.declare_partials(state_name, y_name, val=vals, rows=rows, cols=cols)
 
     def compute(self, inputs, outputs):
         times = self.metadata['times']
@@ -54,6 +54,6 @@ class TMOutputComp(ExplicitComponent):
         for state_name, state in iteritems(self.metadata['states']):
 
             for i_step in range(num_time_steps):
-                name = get_step_name(i_step, state_name)
+                y_name = get_name('y', state_name, i_step=i_step)
 
-                outputs[state_name][i_step, :] = inputs[name]
+                outputs[state_name][i_step, :] = inputs[y_name]

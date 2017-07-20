@@ -5,7 +5,7 @@ import scipy.sparse.linalg
 
 from openmdao.api import ExplicitComponent
 
-from openode.utils.var_names import get_F_name, get_y_old_name, get_y_new_name
+from openode.utils.var_names import get_F_name, get_y_old_name, get_y_new_name, get_name
 from openode.utils.units import get_rate_units
 
 
@@ -36,10 +36,10 @@ class VectorizedStageComp(ExplicitComponent):
             size = np.prod(state['shape'])
             shape = state['shape']
 
-            F_name = 'F:%s' % state_name
-            y_name = 'y:%s' % state_name
-            Y_out_name = 'Y_out:%s' % state_name
-            Y_in_name = 'Y_in:%s' % state_name
+            F_name = get_name('F', state_name)
+            y_name = get_name('y', state_name)
+            Y_out_name = get_name('Y_out', state_name)
+            Y_in_name = get_name('Y_in', state_name)
 
             Y_arange = np.arange((num_time_steps - 1) * num_stages * size).reshape(
                 (num_time_steps - 1, num_stages,) + shape)
@@ -102,10 +102,10 @@ class VectorizedStageComp(ExplicitComponent):
             size = np.prod(state['shape'])
             shape = state['shape']
 
-            F_name = 'F:%s' % state_name
-            y_name = 'y:%s' % state_name
-            Y_out_name = 'Y_out:%s' % state_name
-            Y_in_name = 'Y_in:%s' % state_name
+            F_name = get_name('F', state_name)
+            y_name = get_name('y', state_name)
+            Y_out_name = get_name('Y_out', state_name)
+            Y_in_name = get_name('Y_in', state_name)
 
             outputs[Y_out_name] = -inputs[Y_in_name] \
                 + np.einsum('jk,i,ik...->ij...', glm_A, inputs['h_vec'], inputs[F_name]) \
@@ -123,10 +123,10 @@ class VectorizedStageComp(ExplicitComponent):
             size = np.prod(state['shape'])
             shape = state['shape']
 
-            F_name = 'F:%s' % state_name
-            y_name = 'y:%s' % state_name
-            Y_out_name = 'Y_out:%s' % state_name
-            Y_in_name = 'Y_in:%s' % state_name
+            F_name = get_name('F', state_name)
+            y_name = get_name('y', state_name)
+            Y_out_name = get_name('Y_out', state_name)
+            Y_in_name = get_name('Y_in', state_name)
 
             # (num_time_steps - 1, num_stages, num_stages,) + shape
 

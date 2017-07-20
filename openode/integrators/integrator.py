@@ -11,7 +11,7 @@ from openode.schemes.scheme import GLMScheme
 from openode.schemes.runge_kutta import RK4
 from openode.ode_function import ODEFunction
 from openode.utils.var_names import get_Y_name, get_F_name, get_y_old_name, get_y_new_name, \
-    get_step_name
+    get_step_name, get_name
 
 
 class Integrator(Group):
@@ -74,7 +74,26 @@ class Integrator(Group):
         #     'initial_conditions', 'state_name',
         #     'starting_comp', 'state_name')
 
-    def _connect_states(self, src_comp, src_type, tgt_comp, tgt_type,
+    def _get_names(self, comp, type_, i_step=None, i_stage=None, j_stage=None):
+        names_list = []
+        for state_name, state in iteritems(self.metadata['ode_function']._states):
+            if type_ == 'rate_target':
+                names = '{}.{}'.format(comp, state['rate_target'])
+            elif type_ == 'state_targets':
+                names = ['{}.{}'.format(comp, tgt) for tgt in state['state_targets']]
+            else:
+                names = '{}.{}'.format(comp, get_name(
+                    type_, state_name, i_step=i_step, i_stage=i_stage, j_stage=j_stage))
+
+            names_list.append(names)
+
+        return names_list
+
+    def _connect_states(self, srcs_list, tgts_list):
+        for srcs, tgts in zip(srcs_list, tgts_list):
+            self.connect(srcs, tgts)
+
+    def _connect_states00(self, src_comp, src_type, tgt_comp, tgt_type,
             src_stage=None, tgt_stage=None, src_step=None, tgt_step=None):
 
         for state_name, state in iteritems(self.metadata['ode_function']._states):

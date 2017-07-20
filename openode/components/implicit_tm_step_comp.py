@@ -4,7 +4,7 @@ import scipy.sparse
 
 from openmdao.api import ExplicitComponent
 
-from openode.utils.var_names import get_F_name, get_y_old_name, get_y_new_name
+from openode.utils.var_names import get_F_name, get_y_old_name, get_y_new_name, get_name
 from openode.utils.units import get_rate_units
 
 
@@ -17,11 +17,13 @@ class ImplicitTMStepComp(ExplicitComponent):
         self.metadata.declare('num_step_vars', type_=int, required=True)
         self.metadata.declare('glm_B', type_=np.ndarray, required=True)
         self.metadata.declare('glm_V', type_=np.ndarray, required=True)
+        self.metadata.declare('i_step', type_=int, required=True)
 
     def setup(self):
         time_units = self.metadata['time_units']
         num_stages = self.metadata['num_stages']
         num_step_vars = self.metadata['num_step_vars']
+        i_step = self.metadata['i_step']
         glm_B = self.metadata['glm_B']
         glm_V = self.metadata['glm_V']
 
@@ -33,9 +35,9 @@ class ImplicitTMStepComp(ExplicitComponent):
             size = np.prod(state['shape'])
             shape = state['shape']
 
-            F_name = 'F:%s' % state_name
-            y_old_name = 'y_old:%s' % state_name
-            y_new_name = 'y_new:%s' % state_name
+            F_name = get_name('F', state_name, i_step=i_step)
+            y_old_name = get_name('y_old', state_name, i_step=i_step)
+            y_new_name = get_name('y_new', state_name, i_step=i_step)
 
             self.add_input(F_name, shape=(num_stages,) + shape,
                 units=get_rate_units(state['units'], time_units))
@@ -76,14 +78,15 @@ class ImplicitTMStepComp(ExplicitComponent):
     def compute(self, inputs, outputs):
         glm_B = self.metadata['glm_B']
         glm_V = self.metadata['glm_V']
+        i_step = self.metadata['i_step']
 
         for state_name, state in iteritems(self.metadata['states']):
             size = np.prod(state['shape'])
             shape = state['shape']
 
-            F_name = 'F:%s' % state_name
-            y_old_name = 'y_old:%s' % state_name
-            y_new_name = 'y_new:%s' % state_name
+            F_name = get_name('F', state_name, i_step=i_step)
+            y_old_name = get_name('y_old', state_name, i_step=i_step)
+            y_new_name = get_name('y_new', state_name, i_step=i_step)
 
             outputs[y_new_name] = 0. \
                 + np.einsum('ij,j...->i...', glm_B, inputs[F_name]) * inputs['h'] \
@@ -95,14 +98,15 @@ class ImplicitTMStepComp(ExplicitComponent):
         num_step_vars = self.metadata['num_step_vars']
         glm_B = self.metadata['glm_B']
         glm_V = self.metadata['glm_V']
+        i_step = self.metadata['i_step']
 
         for state_name, state in iteritems(self.metadata['states']):
             size = np.prod(state['shape'])
             shape = state['shape']
 
-            F_name = 'F:%s' % state_name
-            y_old_name = 'y_old:%s' % state_name
-            y_new_name = 'y_new:%s' % state_name
+            F_name = get_name('F', state_name, i_step=i_step)
+            y_old_name = get_name('y_old', state_name, i_step=i_step)
+            y_new_name = get_name('y_new', state_name, i_step=i_step)
 
             # (num_stages, num_stages,) + shape
 

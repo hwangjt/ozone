@@ -5,7 +5,7 @@ import scipy.sparse.linalg
 
 from openmdao.api import ImplicitComponent
 
-from openode.utils.var_names import get_F_name, get_y_old_name, get_y_new_name
+from openode.utils.var_names import get_F_name, get_y_old_name, get_y_new_name, get_name
 from openode.utils.units import get_rate_units
 
 
@@ -39,9 +39,9 @@ class VectorizedStepComp(ImplicitComponent):
             size = np.prod(state['shape'])
             shape = state['shape']
 
-            F_name = 'F:%s' % state_name
-            y0_name = 'y0:%s' % state_name
-            y_name = 'y:%s' % state_name
+            F_name = get_name('F', state_name)
+            y0_name = get_name('y0', state_name)
+            y_name = get_name('y', state_name)
 
             y0_arange = np.arange(num_step_vars * size).reshape((num_step_vars,) + shape)
 
@@ -124,9 +124,9 @@ class VectorizedStepComp(ImplicitComponent):
             size = np.prod(state['shape'])
             shape = state['shape']
 
-            F_name = 'F:%s' % state_name
-            y0_name = 'y0:%s' % state_name
-            y_name = 'y:%s' % state_name
+            F_name = get_name('F', state_name)
+            y0_name = get_name('y0', state_name)
+            y_name = get_name('y', state_name)
 
             # dy_dy term
             in_vec = outputs[y_name].reshape((num_time_steps * num_step_vars * size))
@@ -149,9 +149,9 @@ class VectorizedStepComp(ImplicitComponent):
             size = np.prod(state['shape'])
             shape = state['shape']
 
-            F_name = 'F:%s' % state_name
-            y0_name = 'y0:%s' % state_name
-            y_name = 'y:%s' % state_name
+            F_name = get_name('F', state_name)
+            y0_name = get_name('y0', state_name)
+            y_name = get_name('y', state_name)
 
             vec = np.zeros((num_time_steps, num_step_vars,) + shape)
             vec[0, :, :] += inputs[y0_name] # y0 term
@@ -168,9 +168,9 @@ class VectorizedStepComp(ImplicitComponent):
             size = np.prod(state['shape'])
             shape = state['shape']
 
-            F_name = 'F:%s' % state_name
-            y0_name = 'y0:%s' % state_name
-            y_name = 'y:%s' % state_name
+            F_name = get_name('F', state_name)
+            y0_name = get_name('y0', state_name)
+            y_name = get_name('y', state_name)
 
             # (num_time_steps - 1, num_step_vars, num_stages,) + shape
 
@@ -190,7 +190,7 @@ class VectorizedStepComp(ImplicitComponent):
             size = np.prod(state['shape'])
             shape = state['shape']
 
-            y_name = 'y:%s' % state_name
+            y_name = get_name('y', state_name)
 
             if mode == 'fwd':
                 rhs_vec = d_residuals[y_name].flatten()
