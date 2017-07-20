@@ -8,7 +8,7 @@ from openode.components.starting_comp import StartingComp
 from openode.components.explicit_tm_stage_comp import ExplicitTMStageComp
 from openode.components.explicit_tm_step_comp import ExplicitTMStepComp
 from openode.components.tm_output_comp import TMOutputComp
-from openode.utils.var_names import get_y_new_name, get_y_old_name
+from openode.utils.var_names import get_name
 
 
 class ExplicitTMIntegrator(Integrator):
@@ -82,13 +82,13 @@ class ExplicitTMIntegrator(Integrator):
 
             if i_step == 0:
                 self._connect_states(
-                    self._get_names('starting_comp', 'y_new'),
+                    self._get_names('starting_system', 'y_new'),
                     self._get_names(step_comp_new_name, 'y_old', i_step=i_step),
                 )
                 for i_stage in range(num_stages):
                     stage_comp_name = 'stage_comp_%i_%i' % (i_step, i_stage)
                     self._connect_states(
-                        self._get_names('starting_comp', 'y_new'),
+                        self._get_names('starting_system', 'y_new'),
                         self._get_names(stage_comp_name, 'y_old', i_step=i_step, i_stage=i_stage),
                     )
             else:
@@ -103,13 +103,18 @@ class ExplicitTMIntegrator(Integrator):
                         self._get_names(stage_comp_name, 'y_old', i_step=i_step, i_stage=i_stage),
                     )
 
+        promotes_states = []
+        for state_name in states:
+            out_state_name = get_name('state', state_name)
+            promotes_states.append(out_state_name)
+
         comp = TMOutputComp(states=states, times=times)
-        self.add_subsystem('output_comp', comp)
+        self.add_subsystem('output_comp', comp, promotes_outputs=promotes_states)
 
         for i_step in range(len(times)):
             if i_step == 0:
                 self._connect_states(
-                    self._get_names('starting_comp', 'y_new'),
+                    self._get_names('starting_system', 'y_new'),
                     self._get_names('output_comp', 'y', i_step=i_step),
                 )
             else:

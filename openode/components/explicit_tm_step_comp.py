@@ -4,7 +4,7 @@ import scipy.sparse
 
 from openmdao.api import ExplicitComponent
 
-from openode.utils.var_names import get_F_name, get_y_old_name, get_y_new_name, get_name
+from openode.utils.var_names import get_name
 from openode.utils.units import get_rate_units
 
 
