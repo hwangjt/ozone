@@ -80,8 +80,8 @@ for i, num in enumerate(nums):
         prob.run_model()
 
 
-    errs[i] = np.abs(prob['output_comp.y'][-1][0] - (2 / (2*C1 - t1**2)))
-    # print(prob['output_comp.y'])
+    errs[i] = np.abs(prob['state:y'][-1][0] - (2 / (2*C1 - t1**2)))
+    # print(prob['state:y'])
 
 
 print('-'*40)
@@ -90,5 +90,3 @@ print('-'*40)
 for i, (n, err) in enumerate(zip(nums, errs)):
     print('| {:.4e} | {:.4e} | {:.4e} |'.format(1./(n-1), err, 0. if i == 0 else
         np.log(errs[i] / errs[i-1]) / np.log((1./(n-1)) / (1./(nums[i-1]-1)))))
-
-

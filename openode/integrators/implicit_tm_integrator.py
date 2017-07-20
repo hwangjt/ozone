@@ -8,6 +8,7 @@ from openode.components.starting_comp import StartingComp
 from openode.components.implicit_tm_stage_comp import ImplicitTMStageComp
 from openode.components.implicit_tm_step_comp import ImplicitTMStepComp
 from openode.components.tm_output_comp import TMOutputComp
+from openode.utils.var_names import get_name
 
 
 class ImplicitTMIntegrator(Integrator):
@@ -95,8 +96,13 @@ class ImplicitTMIntegrator(Integrator):
             group.linear_solver = DirectSolver()
             group.jacobian = DenseJacobian()
 
+        promotes_states = []
+        for state_name in states:
+            out_state_name = get_name('state', state_name)
+            promotes_states.append(out_state_name)
+
         comp = TMOutputComp(states=states, times=times)
-        self.add_subsystem('output_comp', comp)
+        self.add_subsystem('output_comp', comp, promotes_outputs=promotes_states)
 
         for i_step in range(len(times)):
             if i_step == 0:

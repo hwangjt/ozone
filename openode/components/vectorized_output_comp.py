@@ -25,12 +25,13 @@ class VectorizedOutputComp(ExplicitComponent):
             shape = state['shape']
 
             y_name = get_name('y', state_name)
+            out_state_name = get_name('state', state_name)
 
             self.add_input(y_name,
                 shape=(num_time_steps, num_step_vars,) + shape,
                 units=state['units'])
 
-            self.add_output(state_name,
+            self.add_output(out_state_name,
                 shape=(num_time_steps,) + shape,
                 units=state['units'])
 
@@ -44,10 +45,11 @@ class VectorizedOutputComp(ExplicitComponent):
             rows = y_arange[:, 0, :].flatten()
             cols = state_arange.flatten()
 
-            self.declare_partials(state_name, y_name, val=data, rows=rows, cols=cols)
+            self.declare_partials(out_state_name, y_name, val=data, rows=rows, cols=cols)
 
     def compute(self, inputs, outputs):
         for state_name, state in iteritems(self.metadata['states']):
             y_name = get_name('y', state_name)
+            out_state_name = get_name('state', state_name)
 
-            outputs[state_name] = inputs[y_name][:, 0, :]
+            outputs[out_state_name] = inputs[y_name][:, 0, :]

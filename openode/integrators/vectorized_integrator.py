@@ -68,10 +68,15 @@ class VectorizedIntegrator(Integrator):
         coupled_group.add_subsystem('vectorized_stage_comp', comp)
         self.connect('time_comp.h_vec', 'coupled_group.vectorized_stage_comp.h_vec')
 
+        promotes_states = []
+        for state_name in states:
+            out_state_name = get_name('state', state_name)
+            promotes_states.append(out_state_name)
+
         comp = VectorizedOutputComp(states=states,
             num_time_steps=num_time_steps, num_step_vars=num_step_vars,
         )
-        self.add_subsystem('output_comp', comp)
+        self.add_subsystem('output_comp', comp, promotes_outputs=promotes_states)
         self._connect_states(
             self._get_names('coupled_group.vectorized_step_comp', 'y'),
             self._get_names('output_comp', 'y'),

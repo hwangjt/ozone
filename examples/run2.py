@@ -36,6 +36,6 @@ prob.run_driver()
 # prob.check_partials(compact_print=True)
 # prob.check_partials(compact_print=False)
 
-print(prob['output_comp.y'])
+print(prob['state:y'])
 
 # view_model(prob)

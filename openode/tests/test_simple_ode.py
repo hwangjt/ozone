@@ -43,7 +43,7 @@ class Test(unittest.TestCase):
         return prob
 
     def compute_diff(self, integrator_name, scheme_name, ode_function, y_ref):
-        y = self.run_ode(integrator_name, scheme_name, ode_function)['output_comp.y']
+        y = self.run_ode(integrator_name, scheme_name, ode_function)['state:y']
 
         return np.linalg.norm(y - y_ref) / np.linalg.norm(y_ref)
 
@@ -54,7 +54,7 @@ class Test(unittest.TestCase):
     ))
     def test_tm(self, scheme_name, ode_function, integrator_name):
 
-        y_ref = self.run_ode('TM', scheme_name, ode_function)['output_comp.y']
+        y_ref = self.run_ode('TM', scheme_name, ode_function)['state:y']
         diff = self.compute_diff(integrator_name, scheme_name, ode_function, y_ref)
         print('%20s %5s %16.9e' % (scheme_name, integrator_name, diff))
         self.assertTrue(diff < 1e-10, 'Error when integrating with %s %s' % (

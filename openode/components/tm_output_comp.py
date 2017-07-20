@@ -26,13 +26,15 @@ class TMOutputComp(ExplicitComponent):
         for state_name, state in iteritems(self.metadata['states']):
             size = np.prod(state['shape'])
 
+            out_state_name = get_name('state', state_name)
+
             for i_step in range(num_time_steps):
                 y_name = get_name('y', state_name, i_step=i_step)
 
                 self.add_input(y_name, src_indices=np.arange(size).reshape(state['shape']),
                     units=state['units'])
 
-            self.add_output(state_name, shape=(num_time_steps,) + state['shape'],
+            self.add_output(out_state_name, shape=(num_time_steps,) + state['shape'],
                 units=state['units'])
 
             vals = np.ones(size)
@@ -44,7 +46,7 @@ class TMOutputComp(ExplicitComponent):
 
                 rows = full_rows[i_step, :]
 
-                self.declare_partials(state_name, y_name, val=vals, rows=rows, cols=cols)
+                self.declare_partials(out_state_name, y_name, val=vals, rows=rows, cols=cols)
 
     def compute(self, inputs, outputs):
         times = self.metadata['times']
@@ -53,7 +55,9 @@ class TMOutputComp(ExplicitComponent):
 
         for state_name, state in iteritems(self.metadata['states']):
 
+            out_state_name = get_name('state', state_name)
+
             for i_step in range(num_time_steps):
                 y_name = get_name('y', state_name, i_step=i_step)
 
-                outputs[state_name][i_step, :] = inputs[y_name]
+                outputs[out_state_name][i_step, :] = inputs[y_name]
