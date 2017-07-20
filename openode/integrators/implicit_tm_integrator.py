@@ -19,7 +19,7 @@ class ImplicitTMIntegrator(Integrator):
     def setup(self):
         super(ImplicitTMIntegrator, self).setup()
 
-        states, time_units, times = self._get_meta()
+        states, time_units, starting_times, my_times = self._get_meta()
         scheme = self.metadata['scheme']
         glm_A = scheme.A
         glm_B = scheme.B
@@ -27,9 +27,10 @@ class ImplicitTMIntegrator(Integrator):
         glm_V = scheme.V
         num_stages = scheme.num_stages
         num_step_vars = scheme.num_values
+        starting_coeffs = self.metadata['starting_coeffs']
         ode_function =  self.metadata['ode_function']
 
-        for i_step in range(len(times) - 1):
+        for i_step in range(len(my_times) - 1):
             group = Group()
             group_old_name = 'step_%i' % (i_step - 1)
             group_new_name = 'step_%i' % i_step
@@ -75,11 +76,11 @@ class ImplicitTMIntegrator(Integrator):
 
             if i_step == 0:
                 self._connect_states(
-                    self._get_names('starting_system', 'y_new'),
+                    self._get_names('starting_system', 'starting'),
                     self._get_names(group_new_name + '.step_comp', 'y_old', i_step=i_step),
                 )
                 self._connect_states(
-                    self._get_names('starting_system', 'y_new'),
+                    self._get_names('starting_system', 'starting'),
                     self._get_names(group_new_name + '.stage_comp', 'y_old', i_step=i_step),
                 )
             else:
@@ -96,18 +97,23 @@ class ImplicitTMIntegrator(Integrator):
             group.linear_solver = DirectSolver()
             group.jacobian = DenseJacobian()
 
-        promotes_states = []
+        promotes_outputs = []
         for state_name in states:
             out_state_name = get_name('state', state_name)
-            promotes_states.append(out_state_name)
+            starting_name = get_name('starting', state_name)
+            promotes_outputs.append(out_state_name)
+            if starting_coeffs is not None:
+                promotes_outputs.append(starting_name)
 
-        comp = TMOutputComp(states=states, times=times)
-        self.add_subsystem('output_comp', comp, promotes_outputs=promotes_states)
+        comp = TMOutputComp(
+            states=states, num_time_steps=len(my_times), num_step_vars=num_step_vars,
+            starting_coeffs=starting_coeffs)
+        self.add_subsystem('output_comp', comp, promotes_outputs=promotes_outputs)
 
-        for i_step in range(len(times)):
+        for i_step in range(len(my_times)):
             if i_step == 0:
                 self._connect_states(
-                    self._get_names('starting_system', 'y_new'),
+                    self._get_names('starting_system', 'starting'),
                     self._get_names('output_comp', 'y', i_step=i_step),
                 )
             else:
