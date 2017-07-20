@@ -75,11 +75,11 @@ class ImplicitTMIntegrator(Integrator):
 
             if i_step == 0:
                 self._connect_states(
-                    self._get_names('starting_comp', 'y_new'),
+                    self._get_names('starting_system', 'y_new'),
                     self._get_names(group_new_name + '.step_comp', 'y_old', i_step=i_step),
                 )
                 self._connect_states(
-                    self._get_names('starting_comp', 'y_new'),
+                    self._get_names('starting_system', 'y_new'),
                     self._get_names(group_new_name + '.stage_comp', 'y_old', i_step=i_step),
                 )
             else:
@@ -107,7 +107,7 @@ class ImplicitTMIntegrator(Integrator):
         for i_step in range(len(times)):
             if i_step == 0:
                 self._connect_states(
-                    self._get_names('starting_comp', 'y_new'),
+                    self._get_names('starting_system', 'y_new'),
                     self._get_names('output_comp', 'y', i_step=i_step),
                 )
             else:

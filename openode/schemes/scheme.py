@@ -5,7 +5,7 @@ class GLMScheme(object):
     """
     Base class for all GLM schemes.
     """
-    def __init__(self, A, B, U, V, abscissa):
+    def __init__(self, A, B, U, V, abscissa, starting_method=None):
 
         s, s2 = A.shape
 
@@ -37,6 +37,7 @@ class GLMScheme(object):
         self.B = B
         self.U = U
         self.V = V
+        self.starting_method = starting_method
 
         lower = np.tril(A, -1)
         err = np.linalg.norm(lower - A)

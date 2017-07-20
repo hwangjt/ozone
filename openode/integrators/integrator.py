@@ -11,6 +11,7 @@ from openode.schemes.scheme import GLMScheme
 from openode.schemes.runge_kutta import RK4
 from openode.ode_function import ODEFunction
 from openode.utils.var_names import get_name
+from openode.utils.misc import get_scheme
 
 
 class Integrator(Group):
@@ -23,68 +24,98 @@ class Integrator(Group):
         self.metadata.declare('times', type_=np.ndarray, required=True)
         self.metadata.declare('initial_conditions', type_=dict)
         self.metadata.declare('scheme', default=RK4(), type_=GLMScheme)
+        self.metadata.declare('starting_coeffs', values=(None,), type_=np.ndarray)
 
     def setup(self):
         ode_function = self.metadata['ode_function']
-        states = ode_function._states
+        initial_conditions = self.metadata['initial_conditions']
+        starting_coeffs = self.metadata['starting_coeffs']
+        scheme = self.metadata['scheme']
+
+        states, time_units, starting_times, my_times = self._get_meta()
 
         # Ensure that all initial_conditions are valid
-        for state_name, value in iteritems(self.metadata['initial_conditions']):
-            assert state_name in ode_function._states, \
-                'State name %s is not valid in the initial conditions' % state_name
+        if initial_conditions is not None:
+            for state_name, value in iteritems(initial_conditions):
+                assert state_name in ode_function._states, \
+                    'State name %s is not valid in the initial conditions' % state_name
 
-            if np.isscalar(value):
-                assert ode_function._states[state_name]['shape'] == (1,), \
-                    'The initial condition for state %s has the wrong shape' % state_name
-            else:
-                assert ode_function._states[state_name]['shape'] == value.shape, \
-                    'The initial condition for state %s has the wrong shape' % state_name
+                if np.isscalar(value):
+                    assert ode_function._states[state_name]['shape'] == (1,), \
+                        'The initial condition for state %s has the wrong shape' % state_name
+                else:
+                    assert ode_function._states[state_name]['shape'] == value.shape, \
+                        'The initial condition for state %s has the wrong shape' % state_name
 
-        initial_conditions = self.metadata['initial_conditions']
-        times = self.metadata['times']
-        time_units = ode_function._time_options['units']
-
-        promotes_ICs = []
-        for state_name in self.metadata['ode_function']._states:
-            promotes_ICs.append((state_name, 'IC:{}'.format(state_name)))
+        # (num_starting, num_time_steps, num_step_vars,)
+        if starting_coeffs is not None:
+            assert len(starting_coeffs.shape) == 3, \
+                'starting_coeffs must be a rank-3 array, but its rank is %i' \
+                % len(starting_coeffs.shape)
+            assert starting_coeffs.shape[1:] == (len(my_times), scheme.num_values), \
+                'starting_coeffs must have shape (num_starting, num_time_steps, num_step_vars,).' \
+                + 'It has shape %i x %i x %i, but it should have shape (? x %i x %i)' % (
+                    starting_coeffs.shape[0], starting_coeffs.shape[1], starting_coeffs.shape[2],
+                    len(my_times), scheme.num_values
+                )
 
         # Initial conditions
-        if len(initial_conditions) > 0:
+        if initial_conditions is not None:
             ivcomp = IndepVarComp()
+
+            promotes = []
+            for state_name in states:
+                promotes.append((state_name, 'IC:{}'.format(state_name)))
 
             for state_name, value in iteritems(initial_conditions):
                 state = ode_function._states[state_name]
                 ivcomp.add_output(state_name, val=value, units=state['units'])
-            self.add_subsystem('initial_conditions', ivcomp, promotes_outputs=promotes_ICs)
+            self.add_subsystem('initial_conditions', ivcomp, promotes_outputs=promotes)
 
-        # Start and end times
-        if times is not None:
-            comp = IndepVarComp()
-            comp.add_output('times', val=times, units=time_units)
-            self.add_subsystem('inputs_t', comp)
+        # Time values just at the time steps
+        comp = IndepVarComp()
+        comp.add_output('times', val=my_times, units=time_units)
+        self.add_subsystem('inputs_t', comp)
 
         # Time comp
         abscissa = self.metadata['scheme'].abscissa
         self.add_subsystem('time_comp',
-            TimeComp(time_units=time_units, glm_abscissa=abscissa, num_time_steps=len(times)))
+            TimeComp(time_units=time_units, glm_abscissa=abscissa,
+                num_time_steps=len(my_times)))
         self.connect('inputs_t.times', 'time_comp.times')
 
         # Starting method
-        self.add_subsystem('starting_comp', StartingComp(states=states),
-            promotes_inputs=promotes_ICs)
-        # self._connect_states(
-        #     'initial_conditions', 'state_name',
-        #     'starting_comp', 'state_name')
+        promotes_inputs = []
+        for state_name in states:
+            promotes_inputs.append('IC:{}'.format(state_name))
+        if scheme.starting_method is None:
+            self.add_subsystem('starting_system', StartingComp(states=states),
+                promotes_inputs=promotes_inputs)
+        else:
+            starting_scheme_name, starting_coeffs, starting_time_steps = scheme.starting_method
+            scheme_class = get_scheme(starting_scheme_name)
+            num_starting = starting_coeffs.shape[0]
+
+            starting_integrator = self.__class__(
+                ode_function=ode_function, times=starting_times, scheme=scheme_class(),
+                starting_coeffs=starting_coeffs,
+            )
+            self.add_subsystem('starting_system', starting_integrator,
+                promotes_inputs=promotes_inputs)
 
     def _get_names(self, comp, type_, i_step=None, i_stage=None, j_stage=None):
         names_list = []
         for state_name, state in iteritems(self.metadata['ode_function']._states):
-            if type_ == 'rate_target':
-                names = '{}.{}'.format(comp, state['rate_target'])
-            elif type_ == 'state_targets':
-                names = ['{}.{}'.format(comp, tgt) for tgt in state['state_targets']]
+            if comp is not None:
+                prefix = comp + '.'
             else:
-                names = '{}.{}'.format(comp, get_name(
+                prefix = ''
+            if type_ == 'rate_target':
+                names = '{}{}'.format(prefix, state['rate_target'])
+            elif type_ == 'state_targets':
+                names = ['{}{}'.format(prefix, tgt) for tgt in state['state_targets']]
+            else:
+                names = '{}{}'.format(prefix, get_name(
                     type_, state_name, i_step=i_step, i_stage=i_stage, j_stage=j_stage))
 
             names_list.append(names)
@@ -95,62 +126,25 @@ class Integrator(Group):
         for srcs, tgts in zip(srcs_list, tgts_list):
             self.connect(srcs, tgts)
 
-    def _connect_states00(self, src_comp, src_type, tgt_comp, tgt_type,
-            src_stage=None, tgt_stage=None, src_step=None, tgt_step=None):
-
-        for state_name, state in iteritems(self.metadata['ode_function']._states):
-
-            if src_type == 'state_name':
-                src_name = state_name
-            elif src_type == 'F_name':
-                src_name = get_F_name(src_stage, state_name)
-            elif src_type == 'Y_name':
-                src_name = get_Y_name(src_stage, state_name)
-            elif src_type == 'y_old_name':
-                src_name = get_y_old_name(state_name)
-            elif src_type == 'y_new_name':
-                src_name = get_y_new_name(state_name)
-            elif src_type == 'rate_target':
-                src_name = state['rate_target']
-            else:
-                src_name = src_type + ':' + state_name
-
-            if tgt_type == 'state_name':
-                tgt_names = [state_name]
-            elif tgt_type == 'F_name':
-                tgt_names = [get_F_name(tgt_stage, state_name)]
-            elif tgt_type == 'Y_name':
-                tgt_names = [get_Y_name(tgt_stage, state_name)]
-            elif tgt_type == 'y_name':
-                tgt_names = ['y:%s' % state_name]
-            elif tgt_type == 'y_old_name':
-                tgt_names = [get_y_old_name(state_name)]
-            elif tgt_type == 'y_new_name':
-                tgt_names = [get_y_new_name(state_name)]
-            elif tgt_type == 'state_targets':
-                tgt_names = state['state_targets']
-            elif tgt_type == 'step_name':
-                tgt_names = [get_step_name(tgt_step, state_name)]
-            else:
-                tgt_names = [tgt_type + ':' + state_name]
-
-            for tgt_name in tgt_names:
-                self.connect(
-                    '%s.%s' % (src_comp, src_name),
-                    '%s.%s' % (tgt_comp, tgt_name))
-
     def _create_ode(self, num):
         ode_function = self.metadata['ode_function']
         return ode_function._system_class(num=num, **ode_function._system_init_kwargs)
 
     def _get_meta(self):
         ode_function = self.metadata['ode_function']
+        scheme = self.metadata['scheme']
+
+        times = self.metadata['times']
+
+        if scheme.starting_method is not None:
+            start_time_index = scheme.starting_method[2]
+        else:
+            start_time_index = 0
 
         states = ode_function._states
         time_units = ode_function._time_options['units']
-        times = self.metadata['times']
 
-        return states, time_units, times
+        return states, time_units, times[:start_time_index+1], times[start_time_index:]
 
     def _get_scheme(self):
         scheme = self.metadata['scheme']

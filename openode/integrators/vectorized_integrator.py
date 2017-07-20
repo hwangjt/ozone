@@ -28,11 +28,12 @@ class VectorizedIntegrator(Integrator):
 
         formulation = self.metadata['formulation']
         ode_function = self.metadata['ode_function']
+        starting_coeffs = self.metadata['starting_coeffs']
 
-        states, time_units, times = self._get_meta()
+        states, time_units, starting_times, my_times = self._get_meta()
         glm_A, glm_B, glm_U, glm_V, num_stages, num_step_vars = self._get_scheme()
 
-        num_time_steps = len(times)
+        num_time_steps = len(my_times)
 
         if formulation == 'SAND':
             comp = IndepVarComp()
@@ -57,7 +58,7 @@ class VectorizedIntegrator(Integrator):
         coupled_group.add_subsystem('vectorized_step_comp', comp)
         self.connect('time_comp.h_vec', 'coupled_group.vectorized_step_comp.h_vec')
         self._connect_states(
-            self._get_names('starting_comp', 'y_new'),
+            self._get_names('starting_system', 'starting'),
             self._get_names('coupled_group.vectorized_step_comp', 'y0'),
         )
 
@@ -68,15 +69,19 @@ class VectorizedIntegrator(Integrator):
         coupled_group.add_subsystem('vectorized_stage_comp', comp)
         self.connect('time_comp.h_vec', 'coupled_group.vectorized_stage_comp.h_vec')
 
-        promotes_states = []
+        promotes_outputs = []
         for state_name in states:
             out_state_name = get_name('state', state_name)
-            promotes_states.append(out_state_name)
+            starting_name = get_name('starting', state_name)
+            promotes_outputs.append(out_state_name)
+            if starting_coeffs is not None:
+                promotes_outputs.append(starting_name)
 
         comp = VectorizedOutputComp(states=states,
             num_time_steps=num_time_steps, num_step_vars=num_step_vars,
+            starting_coeffs=starting_coeffs,
         )
-        self.add_subsystem('output_comp', comp, promotes_outputs=promotes_states)
+        self.add_subsystem('output_comp', comp, promotes_outputs=promotes_outputs)
         self._connect_states(
             self._get_names('coupled_group.vectorized_step_comp', 'y'),
             self._get_names('output_comp', 'y'),

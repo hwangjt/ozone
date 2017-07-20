@@ -4,38 +4,13 @@ from openode.integrators.implicit_tm_integrator import ImplicitTMIntegrator
 from openode.integrators.vectorized_integrator import VectorizedIntegrator
 from openode.schemes.runge_kutta import ForwardEuler, BackwardEuler, ExplicitMidpoint, \
     ImplicitMidpoint, KuttaThirdOrder, RK4, RalstonsMethod, HeunsMethod
-
-
-def _get_class(name, classes, label):
-    if name not in classes:
-        msg = '%s name %s is invalid. Valid options are:\n' % (label, name)
-        for tmp_name in classes:
-            msg += '   %s\n' % tmp_name
-        raise ValueError(msg)
-    else:
-        return classes[name]
+from openode.utils.misc import get_scheme, get_integrator
 
 
 def ODEIntegrator(ode_function, integrator_name, scheme_name, **kwargs):
-    scheme_classes = {
-        'ForwardEuler': ForwardEuler,
-        'BackwardEuler': BackwardEuler,
-        'ExplicitMidpoint': ExplicitMidpoint,
-        'ImplicitMidpoint': ImplicitMidpoint,
-        'KuttaThirdOrder': KuttaThirdOrder,
-        'RK4': RK4,
-        'RalstonsMethod': RalstonsMethod,
-        'HeunsMethod': HeunsMethod,
-    }
-    scheme_class = _get_class(scheme_name, scheme_classes, 'Scheme')
+    scheme_class = get_scheme(scheme_name)
     explicit = scheme_class().explicit
-
-    integrator_classes = {
-        'SAND': VectorizedIntegrator,
-        'MDF': VectorizedIntegrator,
-        'TM': ExplicitTMIntegrator if explicit else ImplicitTMIntegrator,
-    }
-    integrator_class = _get_class(integrator_name, integrator_classes, 'Integrator')
+    integrator_class = get_integrator(integrator_name, explicit)
 
     if integrator_name == 'SAND' or integrator_name == 'MDF':
         kwargs['formulation'] = integrator_name
