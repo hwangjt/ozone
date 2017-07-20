@@ -96,6 +96,7 @@ class Integrator(Group):
             scheme_class = get_scheme(starting_scheme_name)
             num_starting = starting_coeffs.shape[0]
 
+            print(starting_times)
             starting_integrator = self.__class__(
                 ode_function=ode_function, times=starting_times, scheme=scheme_class(),
                 starting_coeffs=starting_coeffs,
