@@ -13,12 +13,12 @@ nums = [11, 16, 21, 26, 31, 36]
 # nums = [5]
 # nums = [11, 21, 31, 51]
 
-scheme_name = 'ExplicitMidpoint'
+scheme_name = 'AB4'
 # scheme_name = 'GaussLegendre4'
 
 # integrator_name = 'SAND'
-integrator_name = 'MDF'
-# integrator_name = 'TM'
+# integrator_name = 'MDF'
+integrator_name = 'TM'
 
 C1 = -1e-2
 if C1 > 0:
@@ -36,11 +36,11 @@ for i, num in enumerate(nums):
 
     y_true = np.array([ode_function.compute_exact_soln(initial_conditions, t0, t) for t in times])
 
-    integrator = ODEIntegrator(ode_function, 'MDF', scheme_name,
+    integrator = ODEIntegrator(ode_function, integrator_name, scheme_name,
         times=times, initial_conditions=initial_conditions)
     prob = Problem(integrator)
     prob.setup()
-    prob['coupled_group.vectorized_step_comp.y:y'] = y_true.reshape((num, 1 ,1))
+    # prob['coupled_group.vectorized_step_comp.y:y'] = y_true.reshape((num, 1 ,1))
     prob.run_model()
 
     approx_y = prob['state:y'][-1][0]

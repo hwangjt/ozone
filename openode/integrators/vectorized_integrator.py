@@ -29,6 +29,10 @@ class VectorizedIntegrator(Integrator):
         formulation = self.metadata['formulation']
         ode_function = self.metadata['ode_function']
         starting_coeffs = self.metadata['starting_coeffs']
+        scheme = self.metadata['scheme']
+
+        has_starting_method = scheme.starting_method is not None
+        is_starting_method = starting_coeffs is not None
 
         states, time_units, starting_times, my_times = self._get_meta()
         glm_A, glm_B, glm_U, glm_V, num_stages, num_step_vars = self._get_scheme()
@@ -74,18 +78,23 @@ class VectorizedIntegrator(Integrator):
             out_state_name = get_name('state', state_name)
             starting_name = get_name('starting', state_name)
             promotes_outputs.append(out_state_name)
-            if starting_coeffs is not None:
+            if is_starting_method:
                 promotes_outputs.append(starting_name)
 
         comp = VectorizedOutputComp(states=states,
-            num_time_steps=num_time_steps, num_step_vars=num_step_vars,
-            starting_coeffs=starting_coeffs,
+            num_starting_time_steps=len(starting_times), num_my_time_steps=len(my_times),
+            num_step_vars=num_step_vars, starting_coeffs=starting_coeffs,
         )
         self.add_subsystem('output_comp', comp, promotes_outputs=promotes_outputs)
         self._connect_states(
             self._get_names('coupled_group.vectorized_step_comp', 'y'),
             self._get_names('output_comp', 'y'),
         )
+        if has_starting_method:
+            self._connect_states(
+                self._get_names('starting_system', 'state'),
+                self._get_names('output_comp', 'starting_state'),
+            )
 
         for state_name, state in iteritems(states):
             size = np.prod(state['shape'])

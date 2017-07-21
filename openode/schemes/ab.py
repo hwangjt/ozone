@@ -23,7 +23,7 @@ class AB(GLMScheme):
         B[0, :] = coeffs[num_steps]
         V[0, 0] = 1.0
 
-        starting_scheme_name = 'RK4'
+        starting_scheme_name = 'ForwardEuler'
         starting_coeffs = np.eye(num_steps).reshape((num_steps, num_steps, 1))
         starting_time_steps = num_steps - 1
 

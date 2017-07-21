@@ -8,10 +8,10 @@ from openode.tests.ode_functions.simple_ode import LinearODEFunction, SimpleODEF
 
 num = 50
 
-scheme_name = 'AB2'
+scheme_name = 'AM4'
 
-integrator_name = 'SAND'
-# integrator_name = 'MDF'
+# integrator_name = 'SAND'
+integrator_name = 'MDF'
 # integrator_name = 'TM'
 
 ode_function = SimpleODEFunction()

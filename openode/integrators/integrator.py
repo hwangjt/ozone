@@ -32,6 +32,9 @@ class Integrator(Group):
         starting_coeffs = self.metadata['starting_coeffs']
         scheme = self.metadata['scheme']
 
+        has_starting_method = scheme.starting_method is not None
+        is_starting_method = starting_coeffs is not None
+
         states, time_units, starting_times, my_times = self._get_meta()
 
         # Ensure that all initial_conditions are valid
@@ -48,7 +51,7 @@ class Integrator(Group):
                         'The initial condition for state %s has the wrong shape' % state_name
 
         # (num_starting, num_time_steps, num_step_vars,)
-        if starting_coeffs is not None:
+        if is_starting_method:
             assert len(starting_coeffs.shape) == 3, \
                 'starting_coeffs must be a rank-3 array, but its rank is %i' \
                 % len(starting_coeffs.shape)
@@ -87,7 +90,7 @@ class Integrator(Group):
         self.connect('inputs_t.times', 'time_comp.times')
 
         # Starting method
-        if scheme.starting_method is None:
+        if not has_starting_method:
             starting_system = StartingComp(states=states)
         else:
             starting_scheme_name, starting_coeffs, starting_time_steps = scheme.starting_method
@@ -129,7 +132,9 @@ class Integrator(Group):
         scheme = self.metadata['scheme']
         times = self.metadata['times']
 
-        if scheme.starting_method is not None:
+        has_starting_method = scheme.starting_method is not None
+
+        if has_starting_method:
             start_time_index = scheme.starting_method[2]
         else:
             start_time_index = 0

@@ -30,6 +30,9 @@ class ExplicitTMIntegrator(Integrator):
         starting_coeffs = self.metadata['starting_coeffs']
         ode_function =  self.metadata['ode_function']
 
+        has_starting_method = scheme.starting_method is not None
+        is_starting_method = starting_coeffs is not None
+
         for i_step in range(len(my_times) - 1):
 
             step_comp_old_name = 'step_comp_%i' % (i_step - 1)
@@ -109,13 +112,19 @@ class ExplicitTMIntegrator(Integrator):
             out_state_name = get_name('state', state_name)
             starting_name = get_name('starting', state_name)
             promotes_outputs.append(out_state_name)
-            if starting_coeffs is not None:
+            if is_starting_method:
                 promotes_outputs.append(starting_name)
 
         comp = TMOutputComp(
-            states=states, num_time_steps=len(my_times), num_step_vars=num_step_vars,
+            states=states, num_starting_time_steps=len(starting_times),
+            num_my_time_steps=len(my_times), num_step_vars=num_step_vars,
             starting_coeffs=starting_coeffs)
         self.add_subsystem('output_comp', comp, promotes_outputs=promotes_outputs)
+        if has_starting_method:
+            self._connect_states(
+                self._get_names('starting_system', 'state'),
+                self._get_names('output_comp', 'starting_state'),
+            )
 
         for i_step in range(len(my_times)):
             if i_step == 0:
