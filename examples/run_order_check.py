@@ -28,13 +28,13 @@ else:
 
 initial_conditions = {'y': 1./C1}
 t0 = 0.
-t = 1e-1
+t1 = 1e-1
 
 errs = np.zeros(len(nums))
 for i, num in enumerate(nums):
-    times = np.linspace(t0, t, num)
+    times = np.linspace(t0, t1, num)
 
-    y_true = np.array([ode_function.compute_exact_soln(initial_conditions, t0, t1) for t1 in times])
+    y_true = np.array([ode_function.compute_exact_soln(initial_conditions, t0, t) for t in times])
 
     integrator = ODEIntegrator(ode_function, 'MDF', scheme_name,
         times=times, initial_conditions=initial_conditions)
@@ -44,7 +44,7 @@ for i, num in enumerate(nums):
     prob.run_model()
 
     approx_y = prob['state:y'][-1][0]
-    true_y = ode_function.compute_exact_soln(initial_conditions, t0, t)
+    true_y = ode_function.compute_exact_soln(initial_conditions, t0, t1)
 
     errs[i] = np.abs(approx_y - true_y)
 
@@ -53,8 +53,8 @@ print('-'*40)
 print('| {:10s} | {:10s} | {:10s} |'.format('h', 'Error', 'Rate'))
 print('-'*40)
 for i in range(len(nums)):
-    h0 = (t - t0) / (nums[i - 1] - 1)
-    h1 = (t - t0) / (nums[i] - 1)
+    h0 = (t1 - t0) / (nums[i - 1] - 1)
+    h1 = (t1 - t0) / (nums[i] - 1)
     err0 = errs[i - 1]
     err1 = errs[i]
 
