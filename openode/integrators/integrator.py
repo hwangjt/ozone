@@ -91,10 +91,10 @@ class Integrator(Group):
             starting_system = StartingComp(states=states)
         else:
             starting_scheme_name, starting_coeffs, starting_time_steps = scheme.starting_method
-            scheme_class = get_scheme(starting_scheme_name)
+            scheme = get_scheme(starting_scheme_name)
 
             starting_system = self.__class__(
-                ode_function=ode_function, times=starting_times, scheme=scheme_class(),
+                ode_function=ode_function, times=starting_times, scheme=scheme,
                 starting_coeffs=starting_coeffs,
             )
 

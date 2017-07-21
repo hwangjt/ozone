@@ -6,14 +6,13 @@ from openode.api import ODEFunction, ODEIntegrator
 from openode.tests.ode_functions.simple_ode import LinearODEFunction, SimpleODEFunction
 
 
-num = 50
+num = 500
 
 scheme_name = 'BDF2'
-# scheme_name = 'BackwardEuler'
 
 # integrator_name = 'SAND'
-# integrator_name = 'MDF'
-integrator_name = 'TM'
+integrator_name = 'MDF'
+# integrator_name = 'TM'
 
 ode_function = SimpleODEFunction()
 
