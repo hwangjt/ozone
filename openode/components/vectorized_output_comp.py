@@ -15,7 +15,7 @@ class VectorizedOutputComp(ExplicitComponent):
         self.metadata.declare('states', type_=dict, required=True)
         self.metadata.declare('num_time_steps', type_=int, required=True)
         self.metadata.declare('num_step_vars', type_=int, required=True)
-        self.metadata.declare('starting_coeffs', values=(None,), type_=np.ndarray)
+        self.metadata.declare('starting_coeffs', type_=(np.ndarray, type(None)))
 
     def setup(self):
         num_time_steps = self.metadata['num_time_steps']

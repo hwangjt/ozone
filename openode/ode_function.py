@@ -39,7 +39,7 @@ class ODEFunction(object):
 
         time_options = OptionsDictionary()
         time_options.declare('targets', default=[], type_=Iterable)
-        time_options.declare('units', default=None, values=(None,), type_=string_types)
+        time_options.declare('units', default=None, type_=(string_types, type(None)))
 
         self._time_options = time_options
         self._states = {}

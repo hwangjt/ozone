@@ -6,9 +6,9 @@ from openode.api import ODEFunction, ODEIntegrator
 from openode.tests.ode_functions.simple_ode import LinearODEFunction, SimpleODEFunction
 
 
-num = 500
+num = 50
 
-scheme_name = 'BDF2'
+scheme_name = 'AM2'
 
 # integrator_name = 'SAND'
 # integrator_name = 'MDF'

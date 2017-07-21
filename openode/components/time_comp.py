@@ -10,7 +10,7 @@ from openmdao.api import ExplicitComponent
 class TimeComp(ExplicitComponent):
 
     def initialize(self):
-        self.metadata.declare('time_units', values=(None,), type_=str, required=True)
+        self.metadata.declare('time_units', type_=(str, type(None)), required=True)
         self.metadata.declare('glm_abscissa', type_=np.ndarray, required=True)
         self.metadata.declare('num_time_steps', type_=int, required=True)
 

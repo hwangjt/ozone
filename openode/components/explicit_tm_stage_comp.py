@@ -12,7 +12,7 @@ class ExplicitTMStageComp(ExplicitComponent):
 
     def initialize(self):
         self.metadata.declare('states', type_=dict, required=True)
-        self.metadata.declare('time_units', values=(None,), type_=str, required=True)
+        self.metadata.declare('time_units', type_=(str, type(None)), required=True)
         self.metadata.declare('num_stages', type_=int, required=True)
         self.metadata.declare('num_step_vars', type_=int, required=True)
         self.metadata.declare('glm_A', type_=np.ndarray, required=True)
