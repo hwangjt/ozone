@@ -104,15 +104,18 @@ class ExplicitTMIntegrator(Integrator):
                         self._get_names(stage_comp_name, 'y_old', i_step=i_step, i_stage=i_stage),
                     )
 
-        promotes_states = []
+        promotes_outputs = []
         for state_name in states:
             out_state_name = get_name('state', state_name)
-            promotes_states.append(out_state_name)
+            starting_name = get_name('starting', state_name)
+            promotes_outputs.append(out_state_name)
+            if starting_coeffs is not None:
+                promotes_outputs.append(starting_name)
 
         comp = TMOutputComp(
             states=states, num_time_steps=len(my_times), num_step_vars=num_step_vars,
             starting_coeffs=starting_coeffs)
-        self.add_subsystem('output_comp', comp, promotes_outputs=promotes_states)
+        self.add_subsystem('output_comp', comp, promotes_outputs=promotes_outputs)
 
         for i_step in range(len(my_times)):
             if i_step == 0:

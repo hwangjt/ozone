@@ -53,19 +53,14 @@ class ExplicitTMStepComp(ExplicitComponent):
 
             self.declare_partials(y_new_name, 'h', dependent=True)
 
-            vals = np.zeros((num_step_vars, num_step_vars, size))
-            rows = np.zeros((num_step_vars, num_step_vars * size), int)
-            cols = np.zeros((num_step_vars, num_step_vars * size), int)
-            for ii_step in range(num_step_vars):
-                for jj_step in range(num_step_vars):
-                    vals[ii_step, jj_step, :] = glm_V[ii_step, jj_step]
-                    rows[ii_step, :] = np.arange(num_step_vars * size)
-                    cols[jj_step, :] = np.arange(num_step_vars * size)
-            vals = vals.flatten()
-            rows = rows.flatten()
-            cols = cols.flatten()
+            y_arange = np.arange(num_step_vars * size).reshape((num_step_vars, size))
 
-            self.declare_partials(y_new_name, y_old_name, val=vals, rows=rows, cols=cols)
+            # num_step_vars, num_step_vars, size
+            data = np.einsum('ij,...->ij...', glm_V, np.ones(size)).flatten()
+            rows = np.einsum('i...,j->ij...', y_arange, np.ones(num_step_vars, int)).flatten()
+            cols = np.einsum('j...,i->ij...', y_arange, np.ones(num_step_vars, int)).flatten()
+
+            self.declare_partials(y_new_name, y_old_name, val=data, rows=rows, cols=cols)
 
             for j_stage in range(num_stages):
                 F_name = get_name('F', state_name, i_step=i_step, j_stage=j_stage)
@@ -102,7 +97,11 @@ class ExplicitTMStepComp(ExplicitComponent):
             for j_stage in range(num_stages):
                 F_name = get_name('F', state_name, i_step=i_step, j_stage=j_stage)
 
-                outputs[y_new_name] += inputs['h'] * glm_B[ii_step, j_stage] * inputs[F_name]
+                #y_new:step x shape
+                # GLM step x stage
+                # F: 1 x shape
+                outputs[y_new_name] += inputs['h'] * np.einsum('i,...->i...',
+                    glm_B[:, j_stage], inputs[F_name][0, :])
 
     def compute_partials(self, inputs, outputs, partials):
         num_stages = self.metadata['num_stages']
@@ -127,5 +126,8 @@ class ExplicitTMStepComp(ExplicitComponent):
 
                 partials[y_new_name, F_name] = inputs['h'] * dy_dF[state_name, j_stage]
 
-                partials[y_new_name, 'h'][:, 0] += glm_B[ii_step, j_stage] \
-                    * inputs[F_name].flatten()
+                # partials[y_new_name, 'h'][:, 0] += glm_B[ii_step, j_stage] \
+                #     * inputs[F_name].flatten()
+
+                partials[y_new_name, 'h'][:, 0] += np.einsum('i,...->i...',
+                    glm_B[:, j_stage], inputs[F_name][0, :]).flatten()
