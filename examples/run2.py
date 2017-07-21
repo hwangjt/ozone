@@ -11,8 +11,8 @@ num = 500
 scheme_name = 'BDF2'
 
 # integrator_name = 'SAND'
-integrator_name = 'MDF'
-# integrator_name = 'TM'
+# integrator_name = 'MDF'
+integrator_name = 'TM'
 
 ode_function = SimpleODEFunction()
 
