@@ -19,7 +19,7 @@ class Test(unittest.TestCase):
         pass
 
     def run_ode(self, integrator_name, scheme_name, ode_function):
-        times = np.linspace(0., 1., 20)
+        times = np.linspace(0., 1.e-2, 6)
         y0 = -1.
 
         integrator = ODEIntegrator(ode_function, integrator_name, scheme_name,
@@ -48,7 +48,12 @@ class Test(unittest.TestCase):
         return np.linalg.norm(y - y_ref) / np.linalg.norm(y_ref)
 
     @parameterized.expand(product(
-        ['ForwardEuler', 'BackwardEuler', 'ExplicitMidpoint', 'ImplicitMidpoint'],  # scheme
+        [
+            'ForwardEuler', 'BackwardEuler', 'ExplicitMidpoint', 'ImplicitMidpoint',
+            'AB2', 'AB3', 'AB4',
+            'AM2', 'AM3', 'AM4',
+            'BDF2', 'BDF3', 'BDF4',
+        ],  # scheme
         [LinearODEFunction(), NonlinearODEFunction()],  # ODE Function
         ['TM', 'MDF', 'SAND']
     ))
