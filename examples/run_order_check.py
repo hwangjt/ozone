@@ -1,0 +1,66 @@
+import numpy as np
+
+from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp
+
+from openode.api import ODEFunction, ODEIntegrator
+from openode.tests.ode_functions.simple_ode import LinearODEFunction, SimpleODEFunction, \
+    NonlinearODEFunction
+
+
+ode_function = NonlinearODEFunction()
+
+nums = [11, 16, 21, 26, 31, 36]
+# nums = [5]
+# nums = [11, 21, 31, 51]
+
+scheme_name = 'ExplicitMidpoint'
+# scheme_name = 'GaussLegendre4'
+
+# integrator_name = 'SAND'
+integrator_name = 'MDF'
+# integrator_name = 'TM'
+
+C1 = -1e-2
+if C1 > 0:
+    assert 2*C1 > t1**2
+else:
+    assert C1 != 0.
+
+initial_conditions = {'y': 1./C1}
+t0 = 0.
+t = 1e-1
+
+errs = np.zeros(len(nums))
+for i, num in enumerate(nums):
+    times = np.linspace(t0, t, num)
+
+    y_true = np.array([ode_function.compute_exact_soln(initial_conditions, t0, t1) for t1 in times])
+
+    integrator = ODEIntegrator(ode_function, 'MDF', scheme_name,
+        times=times, initial_conditions=initial_conditions)
+    prob = Problem(integrator)
+    prob.setup()
+    prob['coupled_group.vectorized_step_comp.y:y'] = y_true.reshape((num, 1 ,1))
+    prob.run_model()
+
+    approx_y = prob['state:y'][-1][0]
+    true_y = ode_function.compute_exact_soln(initial_conditions, t0, t)
+
+    errs[i] = np.abs(approx_y - true_y)
+
+
+print('-'*40)
+print('| {:10s} | {:10s} | {:10s} |'.format('h', 'Error', 'Rate'))
+print('-'*40)
+for i in range(len(nums)):
+    h0 = (t - t0) / (nums[i - 1] - 1)
+    h1 = (t - t0) / (nums[i] - 1)
+    err0 = errs[i - 1]
+    err1 = errs[i]
+
+    if i == 0:
+        rate = 0.
+    else:
+        rate = np.log(err1 / err0) / np.log(h1 / h0)
+
+    print('| {:.4e} | {:.4e} | {:.4e} |'.format(h1, err1, rate))

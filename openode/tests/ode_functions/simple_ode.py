@@ -4,7 +4,7 @@ from openmdao.api import ExplicitComponent
 
 from openode.api import ODEFunction
 
-class NonlinearODE(ExplicitComponent):
+class NonlinearODESystem(ExplicitComponent):
 
     def initialize(self):
         self.metadata.declare('num', default=1, type_=int)
@@ -31,7 +31,7 @@ class NonlinearODE(ExplicitComponent):
         partials['dy_dt', 't'] = np.square(inputs['y']).squeeze()
 
 
-class LinearODE(ExplicitComponent):
+class LinearODESystem(ExplicitComponent):
 
     def initialize(self):
         self.metadata.declare('num', default=1, type_=int)
@@ -58,7 +58,7 @@ class LinearODE(ExplicitComponent):
             * (-(2 * np.pi) ** 2 * np.sin(two_pi_t) - 2 * np.pi * np.cos(two_pi_t))
 
 
-class SimpleODE(ExplicitComponent):
+class SimpleODESystem(ExplicitComponent):
 
     def initialize(self):
         self.metadata.declare('num', default=1, type_=int)
@@ -81,21 +81,43 @@ class SimpleODE(ExplicitComponent):
 class SimpleODEFunction(ODEFunction):
 
     def initialize(self):
-        self.set_system(SimpleODE)
+        self.set_system(SimpleODESystem)
         self.declare_state('y', rate_target='dy_dt', state_targets='y')
         self.declare_time('t')
+
+    def compute_exact_soln(self, initial_conditions, t0, t):
+        y0 = initial_conditions['y']
+        C = y0 / np.exp(t0)
+        return C * np.exp(t)
 
 
 class LinearODEFunction(ODEFunction):
 
     def initialize(self):
-        self.set_system(LinearODE)
+        self.set_system(LinearODESystem)
         self.declare_state('y', rate_target='dy_dt', state_targets='y')
         self.declare_time('t')
+
+    def compute_exact_soln(self, initial_conditions, t0, t):
+        # True solution: C e^t + sin(2*pi*t)
+        # outputs['dy_dt'] = inputs['y'] + 2 * np.pi * np.cos(two_pi_t) - np.sin(two_pi_t)
+
+        y0 = initial_conditions['y']
+        C = (y0 - np.sin(2 * np.pi * t0)) / np.exp(t0)
+        return C * np.exp(t) + np.sin(2 * np.pi * t)
+
 
 class NonlinearODEFunction(ODEFunction):
 
     def initialize(self):
-        self.set_system(NonlinearODE)
+        self.set_system(NonlinearODESystem)
         self.declare_state('y', rate_target='dy_dt', state_targets='y')
         self.declare_time('t')
+
+    def compute_exact_soln(self, initial_conditions, t0, t):
+        # True solution: 2 / (2*C - t^2)
+        # outputs['dy_dt'] = inputs['t'] * np.square(inputs['y'])
+
+        y0 = initial_conditions['y']
+        C = (2. / y0 + t0 ** 2) / 2.
+        return 2. / (2. * C - t ** 2)
