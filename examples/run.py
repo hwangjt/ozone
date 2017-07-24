@@ -8,7 +8,7 @@ from openode.tests.ode_functions.simple_ode import NonlinearODEFunction, LinearO
     SimpleODEFunction
 
 
-num = 100
+num = 11
 
 t0 = 0.
 t1 = 1.
@@ -17,6 +17,8 @@ initial_conditions = {'y': 1.}
 times = np.linspace(t0, t1, num)
 
 scheme_name = 'RK4'
+scheme_name = 'AB2'
+# scheme_name = 'AM4'
 
 integrator_name = 'SAND'
 # integrator_name = 'MDF'
@@ -45,9 +47,18 @@ time1 = time.time()
 # prob.check_partials(compact_print=True)
 # prob.check_partials(compact_print=False)
 
+np.set_printoptions(precision=10)
+
 exact_soln = ode_function.compute_exact_soln(initial_conditions, t0, t1)
 print(prob['state:y'])
 print('Error in state value at final time:', np.linalg.norm(prob['state:y'][-1] - exact_soln))
 print('Runtime (s):', time1 - time0)
 # print(prob['starting:y'])
 # view_model(prob)
+
+print(prob['starting_system.coupled_group.vectorized_stage_comp.Y_out:y'],
+    prob['starting_system.coupled_group.vectorized_stage_comp.Y_out:y'].shape)
+print('----------------')
+print(prob['starting_system.coupled_group.ode_comp.dy_dt'])
+print('----------------')
+print(prob['starting_system.coupled_group.vectorized_step_comp.y:y'])

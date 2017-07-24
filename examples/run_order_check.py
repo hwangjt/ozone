@@ -8,17 +8,21 @@ from openode.tests.ode_functions.simple_ode import LinearODEFunction, SimpleODEF
 
 
 ode_function = NonlinearODEFunction()
+# ode_function = LinearODEFunction()
+# ode_function = SimpleODEFunction()
 
 nums = [11, 16, 21, 26, 31, 36]
 # nums = [5]
 # nums = [11, 21, 31, 51]
 
-scheme_name = 'AB4'
+scheme_name = 'AB5'
+# scheme_name = 'AM2'
+# scheme_name = 'RK4'
 # scheme_name = 'GaussLegendre4'
 
 # integrator_name = 'SAND'
-# integrator_name = 'MDF'
-integrator_name = 'TM'
+integrator_name = 'MDF'
+# integrator_name = 'TM'
 
 C1 = -1e-2
 if C1 > 0:
@@ -28,7 +32,7 @@ else:
 
 initial_conditions = {'y': 1./C1}
 t0 = 0.
-t1 = 1e-1
+t1 = 1.e-1
 
 errs = np.zeros(len(nums))
 for i, num in enumerate(nums):
@@ -39,9 +43,19 @@ for i, num in enumerate(nums):
     integrator = ODEIntegrator(ode_function, integrator_name, scheme_name,
         times=times, initial_conditions=initial_conditions)
     prob = Problem(integrator)
+
+    if integrator_name == 'SAND':
+        prob.driver = ScipyOptimizer()
+        prob.driver.options['optimizer'] = 'SLSQP'
+        prob.driver.options['tol'] = 1e-9
+        prob.driver.options['disp'] = True
+
+        integrator.add_subsystem('dummy_comp', IndepVarComp('dummy_var', val=1.0))
+        integrator.add_objective('dummy_comp.dummy_var')
+
     prob.setup()
     # prob['coupled_group.vectorized_step_comp.y:y'] = y_true.reshape((num, 1 ,1))
-    prob.run_model()
+    prob.run_driver()
 
     approx_y = prob['state:y'][-1][0]
     true_y = ode_function.compute_exact_soln(initial_conditions, t0, t1)

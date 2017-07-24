@@ -42,19 +42,3 @@ class GLMScheme(object):
         lower = np.tril(A, -1)
         err = np.linalg.norm(lower - A)
         self.explicit = err < 1e-15
-
-    def starting_method(self, y0):
-        """
-        Transforms the initial condition into the initial y^[0] vector.
-
-        Parameters
-        ----------
-        y0 : np.array
-            Initial Condition at t=t0.
-
-        Returns
-        -------
-        np.array
-            Initial y^[0] (super)-vector.
-        """
-        raise NotImplementedError('GLM Subclasses must define a starting method.')

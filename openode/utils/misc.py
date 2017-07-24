@@ -1,5 +1,5 @@
 from openode.schemes.runge_kutta import ForwardEuler, BackwardEuler, ExplicitMidpoint, \
-    ImplicitMidpoint, KuttaThirdOrder, RK4, RalstonsMethod, HeunsMethod
+    ImplicitMidpoint, KuttaThirdOrder, RK4, RalstonsMethod, HeunsMethod, RK4ST
 from openode.schemes.bdf import BDF
 from openode.schemes.ab import AB
 from openode.schemes.am import AM
@@ -40,6 +40,7 @@ def get_scheme(scheme_name):
         'BDF4': BDF(4),
         'BDF5': BDF(5),
         'BDF6': BDF(6),
+        'RK4ST': RK4ST(),
     }
     return _get_class(scheme_name, scheme_classes, 'Scheme')
 

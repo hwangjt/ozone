@@ -3,6 +3,7 @@ from __future__ import division
 import numpy as np
 from openode.schemes.scheme import GLMScheme
 
+
 class RungeKutta(GLMScheme):
     def __init__(self, A, B):
         A = np.atleast_2d(A)
@@ -13,47 +14,26 @@ class RungeKutta(GLMScheme):
 
         super(RungeKutta, self).__init__(A=A, B=B, U=U, V=V, abscissa=np.sum(A, 1))
 
-    def starting_method(self, y0):
-        """
-        Transforms the initial condition into the initial y^[0] vector. Since RK schemes do not
-        carry additional information from step to step, this is trivial.
 
-        Parameters
-        ----------
-        y0 : np.array
-            Initial Condition at t=t0.
-
-        Returns
-        -------
-        np.array
-            Initial y^[0] (super)-vector.
-        """
-        return y0[np.newaxis, ...]
-
-class ExplicitRungeKutta(RungeKutta):
+class RungeKuttaST(GLMScheme):
     def __init__(self, A, B):
-
         A = np.atleast_2d(A)
-
-        if np.any(np.triu(A)):
-            raise ValueError('Explicit Runge-Kutta methods must have zeros for the upper triangular '
-                             'portion of A.')
-
         B = np.atleast_2d(B)
 
-        super(ExplicitRungeKutta, self).__init__(A=A, B=B)
+        U = np.zeros((A.shape[0], 2))
+        U[:, 0] = 1.0
+        V = np.zeros((2, 2))
+        V[0, 0] = 1.0
+
+        super(RungeKuttaST, self).__init__(A=A, B=B, U=U, V=V, abscissa=np.sum(A, 1))
 
 
-class ImplicitRungeKutta(RungeKutta):
-    pass
-
-
-class ForwardEuler(ExplicitRungeKutta):
+class ForwardEuler(RungeKutta):
     def __init__(self):
         super(ForwardEuler, self).__init__(A=0., B=1.)
 
 
-class ExplicitMidpoint(ExplicitRungeKutta):
+class ExplicitMidpoint(RungeKutta):
     def __init__(self):
         super(ExplicitMidpoint, self).__init__(
             A=np.array([
@@ -65,7 +45,7 @@ class ExplicitMidpoint(ExplicitRungeKutta):
             ]))
 
 
-class HeunsMethod(ExplicitRungeKutta):
+class HeunsMethod(RungeKutta):
     def __init__(self):
         super(HeunsMethod, self).__init__(
             A=np.array([
@@ -78,7 +58,7 @@ class HeunsMethod(ExplicitRungeKutta):
         )
 
 
-class RalstonsMethod(ExplicitRungeKutta):
+class RalstonsMethod(RungeKutta):
     def __init__(self):
         super(RalstonsMethod, self).__init__(
             A=np.array([
@@ -91,7 +71,7 @@ class RalstonsMethod(ExplicitRungeKutta):
         )
 
 
-class KuttaThirdOrder(ExplicitRungeKutta):
+class KuttaThirdOrder(RungeKutta):
     def __init__(self):
         super(KuttaThirdOrder, self).__init__(
             A=np.array([
@@ -105,7 +85,7 @@ class KuttaThirdOrder(ExplicitRungeKutta):
         )
 
 
-class RK4(ExplicitRungeKutta):
+class RK4(RungeKutta):
     def __init__(self):
         super(RK4, self).__init__(
             A=np.array([
@@ -120,11 +100,28 @@ class RK4(ExplicitRungeKutta):
         )
 
 
-class BackwardEuler(ImplicitRungeKutta):
+class RK4ST(RungeKuttaST):
+    def __init__(self):
+        A = np.array([
+            [0., 0., 0., 0., 0.],
+            [1 / 2, 0., 0., 0., 0.],
+            [0., 1 / 2, 0., 0., 0.],
+            [0., 0., 1., 0., 0.],
+            [1 / 6, 1 / 3, 1 / 3, 1 / 6, 0.],
+        ])
+        B = np.array([
+            [1 / 6, 1 / 3, 1 / 3, 1 / 6, 0.],
+            [0., 0., 0., 0., 1.],
+        ])
+
+        super(RK4ST, self).__init__(A=A, B=B)
+
+
+class BackwardEuler(RungeKutta):
     def __init__(self):
         super(BackwardEuler, self).__init__(A=1., B=1.)
 
 
-class ImplicitMidpoint(ImplicitRungeKutta):
+class ImplicitMidpoint(RungeKutta):
     def __init__(self):
         super(ImplicitMidpoint, self).__init__(A=1/2, B=1.)

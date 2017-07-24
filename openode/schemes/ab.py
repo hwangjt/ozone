@@ -9,24 +9,34 @@ class AB(GLMScheme):
         assert isinstance(num_steps, int) and 2 <= num_steps <= 5, \
             'For AB, num_steps must be between 2 and 5, inclusive'
 
-        A = np.zeros((num_steps, num_steps))
-        U = np.eye(num_steps)[::-1,:]
-        B = np.zeros((num_steps, num_steps))
-        V = np.eye(num_steps, k=-1)
+        A = np.zeros((1, 1))
+        B = np.zeros((num_steps + 1, 1))
+        U = np.zeros((1, num_steps + 1))
+        V = np.eye(num_steps + 1, k=-1)
 
         coeffs = {
-            2: np.array([-1., 3.]) / 2. ,
-            3: np.array([5., -16., 23.]) / 12. ,
-            4: np.array([-9., 37., -59., 55.]) / 24.,
-            5: np.array([251, -1274., 2616., -2774., 1901.]) / 720.,
+            2: np.array([3., -1.]) / 2. ,
+            3: np.array([23., -16., 5.]) / 12. ,
+            4: np.array([55., -59., 37., -9.]) / 24.,
+            5: np.array([1901, -2774., 2616., -1274., 251.]) / 720.,
         }
-        B[0, :] = coeffs[num_steps]
-        V[0, 0] = 1.0
 
-        starting_scheme_name = 'ForwardEuler'
-        starting_coeffs = np.eye(num_steps).reshape((num_steps, num_steps, 1))
-        starting_time_steps = num_steps - 1
+        B[1, 0] = 1.0
+        U[0, 0] = 1.0
+        U[0, 1:] = coeffs[num_steps]
+        V[0, 0] = 1.0
+        V[0, 1:] = coeffs[num_steps]
+        V[1, 0] = 0.0
+
+        starting_scheme_name = 'RK4ST'
+
+        starting_coeffs = np.zeros((num_steps + 1, num_steps + 1, 2))
+        starting_coeffs[0, -1, 0] = 1.0
+        for i in range(num_steps):
+            starting_coeffs[i + 1, -i - 1, 1] = 1.0
+
+        starting_time_steps = num_steps
 
         super(AB, self).__init__(A=A, B=B, U=U, V=V,
-            abscissa=np.linspace(-num_steps + 1, 0, num_steps),
+            abscissa=np.ones(1),
             starting_method=(starting_scheme_name, starting_coeffs, starting_time_steps))
