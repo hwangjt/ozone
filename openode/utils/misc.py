@@ -1,6 +1,8 @@
 from openode.schemes.runge_kutta import ForwardEuler, BackwardEuler, ExplicitMidpoint, \
     ImplicitMidpoint, KuttaThirdOrder, RK4, RalstonsMethod, HeunsMethod
-from openode.schemes.bdf import BDF2, BDF4
+from openode.schemes.bdf import BDF
+from openode.schemes.ab import AB
+from openode.schemes.am import AM
 
 
 def _get_class(name, classes, label):
@@ -15,16 +17,29 @@ def _get_class(name, classes, label):
 
 def get_scheme(scheme_name):
     scheme_classes = {
-        'ForwardEuler': ForwardEuler,
-        'BackwardEuler': BackwardEuler,
-        'ExplicitMidpoint': ExplicitMidpoint,
-        'ImplicitMidpoint': ImplicitMidpoint,
-        'KuttaThirdOrder': KuttaThirdOrder,
-        'RK4': RK4,
-        'RalstonsMethod': RalstonsMethod,
-        'HeunsMethod': HeunsMethod,
-        'BDF2': BDF2,
-        'BDF4': BDF4,
+        'ForwardEuler': ForwardEuler(),
+        'BackwardEuler': BackwardEuler(),
+        'ExplicitMidpoint': ExplicitMidpoint(),
+        'ImplicitMidpoint': ImplicitMidpoint(),
+        'KuttaThirdOrder': KuttaThirdOrder(),
+        'RK4': RK4(),
+        'RalstonsMethod': RalstonsMethod(),
+        'HeunsMethod': HeunsMethod(),
+        'AB1': ForwardEuler(),
+        'AB2': AB(2),
+        'AB3': AB(3),
+        'AB4': AB(4),
+        'AB5': AB(5),
+        'AM1': BackwardEuler(),
+        'AM2': AM(2),
+        'AM3': AM(3),
+        'AM4': AM(4),
+        'BDF1': BackwardEuler(),
+        'BDF2': BDF(2),
+        'BDF3': BDF(3),
+        'BDF4': BDF(4),
+        'BDF5': BDF(5),
+        'BDF6': BDF(6),
     }
     return _get_class(scheme_name, scheme_classes, 'Scheme')
 

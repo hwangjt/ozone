@@ -8,13 +8,13 @@ from openode.utils.misc import get_scheme, get_integrator
 
 
 def ODEIntegrator(ode_function, integrator_name, scheme_name, **kwargs):
-    scheme_class = get_scheme(scheme_name)
-    explicit = scheme_class().explicit
+    scheme = get_scheme(scheme_name)
+    explicit = scheme.explicit
     integrator_class = get_integrator(integrator_name, explicit)
 
     if integrator_name == 'SAND' or integrator_name == 'MDF':
         kwargs['formulation'] = integrator_name
 
-    integrator = integrator_class(ode_function=ode_function, scheme=scheme_class(), **kwargs)
+    integrator = integrator_class(ode_function=ode_function, scheme=scheme, **kwargs)
 
     return integrator
