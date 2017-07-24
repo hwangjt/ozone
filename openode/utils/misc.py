@@ -34,6 +34,7 @@ def get_scheme(scheme_name):
         'AM2': AM(2),
         'AM3': AM(3),
         'AM4': AM(4),
+        'AM5': AM(5),
         'BDF1': BackwardEuler(),
         'BDF2': BDF(2),
         'BDF3': BDF(3),
