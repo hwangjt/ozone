@@ -17,8 +17,8 @@ initial_conditions = {'y': 1.}
 times = np.linspace(t0, t1, num)
 
 scheme_name = 'RK4'
-scheme_name = 'AB2'
-# scheme_name = 'AM4'
+# scheme_name = 'AB2'
+scheme_name = 'BDF3'
 
 integrator_name = 'SAND'
 # integrator_name = 'MDF'
