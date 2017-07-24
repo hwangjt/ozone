@@ -5,10 +5,10 @@ from openode.schemes.scheme import GLMScheme
 
 
 am_coeffs = {
-    1: np.array([1., 1.]) / 2. ,
-    2: np.array([5., 8., -1.]) / 12. ,
-    3: np.array([9., 19., -5., 1.]) / 24. ,
-    4: np.array([251., 646., -264., 106., -19.]) / 720.,
+    2: np.array([1., 1.]) / 2. ,
+    3: np.array([5., 8., -1.]) / 12. ,
+    4: np.array([9., 19., -5., 1.]) / 24. ,
+    5: np.array([251., 646., -264., 106., -19.]) / 720.,
 }
 
 
@@ -24,13 +24,13 @@ class AM(GLMScheme):
         U = np.zeros((1, num_steps + 1))
         V = np.eye(num_steps + 1, k=-1)
 
-        A[0, 0] = am_coeffs[num_steps][0]
-        B[0, 0] = am_coeffs[num_steps][0]
+        A[0, 0] = am_coeffs[order][0]
+        B[0, 0] = am_coeffs[order][0]
         B[1, 0] = 1.0
         U[0, 0] = 1.0
-        U[0, 1:] = am_coeffs[num_steps][1:]
+        U[0, 1:] = am_coeffs[order][1:]
         V[0, 0] = 1.0
-        V[0, 1:] = am_coeffs[num_steps][1:]
+        V[0, 1:] = am_coeffs[order][1:]
         V[1, 0] = 0.0
 
         starting_scheme_name = 'RK4ST'
@@ -59,8 +59,8 @@ class AMalt(GLMScheme):
         B = np.zeros((num_steps, num_steps + 1))
         V = np.eye(num_steps, k=-1)
 
-        A[-1, :] = am_coeffs[num_steps][::-1]
-        B[0, :] = am_coeffs[num_steps][::-1]
+        A[-1, :] = am_coeffs[order][::-1]
+        B[0, :] = am_coeffs[order][::-1]
         V[0, 0] = 1.0
         U[-1, 0] = 1.0
         U[np.arange(num_steps), np.arange(num_steps)[::-1]] = 1.0

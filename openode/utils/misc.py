@@ -1,8 +1,9 @@
 from openode.schemes.runge_kutta import ForwardEuler, BackwardEuler, ExplicitMidpoint, \
     ImplicitMidpoint, KuttaThirdOrder, RK4, RalstonsMethod, HeunsMethod, RK4ST
 from openode.schemes.bdf import BDF
-from openode.schemes.ab import AB, ABalt
-from openode.schemes.am import AM, AMalt
+# from openode.schemes.ab import AB, ABalt
+# from openode.schemes.am import AM, AMalt
+from openode.schemes.adams import AB, ABalt, AM, AMalt
 
 
 def _get_class(name, classes, label):

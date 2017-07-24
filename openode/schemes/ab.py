@@ -26,9 +26,9 @@ class AB(GLMScheme):
 
         B[1, 0] = 1.0
         U[0, 0] = 1.0
-        U[0, 1:] = ab_coeffs[num_steps]
+        U[0, 1:] = ab_coeffs[order]
         V[0, 0] = 1.0
-        V[0, 1:] = ab_coeffs[num_steps]
+        V[0, 1:] = ab_coeffs[order]
         V[1, 0] = 0.0
 
         starting_scheme_name = 'RK4ST'
@@ -57,7 +57,7 @@ class ABalt(GLMScheme):
         B = np.zeros((num_steps, num_steps))
         V = np.eye(num_steps, k=-1)
 
-        B[0, :] = ab_coeffs[num_steps][::-1]
+        B[0, :] = ab_coeffs[order][::-1]
         V[0, 0] = 1.0
 
         starting_scheme_name = 'RK4'
