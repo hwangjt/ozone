@@ -53,6 +53,8 @@ class Test(unittest.TestCase):
             'AB2', 'AB3', 'AB4', 'AB5',
             'AM2', 'AM3', 'AM4', 'AM5',
             'BDF2', 'BDF3', 'BDF4', 'BDF5', 'BDF6',
+            'AdamsPEC2', 'AdamsPEC5',
+            'AdamsPECE2', 'AdamsPECE5',
         ],  # scheme
         [LinearODEFunction(), NonlinearODEFunction()],  # ODE Function
         ['TM', 'MDF', 'SAND']

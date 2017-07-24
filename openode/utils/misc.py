@@ -1,7 +1,7 @@
 from openode.schemes.runge_kutta import ForwardEuler, BackwardEuler, ExplicitMidpoint, \
     ImplicitMidpoint, KuttaThirdOrder, RK4, RalstonsMethod, HeunsMethod, RK4ST
 from openode.schemes.bdf import BDF
-from openode.schemes.adams import AB, ABalt, AM, AMalt
+from openode.schemes.adams import AB, ABalt, AM, AMalt, AdamsPEC, AdamsPECE
 
 
 def _get_class(name, classes, label):
@@ -46,6 +46,15 @@ def get_scheme(scheme_name):
         'AMalt3': AMalt(3),
         'AMalt4': AMalt(4),
         'AMalt5': AMalt(5),
+        # Predictor-corrector methods,
+        'AdamsPEC2': AdamsPEC(2),
+        'AdamsPEC3': AdamsPEC(3),
+        'AdamsPEC4': AdamsPEC(4),
+        'AdamsPEC5': AdamsPEC(5),
+        'AdamsPECE2': AdamsPECE(2),
+        'AdamsPECE3': AdamsPECE(3),
+        'AdamsPECE4': AdamsPECE(4),
+        'AdamsPECE5': AdamsPECE(5),
         # Backwards differentiation formula family
         'BDF1': BackwardEuler(),
         'BDF2': BDF(2),

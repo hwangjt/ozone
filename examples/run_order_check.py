@@ -15,7 +15,7 @@ nums = [11, 16, 21, 26, 31, 36]
 # nums = [5]
 # nums = [11, 21, 31, 51]
 
-scheme_name = 'ABalt5'
+scheme_name = 'AdamsPEC3'
 # scheme_name = 'AM2'
 # scheme_name = 'RK4'
 # scheme_name = 'GaussLegendre4'
