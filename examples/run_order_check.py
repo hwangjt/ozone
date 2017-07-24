@@ -15,13 +15,13 @@ nums = [11, 16, 21, 26, 31, 36]
 # nums = [5]
 # nums = [11, 21, 31, 51]
 
-scheme_name = 'BDF6'
+scheme_name = 'AB5'
 # scheme_name = 'AM2'
 # scheme_name = 'RK4'
 # scheme_name = 'GaussLegendre4'
 
-# integrator_name = 'SAND'
-integrator_name = 'MDF'
+integrator_name = 'SAND'
+# integrator_name = 'MDF'
 # integrator_name = 'TM'
 
 C1 = -1e-2

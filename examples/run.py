@@ -18,11 +18,11 @@ times = np.linspace(t0, t1, num)
 
 scheme_name = 'RK4'
 # scheme_name = 'AB2'
-scheme_name = 'BDF3'
+scheme_name = 'BDF5'
 
 integrator_name = 'SAND'
-# integrator_name = 'MDF'
-# integrator_name = 'TM'
+integrator_name = 'MDF'
+integrator_name = 'TM'
 
 ode_function = NonlinearODEFunction()
 
@@ -56,9 +56,9 @@ print('Runtime (s):', time1 - time0)
 # print(prob['starting:y'])
 # view_model(prob)
 
-print(prob['starting_system.coupled_group.vectorized_stage_comp.Y_out:y'],
-    prob['starting_system.coupled_group.vectorized_stage_comp.Y_out:y'].shape)
-print('----------------')
-print(prob['starting_system.coupled_group.ode_comp.dy_dt'])
-print('----------------')
-print(prob['starting_system.coupled_group.vectorized_step_comp.y:y'])
+# print(prob['starting_system.coupled_group.vectorized_stage_comp.Y_out:y'],
+#     prob['starting_system.coupled_group.vectorized_stage_comp.Y_out:y'].shape)
+# print('----------------')
+# print(prob['starting_system.coupled_group.ode_comp.dy_dt'])
+# print('----------------')
+# print(prob['starting_system.coupled_group.vectorized_step_comp.y:y'])
