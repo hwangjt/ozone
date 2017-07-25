@@ -24,7 +24,10 @@ scheme_name = 'AdamsPEC3'
 integrator_name = 'MDF'
 # integrator_name = 'TM'
 
-C1 = -1e-2
+t0 = 0.
+t1 = 1.
+
+C1 = -1/100
 if C1 > 0:
     assert 2*C1 > t1**2
 else:
@@ -33,6 +36,7 @@ else:
 initial_conditions = {'y': 1./C1}
 t0 = 0.
 t1 = 1.e-1
+
 
 errs = np.zeros(len(nums))
 for i, num in enumerate(nums):
