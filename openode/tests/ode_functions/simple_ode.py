@@ -4,6 +4,7 @@ from openmdao.api import ExplicitComponent
 
 from openode.api import ODEFunction
 
+
 class NonlinearODESystem(ExplicitComponent):
 
     def initialize(self):
@@ -88,7 +89,7 @@ class SimpleODEFunction(ODEFunction):
     def compute_exact_soln(self, initial_conditions, t0, t):
         y0 = initial_conditions['y']
         C = y0 / np.exp(t0)
-        return C * np.exp(t)
+        return {'y': C * np.exp(t)}
 
 
 class LinearODEFunction(ODEFunction):
@@ -104,7 +105,7 @@ class LinearODEFunction(ODEFunction):
 
         y0 = initial_conditions['y']
         C = (y0 - np.sin(2 * np.pi * t0)) / np.exp(t0)
-        return C * np.exp(t) + np.sin(2 * np.pi * t)
+        return {'y': C * np.exp(t) + np.sin(2 * np.pi * t)}
 
 
 class NonlinearODEFunction(ODEFunction):
@@ -120,4 +121,4 @@ class NonlinearODEFunction(ODEFunction):
 
         y0 = initial_conditions['y']
         C = (2. / y0 + t0 ** 2) / 2.
-        return 2. / (2. * C - t ** 2)
+        return {'y': 2. / (2. * C - t ** 2)}
