@@ -36,7 +36,10 @@ class BDF(GLMScheme):
         V[0, :] = y_coeffs[num_steps]
 
         starting_scheme_name = 'RK4'
-        starting_coeffs = np.eye(num_steps).reshape((num_steps, num_steps, 1))
+
+        starting_coeffs = np.zeros((num_steps, num_steps, 1))
+        starting_coeffs[::-1, :, 0] = np.eye(num_steps)
+
         starting_time_steps = num_steps - 1
 
         super(BDF, self).__init__(A=A, B=B, U=U, V=V, abscissa=np.ones(1),
