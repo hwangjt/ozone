@@ -125,3 +125,76 @@ class BackwardEuler(RungeKutta):
 class ImplicitMidpoint(RungeKutta):
     def __init__(self):
         super(ImplicitMidpoint, self).__init__(A=1/2, B=1.)
+
+_gl_coeffs = {
+    2: (
+        np.array([.5]),
+        np.array([1.])
+    ),
+    4: (
+        np.array([[1 / 4, 1 / 4 - np.sqrt(3) / 6],
+                  [1 / 4 + np.sqrt(3) / 6, 1 / 4]]),
+        np.array([1 / 2, 1 / 2])
+    ),
+    6: (
+        np.array([[5 / 36, 2 / 9 - np.sqrt(15) / 15, 5 / 36 - np.sqrt(15) / 30],
+                  [5 / 36 + np.sqrt(15) / 24, 2 / 9, 5 / 36 - np.sqrt(15) / 24],
+                  [5 / 36 + np.sqrt(15) / 30, 2 / 9 + np.sqrt(15) / 15, 5 / 36]]),
+        np.array([5 / 18, 4 / 9, 5 / 18])
+    )
+}
+
+class GaussLegendre(RungeKutta):
+    def __init__(self, order=4):
+        if order not in _gl_coeffs:
+            raise ValueError('GaussLengdre order must be one of the following: {}'.format(
+                sorted(_gl_coeffs.keys())
+            ))
+        A, B = _gl_coeffs[order]
+        super(GaussLegendre, self).__init__(A=A, B=B)
+
+_lobatto_coeffs = {
+    2: (
+        np.array([[0, 0],
+                  [1 / 2, 1 / 2]]),
+        np.array([1 / 2, 1 / 2])
+    ),
+    4: (
+        np.array([[0, 0, 0],
+                  [5 / 24, 1 / 3, -1 / 24],
+                  [1 / 6, 2 / 3, 1 / 6]]),
+        np.array([1 / 6, 2 / 3, 1 / 6])
+    )
+}
+
+class LobattoIIIA(RungeKutta):
+    def __init__(self, order=4):
+        if order not in _lobatto_coeffs:
+            raise ValueError('LobattoIIIA order must be one of the following: {}'.format(
+                sorted(_lobatto_coeffs.keys())
+            ))
+        A, B = _lobatto_coeffs[order]
+        super(LobattoIIIA, self).__init__(A=A, B=B)
+
+_radau_coeffs = {
+    3: (
+        np.array([[1 / 4, -1 / 4],
+                  [1 / 4, 5 / 12]]),
+        np.array([1 / 4, 3 / 4])
+    ),
+    5: (
+        np.array([[1 / 9, (-1 - np.sqrt(6)) / 18, (-1 + np.sqrt(6)) / 18],
+                  [1 / 9, 11 / 45 + 7*np.sqrt(6) / 360, 11 / 45 - 43*np.sqrt(6) / 360],
+                  [1 / 9, 11 / 45 + 43*np.sqrt(6) / 360, 11 / 45 - 7*np.sqrt(6) / 360]]),
+        np.array([1 / 9, 4 / 9 + np.sqrt(6) / 36, 4 / 9 - np.sqrt(6) / 36])
+    )
+}
+
+class RadauI(RungeKutta):
+    def __init__(self, order=5):
+        if order not in _radau_coeffs:
+            raise ValueError('RadauI order must be one of the following: {}'.format(
+                sorted(_radau_coeffs.keys())
+            ))
+        A, B = _radau_coeffs[order]
+        super(RadauI, self).__init__(A=A, B=B)

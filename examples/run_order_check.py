@@ -13,18 +13,23 @@ ode_function = NonlinearODEFunction()
 
 nums = [11, 16, 21, 26, 31, 36]
 # nums = [5]
-# nums = [11, 21, 31, 51]
+# nums = [11, 21, 31, 41]
 
-scheme_name = 'AdamsPEC3'
-# scheme_name = 'AM2'
+# scheme_name = 'AdamsPECE3'
+# scheme_name = 'ForwardEuler'
 # scheme_name = 'RK4'
-# scheme_name = 'GaussLegendre4'
+# scheme_name = 'GaussLegendre6'
+# scheme_name = 'Lobatto4'
+scheme_name = 'Radau5'
 
 # integrator_name = 'SAND'
 integrator_name = 'MDF'
 # integrator_name = 'TM'
 
-C1 = -1e-2
+t0 = 0.
+t1 = 1.
+
+C1 = 0.6
 if C1 > 0:
     assert 2*C1 > t1**2
 else:
@@ -32,7 +37,8 @@ else:
 
 initial_conditions = {'y': 1./C1}
 t0 = 0.
-t1 = 1.e-1
+t1 = 1.
+
 
 errs = np.zeros(len(nums))
 for i, num in enumerate(nums):
