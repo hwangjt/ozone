@@ -90,7 +90,7 @@ class VectorizedStageComp(ExplicitComponent):
             data = np.einsum('jk,i...->ijk...',
                 glm_U, np.ones((num_time_steps - 1,) + shape)).flatten()
             rows = np.einsum('ij...,k->ijk...', Y_arange, np.ones(num_step_vars)).flatten()
-            cols = np.einsum('ikl,j->ijk...', y_arange[:-1, :, :], np.ones(num_stages)).flatten()
+            cols = np.einsum('ik...,j->ijk...', y_arange[:-1, :, :], np.ones(num_stages)).flatten()
 
             self.declare_partials(Y_out_name, y_name, val=data, rows=rows, cols=cols)
 
