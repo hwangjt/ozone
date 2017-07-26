@@ -16,7 +16,7 @@ class GLMScheme(object):
 
         if us != s:
             raise ValueError('GLM Matrix U must have {} rows to match A. '
-                             'Received B: {}x{}'.format(s, s, s, us, r))
+                             'Received U: {}x{}'.format(s, s, s, us, r))
 
         br, bs = B.shape
 
@@ -28,7 +28,7 @@ class GLMScheme(object):
 
         if vr != r or vr2 != r:
             raise ValueError('GLM Matrix V must have {} rows and {} columns to match A and U. '
-                             'Received B: {}x{}'.format(s, r, vr, vr2))
+                             'Received V: {}x{}'.format(s, r, vr, vr2))
 
         self.num_stages = s
         self.num_values = r
