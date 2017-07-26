@@ -2,8 +2,8 @@ import numpy as np
 
 from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp
 
-from openode.api import ODEFunction, ODEIntegrator
-from openode.tests.ode_functions.two_d_orbit import TwoDOrbitFunction
+from ozone.api import ODEFunction, ODEIntegrator
+from ozone.tests.ode_functions.two_d_orbit import TwoDOrbitFunction
 
 
 ode_function = TwoDOrbitFunction()

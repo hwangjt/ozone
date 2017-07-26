@@ -5,8 +5,8 @@ import scipy.sparse.linalg
 
 from openmdao.api import ImplicitComponent
 
-from openode.utils.var_names import get_name
-from openode.utils.units import get_rate_units
+from ozone.utils.var_names import get_name
+from ozone.utils.units import get_rate_units
 
 
 class VectorizedStepComp(ImplicitComponent):

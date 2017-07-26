@@ -4,14 +4,14 @@ import numpy as np
 from openmdao.api import Group, IndepVarComp
 from six import iteritems
 
-import openode.schemes.scheme as schemes
-from openode.components.time_comp import TimeComp
-from openode.components.starting_comp import StartingComp
-from openode.schemes.scheme import GLMScheme
-from openode.schemes.runge_kutta import RK4
-from openode.ode_function import ODEFunction
-from openode.utils.var_names import get_name
-from openode.utils.misc import get_scheme
+import ozone.schemes.scheme as schemes
+from ozone.components.time_comp import TimeComp
+from ozone.components.starting_comp import StartingComp
+from ozone.schemes.scheme import GLMScheme
+from ozone.schemes.runge_kutta import RK4
+from ozone.ode_function import ODEFunction
+from ozone.utils.var_names import get_name
+from ozone.utils.misc import get_scheme
 
 
 class Integrator(Group):
@@ -107,10 +107,10 @@ class Integrator(Group):
     def _get_names(self, comp, type_, i_step=None, i_stage=None, j_stage=None):
         names_list = []
         for state_name, state in iteritems(self.metadata['ode_function']._states):
-            if type_ == 'rate_target':
-                names = '{}.{}'.format(comp, state['rate_target'])
-            elif type_ == 'state_targets':
-                names = ['{}.{}'.format(comp, tgt) for tgt in state['state_targets']]
+            if type_ == 'rate_path':
+                names = '{}.{}'.format(comp, state['rate_path'])
+            elif type_ == 'paths':
+                names = ['{}.{}'.format(comp, tgt) for tgt in state['paths']]
             else:
                 names = '{}.{}'.format(comp, get_name(
                     type_, state_name, i_step=i_step, i_stage=i_stage, j_stage=j_stage))

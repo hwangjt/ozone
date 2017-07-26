@@ -1,7 +1,7 @@
 from __future__ import division
 
 import numpy as np
-from openode.schemes.scheme import GLMScheme
+from ozone.schemes.scheme import GLMScheme
 
 
 class RungeKutta(GLMScheme):

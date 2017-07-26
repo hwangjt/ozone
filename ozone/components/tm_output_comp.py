@@ -6,7 +6,7 @@ from openmdao.utils.options_dictionary import OptionsDictionary
 
 from openmdao.api import ExplicitComponent
 
-from openode.utils.var_names import get_name
+from ozone.utils.var_names import get_name
 
 
 class TMOutputComp(ExplicitComponent):

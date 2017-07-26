@@ -2,8 +2,8 @@ import numpy as np
 
 from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp
 
-from openode.api import ODEFunction, ODEIntegrator
-from openode.tests.ode_functions.simple_ode import LinearODEFunction, SimpleODEFunction, \
+from ozone.api import ODEFunction, ODEIntegrator
+from ozone.tests.ode_functions.simple_ode import LinearODEFunction, SimpleODEFunction, \
     NonlinearODEFunction
 
 

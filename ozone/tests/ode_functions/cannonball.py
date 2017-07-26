@@ -2,7 +2,7 @@ import numpy as np
 
 from openmdao.api import ExplicitComponent
 
-from openode.api import ODEFunction
+from ozone.api import ODEFunction
 
 
 class CannonballSystem(ExplicitComponent):
@@ -67,10 +67,10 @@ class CannonballODEFunction(ODEFunction):
 
     def initialize(self):
         self.set_system(CannonballSystem)
-        self.declare_state('x', rate_target='xdot', state_targets=[], units='m')
-        self.declare_state('y', rate_target='ydot', state_targets=[], units='m')
-        self.declare_state('vx', rate_target='vxdot', state_targets=['vx'], units='m/s')
-        self.declare_state('vy', rate_target='vydot', state_targets=['vy'], units='m/s')
+        self.declare_state('x', rate_path='xdot', paths=[], units='m')
+        self.declare_state('y', rate_path='ydot', paths=[], units='m')
+        self.declare_state('vx', rate_path='vxdot', paths=['vx'], units='m/s')
+        self.declare_state('vy', rate_path='vydot', paths=['vy'], units='m/s')
         self.declare_time(units='s')
 
     def compute_exact_soln(self, initial_conditions, t0, t):

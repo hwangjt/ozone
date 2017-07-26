@@ -3,12 +3,12 @@ from six import iteritems
 
 from openmdao.api import Group, IndepVarComp
 
-from openode.integrators.integrator import Integrator
-from openode.components.starting_comp import StartingComp
-from openode.components.explicit_tm_stage_comp import ExplicitTMStageComp
-from openode.components.explicit_tm_step_comp import ExplicitTMStepComp
-from openode.components.tm_output_comp import TMOutputComp
-from openode.utils.var_names import get_name
+from ozone.integrators.integrator import Integrator
+from ozone.components.starting_comp import StartingComp
+from ozone.components.explicit_tm_stage_comp import ExplicitTMStageComp
+from ozone.components.explicit_tm_step_comp import ExplicitTMStepComp
+from ozone.components.tm_output_comp import TMOutputComp
+from ozone.utils.var_names import get_name
 
 
 class ExplicitTMIntegrator(Integrator):
@@ -59,7 +59,7 @@ class ExplicitTMIntegrator(Integrator):
                 for j_stage in range(i_stage):
                     ode_comp_tmp_name = 'ode_comp_%i_%i' % (i_step, j_stage)
                     self._connect_states(
-                        self._get_names(ode_comp_tmp_name, 'rate_target'),
+                        self._get_names(ode_comp_tmp_name, 'rate_path'),
                         self._get_names(stage_comp_name, 'F', i_step=i_step, i_stage=i_stage, j_stage=j_stage),
                     )
 
@@ -67,7 +67,7 @@ class ExplicitTMIntegrator(Integrator):
                 self.add_subsystem(ode_comp_name, comp)
                 self._connect_states(
                     self._get_names(stage_comp_name, 'Y', i_step=i_step, i_stage=i_stage),
-                    self._get_names(ode_comp_name, 'state_targets'),
+                    self._get_names(ode_comp_name, 'paths'),
                 )
 
             comp = ExplicitTMStepComp(
@@ -80,7 +80,7 @@ class ExplicitTMIntegrator(Integrator):
             for j_stage in range(num_stages):
                 ode_comp_tmp_name = 'ode_comp_%i_%i' % (i_step, j_stage)
                 self._connect_states(
-                    self._get_names(ode_comp_tmp_name, 'rate_target'),
+                    self._get_names(ode_comp_tmp_name, 'rate_path'),
                     self._get_names(step_comp_new_name, 'F', i_step=i_step, j_stage=j_stage),
                 )
 

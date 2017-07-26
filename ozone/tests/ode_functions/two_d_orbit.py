@@ -3,7 +3,7 @@ from scipy import sparse, linalg
 
 from openmdao.api import ExplicitComponent
 
-from openode.api import ODEFunction
+from ozone.api import ODEFunction
 
 class TwoDOrbit(ExplicitComponent):
 
@@ -41,8 +41,8 @@ class TwoDOrbitFunction(ODEFunction):
 
     def initialize(self):
         self.set_system(TwoDOrbit)
-        self.declare_state('position', rate_target='dpos_dt', state_targets='position', shape=2)
-        self.declare_state('velocity', rate_target='dvel_dt', state_targets='velocity', shape=2)
+        self.declare_state('position', rate_path='dpos_dt', paths='position', shape=2)
+        self.declare_state('velocity', rate_path='dvel_dt', paths='velocity', shape=2)
         self.declare_time('t')
 
     def compute_exact_soln(self, initial_conditions, t0, t):

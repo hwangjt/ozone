@@ -2,7 +2,7 @@ import numpy as np
 
 from openmdao.api import ExplicitComponent
 
-from openode.api import ODEFunction
+from ozone.api import ODEFunction
 
 
 class NonlinearODESystem(ExplicitComponent):
@@ -83,7 +83,7 @@ class SimpleODEFunction(ODEFunction):
 
     def initialize(self):
         self.set_system(SimpleODESystem)
-        self.declare_state('y', rate_target='dy_dt', state_targets='y')
+        self.declare_state('y', rate_path='dy_dt', paths='y')
         self.declare_time('t')
 
     def compute_exact_soln(self, initial_conditions, t0, t):
@@ -96,7 +96,7 @@ class LinearODEFunction(ODEFunction):
 
     def initialize(self):
         self.set_system(LinearODESystem)
-        self.declare_state('y', rate_target='dy_dt', state_targets='y')
+        self.declare_state('y', rate_path='dy_dt', paths='y')
         self.declare_time('t')
 
     def compute_exact_soln(self, initial_conditions, t0, t):
@@ -112,7 +112,7 @@ class NonlinearODEFunction(ODEFunction):
 
     def initialize(self):
         self.set_system(NonlinearODESystem)
-        self.declare_state('y', rate_target='dy_dt', state_targets='y')
+        self.declare_state('y', rate_path='dy_dt', paths='y')
         self.declare_time('t')
 
     def compute_exact_soln(self, initial_conditions, t0, t):

@@ -3,11 +3,11 @@ from six import iteritems
 
 from openmdao.api import Group, IndepVarComp, NewtonSolver, DirectSolver, DenseJacobian
 
-from openode.integrators.integrator import Integrator
-from openode.components.vectorized_step_comp import VectorizedStepComp
-from openode.components.vectorized_stage_comp import VectorizedStageComp
-from openode.components.vectorized_output_comp import VectorizedOutputComp
-from openode.utils.var_names import get_name
+from ozone.integrators.integrator import Integrator
+from ozone.components.vectorized_step_comp import VectorizedStepComp
+from ozone.components.vectorized_stage_comp import VectorizedStageComp
+from ozone.components.vectorized_output_comp import VectorizedOutputComp
+from ozone.utils.var_names import get_name
 
 
 class VectorizedIntegrator(Integrator):
@@ -102,12 +102,12 @@ class VectorizedIntegrator(Integrator):
 
             src_indices = np.arange((num_time_steps - 1) * num_stages * size)
             coupled_group.connect(
-                'ode_comp.%s' % state['rate_target'],
+                'ode_comp.%s' % state['rate_path'],
                 'vectorized_step_comp.{}'.format(get_name('F', state_name)),
                 src_indices=src_indices,
             )
             coupled_group.connect(
-                'ode_comp.%s' % state['rate_target'],
+                'ode_comp.%s' % state['rate_path'],
                 'vectorized_stage_comp.{}'.format(get_name('F', state_name)),
                 src_indices=src_indices,
             )
@@ -121,12 +121,12 @@ class VectorizedIntegrator(Integrator):
         if formulation == 'MDF':
             self._connect_states(
                 self._get_names('coupled_group.vectorized_stage_comp', 'Y_out'),
-                self._get_names('coupled_group.ode_comp', 'state_targets'),
+                self._get_names('coupled_group.ode_comp', 'paths'),
             )
         elif formulation == 'SAND':
             self._connect_states(
                 self._get_names('coupled_group.desvars_comp', 'Y'),
-                self._get_names('coupled_group.ode_comp', 'state_targets'),
+                self._get_names('coupled_group.ode_comp', 'paths'),
             )
             self._connect_states(
                 self._get_names('coupled_group.desvars_comp', 'Y'),
