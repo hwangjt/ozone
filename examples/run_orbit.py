@@ -15,17 +15,19 @@ nums = [11, 16, 21, 26, 31, 36]
 # nums = [11, 21, 31, 41]
 
 # scheme_name = 'AdamsPECE3'
+# scheme_name = 'BDF2'
 # scheme_name = 'ForwardEuler'
-scheme_name = 'RK4'
-# scheme_name = 'GaussLegendre6'
+# scheme_name = 'RK4'
+# scheme_name = 'GaussLegendre4'
+scheme_name = 'Trapezoidal'
 # scheme_name = 'Lobatto4'
 # scheme_name = 'Radau5'
 
 # integrator_name = 'SAND'
-# integrator_name = 'MDF'
-integrator_name = 'TM'
+integrator_name = 'MDF'
+# integrator_name = 'TM'
 
-ecc = 1/2
+ecc = 1 / 2
 
 initial_conditions = {'position': np.array([1 - ecc, 0]),
                       'velocity': np.array([0, np.sqrt((1+ecc) / (1 - ecc))])}

@@ -217,3 +217,8 @@ class Radau(RungeKutta):
             ))
         A, B = coeffs[order]
         super(Radau, self).__init__(A=A, B=B)
+
+class TrapezoidalRule(RungeKutta):
+    def __init__(self):
+        super(TrapezoidalRule, self).__init__(A=np.array([[0., 0.], [1 / 2, 1 / 2]]),
+                                              B=np.array([1 / 2, 1 / 2]))
