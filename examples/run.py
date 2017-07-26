@@ -6,13 +6,15 @@ from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarCom
 from openode.api import ODEFunction, ODEIntegrator
 from openode.tests.ode_functions.simple_ode import NonlinearODEFunction, LinearODEFunction, \
     SimpleODEFunction
+from openode.tests.ode_functions.cannonball import CannonballODEFunction
 
 
 num = 11
 
 t0 = 0.
 t1 = 1.
-initial_conditions = {'y': 1.}
+# initial_conditions = {'y': 1.}
+initial_conditions = {'x': 0., 'y': 0., 'vx': 0.1, 'vy': 0.}
 
 times = np.linspace(t0, t1, num)
 
@@ -24,7 +26,8 @@ integrator_name = 'SAND'
 integrator_name = 'MDF'
 integrator_name = 'TM'
 
-ode_function = NonlinearODEFunction()
+# ode_function = NonlinearODEFunction()
+ode_function = CannonballODEFunction()
 
 integrator = ODEIntegrator(ode_function, integrator_name, scheme_name,
     times=times, initial_conditions=initial_conditions)
@@ -50,8 +53,10 @@ time1 = time.time()
 np.set_printoptions(precision=10)
 
 exact_soln = ode_function.compute_exact_soln(initial_conditions, t0, t1)
-print(prob['state:y'])
-print('Error in state value at final time:', np.linalg.norm(prob['state:y'][-1] - exact_soln))
+
+for key in exact_soln:
+    print('Error in state %s at final time:' % key,
+        np.linalg.norm(prob['state:%s' % key][-1] - exact_soln[key]))
 print('Runtime (s):', time1 - time0)
 # print(prob['starting:y'])
 # view_model(prob)

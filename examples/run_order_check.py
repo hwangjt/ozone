@@ -20,7 +20,7 @@ nums = [11, 16, 21, 26, 31, 36]
 # scheme_name = 'RK4'
 # scheme_name = 'GaussLegendre6'
 # scheme_name = 'Lobatto4'
-scheme_name = 'Radau5'
+scheme_name = 'RadauI5'
 
 # integrator_name = 'SAND'
 integrator_name = 'MDF'
@@ -64,9 +64,9 @@ for i, num in enumerate(nums):
     prob.run_driver()
 
     approx_y = prob['state:y'][-1][0]
-    true_y = ode_function.compute_exact_soln(initial_conditions, t0, t1)
+    true_y = ode_function.compute_exact_soln(initial_conditions, t0, t1)['y']
 
-    errs[i] = np.abs(approx_y - true_y)
+    errs[i] = np.linalg.norm(approx_y - true_y)
 
 
 print('-'*40)
