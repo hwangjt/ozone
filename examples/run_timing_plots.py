@@ -5,11 +5,11 @@ import time
 
 from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp
 
-from openode.api import ODEFunction, ODEIntegrator
-from openode.tests.ode_functions.simple_ode import LinearODEFunction, SimpleODEFunction, \
+from ozone.api import ODEFunction, ODEIntegrator
+from ozone.tests.ode_functions.simple_ode import LinearODEFunction, SimpleODEFunction, \
     NonlinearODEFunction
-from openode.utils.suppress_printing import nostdout
-from openode.utils.misc import get_scheme_families
+from ozone.utils.suppress_printing import nostdout
+from ozone.utils.misc import get_scheme_families
 
 
 ode_function = NonlinearODEFunction()

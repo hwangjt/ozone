@@ -3,12 +3,12 @@ from six import iteritems
 
 from openmdao.api import Group, IndepVarComp, NewtonSolver, DirectSolver, DenseJacobian
 
-from openode.integrators.integrator import Integrator
-from openode.components.starting_comp import StartingComp
-from openode.components.implicit_tm_stage_comp import ImplicitTMStageComp
-from openode.components.implicit_tm_step_comp import ImplicitTMStepComp
-from openode.components.tm_output_comp import TMOutputComp
-from openode.utils.var_names import get_name
+from ozone.integrators.integrator import Integrator
+from ozone.components.starting_comp import StartingComp
+from ozone.components.implicit_tm_stage_comp import ImplicitTMStageComp
+from ozone.components.implicit_tm_step_comp import ImplicitTMStepComp
+from ozone.components.tm_output_comp import TMOutputComp
+from ozone.utils.var_names import get_name
 
 
 class ImplicitTMIntegrator(Integrator):

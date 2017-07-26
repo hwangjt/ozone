@@ -1,8 +1,8 @@
-from openode.schemes.runge_kutta import ForwardEuler, BackwardEuler, ExplicitMidpoint, \
+from ozone.schemes.runge_kutta import ForwardEuler, BackwardEuler, ExplicitMidpoint, \
     ImplicitMidpoint, KuttaThirdOrder, RK4, RalstonsMethod, HeunsMethod, RK4ST, GaussLegendre, \
     LobattoIIIA, Radau
-from openode.schemes.bdf import BDF
-from openode.schemes.adams import AB, ABalt, AM, AMalt, AdamsPEC, AdamsPECE
+from ozone.schemes.bdf import BDF
+from ozone.schemes.adams import AB, ABalt, AM, AMalt, AdamsPEC, AdamsPECE
 
 
 def _get_class(name, classes, label):
@@ -79,9 +79,9 @@ def get_scheme(scheme_name):
 
 
 def get_integrator(integrator_name, explicit):
-    from openode.integrators.explicit_tm_integrator import ExplicitTMIntegrator
-    from openode.integrators.implicit_tm_integrator import ImplicitTMIntegrator
-    from openode.integrators.vectorized_integrator import VectorizedIntegrator
+    from ozone.integrators.explicit_tm_integrator import ExplicitTMIntegrator
+    from ozone.integrators.implicit_tm_integrator import ImplicitTMIntegrator
+    from ozone.integrators.vectorized_integrator import VectorizedIntegrator
 
     integrator_classes = {
         'SAND': VectorizedIntegrator,

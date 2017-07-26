@@ -3,10 +3,10 @@ import time
 
 from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp, view_model
 
-from openode.api import ODEFunction, ODEIntegrator
-from openode.tests.ode_functions.simple_ode import NonlinearODEFunction, LinearODEFunction, \
+from ozone.api import ODEFunction, ODEIntegrator
+from ozone.tests.ode_functions.simple_ode import NonlinearODEFunction, LinearODEFunction, \
     SimpleODEFunction
-from openode.tests.ode_functions.cannonball import CannonballODEFunction
+from ozone.tests.ode_functions.cannonball import CannonballODEFunction
 
 
 num = 11

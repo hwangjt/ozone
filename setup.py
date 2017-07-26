@@ -3,16 +3,16 @@ import os
 from subprocess import call
 
 
-setup(name='openode',
+setup(name='ozone',
     version='0.1',
     description='Open-source ODE solver package for gradient-based MDO',
     license='Apache License',
     packages=[
-        'openode',
-        'openode/components',
-        'openode/integrators',
-        'openode/schemes',
-        'openode/utils',
+        'ozone',
+        'ozone/components',
+        'ozone/integrators',
+        'ozone/schemes',
+        'ozone/utils',
     ],
     install_requires=[
     ],

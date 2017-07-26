@@ -4,14 +4,14 @@ import numpy as np
 from openmdao.api import Group, IndepVarComp
 from six import iteritems
 
-import openode.schemes.scheme as schemes
-from openode.components.time_comp import TimeComp
-from openode.components.starting_comp import StartingComp
-from openode.schemes.scheme import GLMScheme
-from openode.schemes.runge_kutta import RK4
-from openode.ode_function import ODEFunction
-from openode.utils.var_names import get_name
-from openode.utils.misc import get_scheme
+import ozone.schemes.scheme as schemes
+from ozone.components.time_comp import TimeComp
+from ozone.components.starting_comp import StartingComp
+from ozone.schemes.scheme import GLMScheme
+from ozone.schemes.runge_kutta import RK4
+from ozone.ode_function import ODEFunction
+from ozone.utils.var_names import get_name
+from ozone.utils.misc import get_scheme
 
 
 class Integrator(Group):

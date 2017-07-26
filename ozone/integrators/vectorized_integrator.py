@@ -3,11 +3,11 @@ from six import iteritems
 
 from openmdao.api import Group, IndepVarComp, NewtonSolver, DirectSolver, DenseJacobian
 
-from openode.integrators.integrator import Integrator
-from openode.components.vectorized_step_comp import VectorizedStepComp
-from openode.components.vectorized_stage_comp import VectorizedStageComp
-from openode.components.vectorized_output_comp import VectorizedOutputComp
-from openode.utils.var_names import get_name
+from ozone.integrators.integrator import Integrator
+from ozone.components.vectorized_step_comp import VectorizedStepComp
+from ozone.components.vectorized_stage_comp import VectorizedStageComp
+from ozone.components.vectorized_output_comp import VectorizedOutputComp
+from ozone.utils.var_names import get_name
 
 
 class VectorizedIntegrator(Integrator):

@@ -2,7 +2,7 @@ import numpy as np
 
 from openmdao.api import ExplicitComponent
 
-from openode.api import ODEFunction
+from ozone.api import ODEFunction
 
 
 class CannonballSystem(ExplicitComponent):

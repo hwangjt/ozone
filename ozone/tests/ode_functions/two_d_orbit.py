@@ -3,7 +3,7 @@ from scipy.sparse import block_diag
 
 from openmdao.api import ExplicitComponent
 
-from openode.api import ODEFunction
+from ozone.api import ODEFunction
 
 class TwoDOrbit(ExplicitComponent):
 

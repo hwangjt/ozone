@@ -3,12 +3,12 @@ from six import iteritems
 
 from openmdao.api import Group, IndepVarComp
 
-from openode.integrators.integrator import Integrator
-from openode.components.starting_comp import StartingComp
-from openode.components.explicit_tm_stage_comp import ExplicitTMStageComp
-from openode.components.explicit_tm_step_comp import ExplicitTMStepComp
-from openode.components.tm_output_comp import TMOutputComp
-from openode.utils.var_names import get_name
+from ozone.integrators.integrator import Integrator
+from ozone.components.starting_comp import StartingComp
+from ozone.components.explicit_tm_stage_comp import ExplicitTMStageComp
+from ozone.components.explicit_tm_step_comp import ExplicitTMStepComp
+from ozone.components.tm_output_comp import TMOutputComp
+from ozone.utils.var_names import get_name
 
 
 class ExplicitTMIntegrator(Integrator):

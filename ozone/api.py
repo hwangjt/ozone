@@ -1,10 +1,10 @@
-from openode.ode_function import ODEFunction
-from openode.integrators.explicit_tm_integrator import ExplicitTMIntegrator
-from openode.integrators.implicit_tm_integrator import ImplicitTMIntegrator
-from openode.integrators.vectorized_integrator import VectorizedIntegrator
-from openode.schemes.runge_kutta import ForwardEuler, BackwardEuler, ExplicitMidpoint, \
+from ozone.ode_function import ODEFunction
+from ozone.integrators.explicit_tm_integrator import ExplicitTMIntegrator
+from ozone.integrators.implicit_tm_integrator import ImplicitTMIntegrator
+from ozone.integrators.vectorized_integrator import VectorizedIntegrator
+from ozone.schemes.runge_kutta import ForwardEuler, BackwardEuler, ExplicitMidpoint, \
     ImplicitMidpoint, KuttaThirdOrder, RK4, RalstonsMethod, HeunsMethod
-from openode.utils.misc import get_scheme, get_integrator
+from ozone.utils.misc import get_scheme, get_integrator
 
 
 def ODEIntegrator(ode_function, integrator_name, scheme_name, **kwargs):
