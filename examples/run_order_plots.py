@@ -8,6 +8,7 @@ from openode.api import ODEFunction, ODEIntegrator
 from openode.tests.ode_functions.simple_ode import LinearODEFunction, SimpleODEFunction, \
     NonlinearODEFunction
 from openode.utils.suppress_printing import nostdout
+from openode.utils.misc import get_scheme_families
 
 
 ode_function = NonlinearODEFunction()
@@ -28,62 +29,7 @@ integrator_name = 'MDF'
 
 scheme_family_name = 'basic'
 
-scheme_families = {}
-scheme_families['basic'] = [
-    ('ForwardEuler', 1),
-    ('BackwardEuler', 1),
-    ('ExplicitMidpoint', 2),
-    ('ImplicitMidpoint', 2),
-]
-scheme_families['GaussLegendre'] = [
-    ('GaussLegendre2', 2),
-    ('GaussLegendre4', 4),
-    ('GaussLegendre6', 6),
-]
-scheme_families['Lobatto'] = [
-    ('Lobatto2', 2),
-    ('Lobatto4', 4),
-]
-scheme_families['Radau'] = [
-    ('RadauI3', 3),
-    ('RadauI5', 5),
-    ('RadauII3', 3),
-    ('RadauII5', 5),
-]
-scheme_families['AB'] = [
-    ('AB1', 1),
-    ('AB2', 2),
-    ('AB3', 3),
-    ('AB4', 4),
-    ('AB5', 5),
-]
-scheme_families['AM'] = [
-    ('AM1', 1),
-    ('AM2', 2),
-    ('AM3', 3),
-    ('AM4', 4),
-    ('AM5', 5),
-]
-scheme_families['BDF'] = [
-    ('BDF1', 1),
-    ('BDF2', 2),
-    ('BDF3', 3),
-    ('BDF4', 4),
-    ('BDF5', 5),
-    ('BDF6', 6),
-]
-scheme_families['AdamsPEC'] = [
-    ('AdamsPEC2', 2),
-    ('AdamsPEC3', 3),
-    ('AdamsPEC4', 4),
-    ('AdamsPEC5', 5),
-]
-scheme_families['AdamsPECE'] = [
-    ('AdamsPECE2', 2),
-    ('AdamsPECE3', 3),
-    ('AdamsPECE4', 4),
-    ('AdamsPECE5', 5),
-]
+scheme_families = get_scheme_families()
 
 colors = ['b', 'g', 'r', 'c', 'm', 'k']
 
@@ -141,4 +87,4 @@ for scheme_family_name, scheme_family in iteritems(scheme_families):
 
     plt.legend(legend_entries)
 
-plt.savefig("fig.pdf")
+plt.savefig("order_plots.pdf")
