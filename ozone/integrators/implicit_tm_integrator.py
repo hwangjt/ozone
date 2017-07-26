@@ -43,7 +43,7 @@ class ImplicitTMIntegrator(Integrator):
             group.add_subsystem('ode_comp', comp)
             self.connect('time_comp.abscissa_times',
                 ['.'.join((group_new_name + '.ode_comp', t)) for t in
-                ode_function._time_options['targets']],
+                ode_function._time_options['paths']],
                 src_indices=i_step * (num_stages) + np.arange(num_stages))
 
             comp = ImplicitTMStageComp(

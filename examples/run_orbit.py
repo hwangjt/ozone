@@ -10,16 +10,19 @@ ode_function = TwoDOrbitFunction()
 # ode_function = LinearODEFunction()
 # ode_function = SimpleODEFunction()
 
-nums = [11, 16, 21, 26, 31, 36]
+# nums = [11, 16, 21, 26, 31, 36]
 # nums = [5]
 # nums = [11, 21, 31, 41]
+# nums = [51, 101, 151, 201]
+# nums = [51, 76, 101, 151]
+nums = [101]
 
 # scheme_name = 'AdamsPECE3'
-# scheme_name = 'BDF2'
+# scheme_name = 'BDF4'
 # scheme_name = 'ForwardEuler'
 # scheme_name = 'RK4'
-# scheme_name = 'GaussLegendre4'
-scheme_name = 'Trapezoidal'
+scheme_name = 'GaussLegendre4'
+# scheme_name = 'Trapezoidal'
 # scheme_name = 'Lobatto4'
 # scheme_name = 'Radau5'
 
@@ -32,7 +35,7 @@ ecc = 1 / 2
 initial_conditions = {'position': np.array([1 - ecc, 0]),
                       'velocity': np.array([0, np.sqrt((1+ecc) / (1 - ecc))])}
 t0 = 0.
-t1 = np.pi
+t1 = 1*np.pi
 
 
 errs = np.zeros(len(nums))
@@ -79,3 +82,8 @@ for i in range(len(nums)):
         rate = np.log(err1 / err0) / np.log(h1 / h0)
 
     print('| {:.4e} | {:.4e} | {:.4e} |'.format(h1, err1, rate))
+
+# import matplotlib.pyplot as plt
+# plt.plot(prob['state:position'][:, 0], prob['state:position'][:, 1])
+# plt.axis('equal')
+# plt.show()

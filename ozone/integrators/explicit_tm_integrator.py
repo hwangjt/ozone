@@ -44,7 +44,7 @@ class ExplicitTMIntegrator(Integrator):
 
                 self.connect('time_comp.abscissa_times',
                              ['.'.join((ode_comp_name, t)) for t in
-                              ode_function._time_options['targets']],
+                              ode_function._time_options['paths']],
                              src_indices=i_step * (num_stages) + i_stage
                              )
 
