@@ -87,4 +87,4 @@ for scheme_family_name, scheme_family in iteritems(scheme_families):
 
     plt.legend(legend_entries)
 
-plt.savefig("order_plots.pdf")
+plt.savefig("order_vs_stepsize_plots.pdf")

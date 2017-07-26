@@ -42,7 +42,7 @@ for scheme_family_name, scheme_family in iteritems(scheme_families):
     plot_index += 1
     plt.subplot(3, 3, plot_index)
 
-    scheme_name, order = scheme_family[0]
+    scheme_name, order = scheme_family[1]
 
     for j, integrator_name in enumerate(integrator_names):
 
@@ -88,4 +88,4 @@ for scheme_family_name, scheme_family in iteritems(scheme_families):
     plt.title(scheme_name)
     plt.legend(legend_entries)
 
-plt.savefig("timing_plots.pdf")
+plt.savefig("time_vs_stepsize_plots.pdf")
