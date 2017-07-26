@@ -94,7 +94,7 @@ class ODEFunction(object):
         if units is not None:
             self._time_options['units'] = units
 
-    def declare_state(self, name, rate_target, state_targets=None, shape=None, units=None):
+    def declare_state(self, name, rate_path, paths=None, shape=None, units=None):
         """
         Add an ODE state variable.
 
@@ -103,10 +103,10 @@ class ODEFunction(object):
         name : str
             The name of the state variable as seen by the driver. This variable will
             exist as an interface to the ODE.
-        rate_target : str
+        rate_path : str
             The path to the variable within the ODE which represents the derivative of
             the state variable w.r.t. the variable of integration.
-        state_targets : string_types or Iterable or None
+        paths : string_types or Iterable or None
             Paths to inputs in the ODE to which the incoming value of the state variable
             needs to be connected.
         shape : int or tuple or None
@@ -119,19 +119,19 @@ class ODEFunction(object):
 
         state_options = OptionsDictionary()
         state_options.declare('name', type_=string_types)
-        state_options.declare('rate_target', type_=string_types)
-        state_options.declare('state_targets', default=[], type_=Iterable)
+        state_options.declare('rate_path', type_=string_types)
+        state_options.declare('paths', default=[], type_=Iterable)
         state_options.declare('shape', default=(1,), type_=tuple)
         state_options.declare('units', default=None, type_=string_types)
 
         state_options['name'] = name
-        state_options['rate_target'] = rate_target
-        if isinstance(state_targets, string_types):
-            state_options['state_targets'] = [state_targets]
-        elif isinstance(state_targets, Iterable):
-            state_options['state_targets'] = state_targets
-        elif state_targets is not None:
-            raise ValueError('state_targets must be of type string_types or Iterable or None')
+        state_options['rate_path'] = rate_path
+        if isinstance(paths, string_types):
+            state_options['paths'] = [paths]
+        elif isinstance(paths, Iterable):
+            state_options['paths'] = paths
+        elif paths is not None:
+            raise ValueError('paths must be of type string_types or Iterable or None')
         if np.isscalar(shape):
             state_options['shape'] = (shape,)
         elif isinstance(shape, Iterable):

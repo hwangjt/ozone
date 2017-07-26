@@ -63,18 +63,18 @@ class ImplicitTMIntegrator(Integrator):
             self.connect('time_comp.h_vec', group_new_name + '.step_comp.h', src_indices=i_step)
 
             self._connect_states(
-                self._get_names(group_new_name + '.ode_comp', 'rate_target'),
+                self._get_names(group_new_name + '.ode_comp', 'rate_path'),
                 self._get_names(group_new_name + '.step_comp', 'F', i_step=i_step),
             )
 
             self._connect_states(
-                self._get_names(group_new_name + '.ode_comp', 'rate_target'),
+                self._get_names(group_new_name + '.ode_comp', 'rate_path'),
                 self._get_names(group_new_name + '.stage_comp', 'F', i_step=i_step),
             )
 
             self._connect_states(
                 self._get_names(group_new_name + '.stage_comp', 'Y', i_step=i_step),
-                self._get_names(group_new_name + '.ode_comp', 'state_targets'),
+                self._get_names(group_new_name + '.ode_comp', 'paths'),
             )
 
             if i_step == 0:

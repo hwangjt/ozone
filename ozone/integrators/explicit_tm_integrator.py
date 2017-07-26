@@ -59,7 +59,7 @@ class ExplicitTMIntegrator(Integrator):
                 for j_stage in range(i_stage):
                     ode_comp_tmp_name = 'ode_comp_%i_%i' % (i_step, j_stage)
                     self._connect_states(
-                        self._get_names(ode_comp_tmp_name, 'rate_target'),
+                        self._get_names(ode_comp_tmp_name, 'rate_path'),
                         self._get_names(stage_comp_name, 'F', i_step=i_step, i_stage=i_stage, j_stage=j_stage),
                     )
 
@@ -67,7 +67,7 @@ class ExplicitTMIntegrator(Integrator):
                 self.add_subsystem(ode_comp_name, comp)
                 self._connect_states(
                     self._get_names(stage_comp_name, 'Y', i_step=i_step, i_stage=i_stage),
-                    self._get_names(ode_comp_name, 'state_targets'),
+                    self._get_names(ode_comp_name, 'paths'),
                 )
 
             comp = ExplicitTMStepComp(
@@ -80,7 +80,7 @@ class ExplicitTMIntegrator(Integrator):
             for j_stage in range(num_stages):
                 ode_comp_tmp_name = 'ode_comp_%i_%i' % (i_step, j_stage)
                 self._connect_states(
-                    self._get_names(ode_comp_tmp_name, 'rate_target'),
+                    self._get_names(ode_comp_tmp_name, 'rate_path'),
                     self._get_names(step_comp_new_name, 'F', i_step=i_step, j_stage=j_stage),
                 )
 

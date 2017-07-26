@@ -107,10 +107,10 @@ class Integrator(Group):
     def _get_names(self, comp, type_, i_step=None, i_stage=None, j_stage=None):
         names_list = []
         for state_name, state in iteritems(self.metadata['ode_function']._states):
-            if type_ == 'rate_target':
-                names = '{}.{}'.format(comp, state['rate_target'])
-            elif type_ == 'state_targets':
-                names = ['{}.{}'.format(comp, tgt) for tgt in state['state_targets']]
+            if type_ == 'rate_path':
+                names = '{}.{}'.format(comp, state['rate_path'])
+            elif type_ == 'paths':
+                names = ['{}.{}'.format(comp, tgt) for tgt in state['paths']]
             else:
                 names = '{}.{}'.format(comp, get_name(
                     type_, state_name, i_step=i_step, i_stage=i_stage, j_stage=j_stage))
