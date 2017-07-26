@@ -9,22 +9,22 @@ from ozone.tests.ode_functions.simple_ode import NonlinearODEFunction, LinearODE
 from ozone.tests.ode_functions.cannonball import CannonballODEFunction
 
 
-num = 11
+num = 400
 
 t0 = 0.
-t1 = 1.
+t1 = 1.e-2
 # initial_conditions = {'y': 1.}
 initial_conditions = {'x': 0., 'y': 0., 'vx': 0.1, 'vy': 0.}
 
 times = np.linspace(t0, t1, num)
 
-scheme_name = 'RK4'
+scheme_name = 'ImplicitMidpoint'
 # scheme_name = 'AB2'
-scheme_name = 'BDF5'
+# scheme_name = 'BDF2'
 
 integrator_name = 'SAND'
 integrator_name = 'MDF'
-integrator_name = 'TM'
+# integrator_name = 'TM'
 
 # ode_function = NonlinearODEFunction()
 ode_function = CannonballODEFunction()
@@ -60,6 +60,10 @@ for key in exact_soln:
 print('Runtime (s):', time1 - time0)
 # print(prob['starting:y'])
 # view_model(prob)
+
+import matplotlib.pyplot as plt
+plt.plot(prob['state:x'], prob['state:y'])
+plt.show()
 
 # print(prob['starting_system.coupled_group.vectorized_stage_comp.Y_out:y'],
 #     prob['starting_system.coupled_group.vectorized_stage_comp.Y_out:y'].shape)
