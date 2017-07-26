@@ -1,8 +1,7 @@
 from openode.schemes.runge_kutta import ForwardEuler, BackwardEuler, ExplicitMidpoint, \
     ImplicitMidpoint, KuttaThirdOrder, RK4, RalstonsMethod, HeunsMethod, RK4ST, GaussLegendre, \
-    LobattoIIIA, Radau
-from openode.schemes.bdf import BDF
-from openode.schemes.adams import AB, ABalt, AM, AMalt, AdamsPEC, AdamsPECE
+    LobattoIIIA, Radau, TrapezoidalRule
+from openode.schemes.multistep import AdamsPEC, AdamsPECE, AB, AM, ABalt, AMalt, BDF
 
 
 def _get_class(name, classes, label):
@@ -36,6 +35,7 @@ def get_scheme(scheme_name):
         'RadauI5': Radau('I', 5),
         'RadauII3': Radau('II', 3),
         'RadauII5': Radau('II', 5),
+        'Trapezoidal': TrapezoidalRule(),
         # Adams--Bashforth family
         'AB1': ForwardEuler(),
         'AB2': AB(2),
