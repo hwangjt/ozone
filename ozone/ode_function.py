@@ -38,7 +38,7 @@ class ODEFunction(object):
         self._system_init_kwargs = {}
 
         time_options = OptionsDictionary()
-        time_options.declare('targets', default=[], type_=Iterable)
+        time_options.declare('paths', default=[], type_=Iterable)
         time_options.declare('units', default=None, type_=(string_types, type(None)))
 
         self._time_options = time_options
@@ -73,24 +73,24 @@ class ODEFunction(object):
         if system_init_kwargs is not None:
             self._system_init_kwargs = system_init_kwargs
 
-    def declare_time(self, targets=None, units=None):
+    def declare_time(self, paths=None, units=None):
         """
-        Specify the targets and units of time or the time-like variable.
+        Specify the paths and units of time or the time-like variable.
 
         Parameters
         ----------
-        targets : string_types or Iterable or None
+        paths : string_types or Iterable or None
             Targets for the time or time-like variable within the ODE, or None if no models
             are explicitly time-dependent. Default is None.
         units : str or None
             Units for the integration variable within the ODE. Default is None.
         """
-        if isinstance(targets, string_types):
-            self._time_options['targets'] = [targets]
-        elif isinstance(targets, Iterable):
-            self._time_options['targets'] = targets
-        elif targets is not None:
-            raise ValueError('targets must be of type string_types or Iterable or None')
+        if isinstance(paths, string_types):
+            self._time_options['paths'] = [paths]
+        elif isinstance(paths, Iterable):
+            self._time_options['paths'] = paths
+        elif paths is not None:
+            raise ValueError('paths must be of type string_types or Iterable or None')
         if units is not None:
             self._time_options['units'] = units
 
@@ -143,7 +143,7 @@ class ODEFunction(object):
 
         self._states[name] = state_options
 
-    def declare_parameter(self, name, targets):
+    def declare_parameter(self, name, paths):
         """
         Declare an input to the ODE.
 
@@ -152,7 +152,7 @@ class ODEFunction(object):
         name : str
             The name of the state variable as seen by the driver. This variable will
             exist as an interface to the ODE.
-        targets : string_types or Iterable or None
+        paths : string_types or Iterable or None
             Paths to inputs in the ODE to which the incoming value of the state variable
             needs to be connected.
         """
@@ -161,9 +161,9 @@ class ODEFunction(object):
 
         parameter_options = OptionsDictionary()
         parameter_options.declare('name', type_=string_types)
-        parameter_options.declare('targets', default=[], type_=Iterable)
+        parameter_options.declare('paths', default=[], type_=Iterable)
 
         parameter_options['name'] = name
-        parameter_options['targets'] = targets
+        parameter_options['paths'] = paths
 
         self._parameters[name] = parameter_options

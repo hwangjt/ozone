@@ -52,7 +52,7 @@ class VectorizedIntegrator(Integrator):
         coupled_group.add_subsystem('ode_comp', comp)
         self.connect(
             'time_comp.abscissa_times',
-            ['.'.join(('coupled_group.ode_comp', t)) for t in ode_function._time_options['targets']],
+            ['.'.join(('coupled_group.ode_comp', t)) for t in ode_function._time_options['paths']],
         )
 
         comp = VectorizedStepComp(states=states, time_units=time_units,
