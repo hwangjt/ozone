@@ -96,24 +96,58 @@ class VectorizedIntegrator(Integrator):
                 self._get_names('output_comp', 'starting_state'),
             )
 
+        # --------------------
+
+        src_indices_to_ode = []
         for state_name, state in iteritems(states):
             size = np.prod(state['shape'])
             shape = state['shape']
 
-            src_indices = np.arange((num_time_steps - 1) * num_stages * size)
+            src_indices = np.arange((num_time_steps - 1) * num_stages * size).reshape(
+                ((num_time_steps - 1) * num_stages,) + shape,
+            )
+            src_indices_to_ode.append(src_indices)
+
+        src_indices_from_ode = []
+        for state_name, state in iteritems(states):
+            size = np.prod(state['shape'])
+            shape = state['shape']
+
             src_indices = np.arange((num_time_steps - 1) * num_stages * size).reshape(
                 (num_time_steps - 1, num_stages,) + shape,
             )
-            coupled_group.connect(
-                'ode_comp.%s' % state['rate_path'],
-                'vectorized_step_comp.{}'.format(get_name('F', state_name)),
-                src_indices=src_indices,
-            )
-            coupled_group.connect(
-                'ode_comp.%s' % state['rate_path'],
-                'vectorized_stage_comp.{}'.format(get_name('F', state_name)),
-                src_indices=src_indices,
-            )
+            src_indices_from_ode.append(src_indices)
+
+        # --------------------
+
+        self._connect_states(
+            self._get_names('coupled_group.ode_comp', 'rate_path'),
+            self._get_names('coupled_group.vectorized_step_comp', 'F'),
+            src_indices_from_ode,
+        )
+        self._connect_states(
+            self._get_names('coupled_group.ode_comp', 'rate_path'),
+            self._get_names('coupled_group.vectorized_stage_comp', 'F'),
+            src_indices_from_ode,
+        )
+
+        # for state_name, state in iteritems(states):
+        #     size = np.prod(state['shape'])
+        #     shape = state['shape']
+        #
+        #     src_indices = np.arange((num_time_steps - 1) * num_stages * size).reshape(
+        #         (num_time_steps - 1, num_stages,) + shape,
+        #     )
+        #     coupled_group.connect(
+        #         'ode_comp.%s' % state['rate_path'],
+        #         'vectorized_step_comp.{}'.format(get_name('F', state_name)),
+        #         src_indices=src_indices,
+        #     )
+        #     coupled_group.connect(
+        #         'ode_comp.%s' % state['rate_path'],
+        #         'vectorized_stage_comp.{}'.format(get_name('F', state_name)),
+        #         src_indices=src_indices,
+        #     )
 
         ###
         self._connect_states(
@@ -123,36 +157,16 @@ class VectorizedIntegrator(Integrator):
 
         print(num_time_steps - 1, num_stages)
         if formulation == 'MDF':
-            src_indices_list = []
-            for state_name, state in iteritems(states):
-                size = np.prod(state['shape'])
-                shape = state['shape']
-
-                src_indices = np.arange((num_time_steps - 1) * num_stages * size).reshape(
-                    ((num_time_steps - 1) * num_stages,) + shape,
-                )
-                src_indices_list.append(src_indices)
-
             self._connect_states(
                 self._get_names('coupled_group.vectorized_stage_comp', 'Y_out'),
                 self._get_names('coupled_group.ode_comp', 'paths'),
-                src_indices_list,
+                src_indices_to_ode,
             )
         elif formulation == 'SAND':
-            src_indices_list = []
-            for state_name, state in iteritems(states):
-                size = np.prod(state['shape'])
-                shape = state['shape']
-
-                src_indices = np.arange((num_time_steps - 1) * num_stages * size).reshape(
-                    ((num_time_steps - 1) * num_stages,) + shape,
-                )
-                src_indices_list.append(src_indices)
-
             self._connect_states(
                 self._get_names('coupled_group.desvars_comp', 'Y'),
                 self._get_names('coupled_group.ode_comp', 'paths'),
-                src_indices_list,
+                src_indices_to_ode,
             )
             self._connect_states(
                 self._get_names('coupled_group.desvars_comp', 'Y'),
