@@ -32,6 +32,8 @@ class Integrator(Group):
         starting_coeffs = self.metadata['starting_coeffs']
         scheme = self.metadata['scheme']
 
+        num_step_vars = scheme.num_values
+
         has_starting_method = scheme.starting_method is not None
         is_starting_method = starting_coeffs is not None
 
@@ -91,7 +93,7 @@ class Integrator(Group):
 
         # Starting method
         if not has_starting_method:
-            starting_system = StartingComp(states=states)
+            starting_system = StartingComp(states=states, num_step_vars=num_step_vars)
         else:
             starting_scheme_name, starting_coeffs, starting_time_steps = scheme.starting_method
             scheme = get_scheme(starting_scheme_name)
@@ -119,9 +121,13 @@ class Integrator(Group):
 
         return names_list
 
-    def _connect_states(self, srcs_list, tgts_list):
-        for srcs, tgts in zip(srcs_list, tgts_list):
-            self.connect(srcs, tgts)
+    def _connect_states(self, srcs_list, tgts_list, src_indices_list=None):
+        if src_indices_list is None:
+            for srcs, tgts in zip(srcs_list, tgts_list):
+                self.connect(srcs, tgts)
+        else:
+            for srcs, tgts, src_indices in zip(srcs_list, tgts_list, src_indices_list):
+                self.connect(srcs, tgts, src_indices=src_indices)
 
     def _create_ode(self, num):
         ode_function = self.metadata['ode_function']

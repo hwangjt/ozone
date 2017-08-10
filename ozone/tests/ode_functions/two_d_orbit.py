@@ -29,7 +29,7 @@ class TwoDOrbit(ExplicitComponent):
         attraction = np.linalg.norm(inputs['position'], axis=-1) ** 3
         outputs['dvel_dt'] = -inputs['position'] / attraction[..., None]
 
-    def compute_partials(self, inputs, outputs, partials):
+    def compute_partials(self, inputs, partials):
         x, y = inputs['position'][..., 0], inputs['position'][..., 1]
         scale = (x**2 + y**2) ** (5/2)
         jac = 1/scale * np.array([[2*x**2 - y**2, 3*x*y],

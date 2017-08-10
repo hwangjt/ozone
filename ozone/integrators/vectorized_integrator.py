@@ -101,6 +101,9 @@ class VectorizedIntegrator(Integrator):
             shape = state['shape']
 
             src_indices = np.arange((num_time_steps - 1) * num_stages * size)
+            src_indices = np.arange((num_time_steps - 1) * num_stages * size).reshape(
+                (num_time_steps - 1, num_stages,) + shape,
+            )
             coupled_group.connect(
                 'ode_comp.%s' % state['rate_path'],
                 'vectorized_step_comp.{}'.format(get_name('F', state_name)),
@@ -118,15 +121,38 @@ class VectorizedIntegrator(Integrator):
             self._get_names('coupled_group.vectorized_stage_comp', 'y'),
         )
 
+        print(num_time_steps - 1, num_stages)
         if formulation == 'MDF':
+            src_indices_list = []
+            for state_name, state in iteritems(states):
+                size = np.prod(state['shape'])
+                shape = state['shape']
+
+                src_indices = np.arange((num_time_steps - 1) * num_stages * size).reshape(
+                    ((num_time_steps - 1) * num_stages,) + shape,
+                )
+                src_indices_list.append(src_indices)
+
             self._connect_states(
                 self._get_names('coupled_group.vectorized_stage_comp', 'Y_out'),
                 self._get_names('coupled_group.ode_comp', 'paths'),
+                src_indices_list,
             )
         elif formulation == 'SAND':
+            src_indices_list = []
+            for state_name, state in iteritems(states):
+                size = np.prod(state['shape'])
+                shape = state['shape']
+
+                src_indices = np.arange((num_time_steps - 1) * num_stages * size).reshape(
+                    ((num_time_steps - 1) * num_stages,) + shape,
+                )
+                src_indices_list.append(src_indices)
+
             self._connect_states(
                 self._get_names('coupled_group.desvars_comp', 'Y'),
                 self._get_names('coupled_group.ode_comp', 'paths'),
+                src_indices_list,
             )
             self._connect_states(
                 self._get_names('coupled_group.desvars_comp', 'Y'),

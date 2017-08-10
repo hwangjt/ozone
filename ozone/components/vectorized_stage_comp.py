@@ -111,7 +111,7 @@ class VectorizedStageComp(ExplicitComponent):
                 + np.einsum('jk,i,ik...->ij...', glm_A, inputs['h_vec'], inputs[F_name]) \
                 + np.einsum('jk,ik...->ij...', glm_U, inputs[y_name][:-1, :, :])
 
-    def compute_partials(self, inputs, outputs, partials):
+    def compute_partials(self, inputs, partials):
         time_units = self.metadata['time_units']
         num_time_steps = self.metadata['num_time_steps']
         num_stages = self.metadata['num_stages']

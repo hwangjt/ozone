@@ -13,8 +13,11 @@ class StartingComp(ExplicitComponent):
 
     def initialize(self):
         self.metadata.declare('states', type_=dict, required=True)
+        self.metadata.declare('num_step_vars', type_=int, required=True)
 
     def setup(self):
+        num_step_vars = self.metadata['num_step_vars']
+
         self.declare_partials('*', '*', dependent=False)
 
         for state_name, state in iteritems(self.metadata['states']):
@@ -24,7 +27,7 @@ class StartingComp(ExplicitComponent):
             starting_name = get_name('starting', state_name)
 
             self.add_input(IC_name, shape=state['shape'], units=state['units'])
-            self.add_output(starting_name, shape=(1,) + state['shape'], units=state['units'])
+            self.add_output(starting_name, shape=(num_step_vars,) + state['shape'], units=state['units'])
 
             ones = np.ones(size)
             arange = np.arange(size)
@@ -35,4 +38,5 @@ class StartingComp(ExplicitComponent):
             IC_name = get_name('IC', state_name)
             starting_name = get_name('starting', state_name)
 
-            outputs[starting_name] = inputs[IC_name].reshape((1,) + state['shape'])
+            outputs[starting_name] = 0.
+            outputs[starting_name][0, :] = inputs[IC_name]

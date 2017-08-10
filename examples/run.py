@@ -1,7 +1,7 @@
 import numpy as np
 import time
 
-from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp, view_model
+from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp, view_model, ExecComp
 
 from ozone.api import ODEFunction, ODEIntegrator
 from ozone.tests.ode_functions.simple_ode import NonlinearODEFunction, LinearODEFunction, \
@@ -9,7 +9,7 @@ from ozone.tests.ode_functions.simple_ode import NonlinearODEFunction, LinearODE
 from ozone.tests.ode_functions.cannonball import CannonballODEFunction
 
 
-num = 400
+num = 100
 
 t0 = 0.
 t1 = 1.e-2
@@ -18,6 +18,7 @@ initial_conditions = {'x': 0., 'y': 0., 'vx': 0.1, 'vy': 0.}
 
 times = np.linspace(t0, t1, num)
 
+scheme_name = 'ExplicitMidpoint'
 scheme_name = 'ImplicitMidpoint'
 # scheme_name = 'AB2'
 # scheme_name = 'BDF2'
@@ -26,7 +27,7 @@ integrator_name = 'SAND'
 integrator_name = 'MDF'
 # integrator_name = 'TM'
 
-# ode_function = NonlinearODEFunction()
+# ode_function = LinearODEFunction()
 ode_function = CannonballODEFunction()
 
 integrator = ODEIntegrator(ode_function, integrator_name, scheme_name,
@@ -40,8 +41,10 @@ if integrator_name == 'SAND':
     prob.driver.options['tol'] = 1e-9
     prob.driver.options['disp'] = True
 
-    integrator.add_subsystem('dummy_comp', IndepVarComp('dummy_var', val=1.0))
-    integrator.add_objective('dummy_comp.dummy_var')
+    integrator.add_subsystem('dummy_comp1', IndepVarComp('x', val=1.0))
+    integrator.add_subsystem('dummy_comp2', ExecComp('y=x'))
+    integrator.connect('dummy_comp1.x', 'dummy_comp2.x')
+    integrator.add_objective('dummy_comp2.y')
 
 prob.setup()
 time0 = time.time()

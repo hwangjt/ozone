@@ -91,7 +91,7 @@ class ExplicitTMStageComp(ExplicitComponent):
 
                 outputs[Y_name] += inputs['h'] * glm_A[i_stage, j_stage] * inputs[F_name]
 
-    def compute_partials(self, inputs, outputs, partials):
+    def compute_partials(self, inputs, partials):
         num_stages = self.metadata['num_stages']
         num_step_vars = self.metadata['num_step_vars']
         i_stage = self.metadata['i_stage']

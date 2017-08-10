@@ -92,7 +92,7 @@ class ImplicitTMStepComp(ExplicitComponent):
                 + np.einsum('ij,j...->i...', glm_B, inputs[F_name]) * inputs['h'] \
                 + np.einsum('ij,j...->i...', glm_V, inputs[y_old_name])
 
-    def compute_partials(self, inputs, outputs, partials):
+    def compute_partials(self, inputs, partials):
         time_units = self.metadata['time_units']
         num_stages = self.metadata['num_stages']
         num_step_vars = self.metadata['num_step_vars']
