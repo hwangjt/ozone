@@ -29,6 +29,7 @@ class ImplicitTMIntegrator(Integrator):
         num_step_vars = scheme.num_values
         starting_coeffs = self.metadata['starting_coeffs']
         ode_function =  self.metadata['ode_function']
+        parameters = ode_function._parameters
 
         has_starting_method = scheme.starting_method is not None
         is_starting_method = starting_coeffs is not None
@@ -45,6 +46,22 @@ class ImplicitTMIntegrator(Integrator):
                 ['.'.join((group_new_name + '.ode_comp', t)) for t in
                 ode_function._time_options['paths']],
                 src_indices=i_step * (num_stages) + np.arange(num_stages))
+
+            if len(parameters) > 1:
+                src_indices_list = []
+                for parameter_name, value in iteritems(parameters):
+                    size = np.prod(value['shape'])
+                    shape = value['shape']
+
+                    arange = np.arange(((len(my_times) - 1) * num_stages * size)).reshape(
+                        ((len(my_times) - 1, num_stages,) + shape))
+                    src_indices = arange[i_step, :, :]
+                    src_indices_list.append(src_indices)
+                self._connect_states(
+                    self._get_parameter_names('parameter_comp', 'out'),
+                    self._get_parameter_names(group_new_name + '.ode_comp', 'paths'),
+                    src_indices_list,
+                )
 
             comp = ImplicitTMStageComp(
                 states=states, time_units=time_units,

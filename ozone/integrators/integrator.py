@@ -7,6 +7,7 @@ from six import iteritems
 import ozone.schemes.scheme as schemes
 from ozone.components.time_comp import TimeComp
 from ozone.components.starting_comp import StartingComp
+from ozone.components.parameter_comp import ParameterComp
 from ozone.schemes.scheme import GLMScheme
 from ozone.schemes.runge_kutta import RK4
 from ozone.ode_function import ODEFunction
@@ -23,12 +24,14 @@ class Integrator(Group):
         self.metadata.declare('ode_function', type_=ODEFunction, required=True)
         self.metadata.declare('times', type_=np.ndarray, required=True)
         self.metadata.declare('initial_conditions', type_=dict)
+        self.metadata.declare('parameters', type_=dict)
         self.metadata.declare('scheme', default=RK4(), type_=GLMScheme)
         self.metadata.declare('starting_coeffs', type_=(np.ndarray, type(None)))
 
     def setup(self):
         ode_function = self.metadata['ode_function']
         initial_conditions = self.metadata['initial_conditions']
+        given_parameters = self.metadata['parameters']
         starting_coeffs = self.metadata['starting_coeffs']
         scheme = self.metadata['scheme']
 
@@ -38,19 +41,7 @@ class Integrator(Group):
         is_starting_method = starting_coeffs is not None
 
         states, time_units, starting_times, my_times = self._get_meta()
-
-        # Ensure that all initial_conditions are valid
-        if initial_conditions is not None:
-            for state_name, value in iteritems(initial_conditions):
-                assert state_name in ode_function._states, \
-                    'State name %s is not valid in the initial conditions' % state_name
-
-                if np.isscalar(value):
-                    assert ode_function._states[state_name]['shape'] == (1,), \
-                        'The initial condition for state %s has the wrong shape' % state_name
-                else:
-                    assert ode_function._states[state_name]['shape'] == value.shape, \
-                        'The initial condition for state %s has the wrong shape' % state_name
+        parameters = ode_function._parameters
 
         # (num_starting, num_time_steps, num_step_vars,)
         if is_starting_method:
@@ -77,7 +68,21 @@ class Integrator(Group):
                 IC_name = get_name('IC', state_name)
                 state = ode_function._states[state_name]
                 ivcomp.add_output(IC_name, val=value, units=state['units'])
+
             self.add_subsystem('initial_conditions', ivcomp, promotes_outputs=promotes_ICs)
+
+        # Given parameters
+        if given_parameters is not None:
+            comp = IndepVarComp()
+
+            promotes = []
+            for parameter_name, value in iteritems(given_parameters):
+                parameter = ode_function._parameters[parameter_name]
+                name = get_name('parameter', parameter_name)
+                comp.add_output(name, val=value, units=parameter['units'])
+                promotes.append(name)
+
+            self.add_subsystem('inputs_p', comp, promotes_outputs=promotes)
 
         # Time values just at the time steps
         comp = IndepVarComp()
@@ -90,6 +95,18 @@ class Integrator(Group):
             TimeComp(time_units=time_units, glm_abscissa=abscissa,
                 num_time_steps=len(my_times)))
         self.connect('inputs_t.times', 'time_comp.times')
+
+        # Parameter comp
+        if len(parameters) > 1:
+            abscissa_times = self._get_abscissa_times()
+            promotes_parameters = []
+            for parameter_name, value in iteritems(parameters):
+                old_name = get_name('in', parameter_name)
+                new_name = get_name('parameter', parameter_name)
+                promotes_parameters.append((old_name, new_name))
+            self.add_subsystem('parameter_comp',
+                ParameterComp(parameters=parameters, times=my_times, parameter_times=abscissa_times),
+                promotes_inputs=promotes_parameters)
 
         # Starting method
         if not has_starting_method:
@@ -116,6 +133,19 @@ class Integrator(Group):
             else:
                 names = '{}.{}'.format(comp, get_name(
                     type_, state_name, i_step=i_step, i_stage=i_stage, j_stage=j_stage))
+
+            names_list.append(names)
+
+        return names_list
+
+    def _get_parameter_names(self, comp, type_, i_step=None, i_stage=None, j_stage=None):
+        names_list = []
+        for parameter_name, parameter in iteritems(self.metadata['ode_function']._parameters):
+            if type_ == 'paths':
+                names = ['{}.{}'.format(comp, tgt) for tgt in parameter['paths']]
+            else:
+                names = '{}.{}'.format(comp, get_name(
+                    type_, parameter_name, i_step=i_step, i_stage=i_stage, j_stage=j_stage))
 
             names_list.append(names)
 
@@ -154,3 +184,15 @@ class Integrator(Group):
         scheme = self.metadata['scheme']
 
         return scheme.A, scheme.B, scheme.U, scheme.V, scheme.num_stages, scheme.num_values
+
+    def _get_abscissa_times(self):
+        states, time_units, starting_times, my_times = self._get_meta()
+        abscissa = self.metadata['scheme'].abscissa
+
+        repeated_times1 = np.repeat(my_times[:-1], len(abscissa))
+        repeated_times2 = np.repeat(my_times[1:], len(abscissa))
+        tiled_abscissa = np.tile(abscissa, len(my_times) - 1)
+
+        abscissa_times = repeated_times1 + (repeated_times2 - repeated_times1) * tiled_abscissa
+
+        return abscissa_times

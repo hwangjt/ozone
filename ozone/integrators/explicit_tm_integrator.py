@@ -29,6 +29,7 @@ class ExplicitTMIntegrator(Integrator):
         num_step_vars = scheme.num_values
         starting_coeffs = self.metadata['starting_coeffs']
         ode_function =  self.metadata['ode_function']
+        parameters = ode_function._parameters
 
         has_starting_method = scheme.starting_method is not None
         is_starting_method = starting_coeffs is not None
@@ -69,6 +70,22 @@ class ExplicitTMIntegrator(Integrator):
                     self._get_names(stage_comp_name, 'Y', i_step=i_step, i_stage=i_stage),
                     self._get_names(ode_comp_name, 'paths'),
                 )
+
+                if len(parameters) > 1:
+                    src_indices_list = []
+                    for parameter_name, value in iteritems(parameters):
+                        size = np.prod(value['shape'])
+                        shape = value['shape']
+
+                        arange = np.arange(((len(my_times) - 1) * num_stages * size)).reshape(
+                            ((len(my_times) - 1, num_stages,) + shape))
+                        src_indices = arange[i_step, i_stage, :]
+                        src_indices_list.append(src_indices)
+                    self._connect_states(
+                        self._get_parameter_names('parameter_comp', 'out'),
+                        self._get_parameter_names(ode_comp_name, 'paths'),
+                        src_indices_list,
+                    )
 
             comp = ExplicitTMStepComp(
                 states=states, time_units=time_units,

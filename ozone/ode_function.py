@@ -143,7 +143,7 @@ class ODEFunction(object):
 
         self._states[name] = state_options
 
-    def declare_parameter(self, name, paths):
+    def declare_parameter(self, name, paths, shape=None, units=None):
         """
         Declare an input to the ODE.
 
@@ -155,6 +155,10 @@ class ODEFunction(object):
         paths : string_types or Iterable or None
             Paths to inputs in the ODE to which the incoming value of the state variable
             needs to be connected.
+        shape : int or tuple or None
+            Shape of the parameter.
+        units : str or None
+            Units of the parameter.
         """
         if name in self._parameters:
             raise ValueError('Parameter {0} has already been declared.'.format(name))
@@ -162,8 +166,18 @@ class ODEFunction(object):
         parameter_options = OptionsDictionary()
         parameter_options.declare('name', type_=string_types)
         parameter_options.declare('paths', default=[], type_=Iterable)
+        parameter_options.declare('shape', default=(1,), type_=tuple)
+        parameter_options.declare('units', default=None, type_=string_types)
 
         parameter_options['name'] = name
         parameter_options['paths'] = paths
+        if np.isscalar(shape):
+            parameter_options['shape'] = (shape,)
+        elif isinstance(shape, Iterable):
+            parameter_options['shape'] = tuple(shape)
+        elif shape is not None:
+            raise ValueError('shape must be of type int or Iterable or None')
+        if units is not None:
+            parameter_options['units'] = units
 
         self._parameters[name] = parameter_options

@@ -1,0 +1,65 @@
+import numpy as np
+from six import iteritems
+import scipy.sparse
+
+from openmdao.api import ExplicitComponent
+
+from ozone.utils.var_names import get_name
+from ozone.utils.units import get_rate_units
+from ozone.utils.sparse_linear_spline import get_sparse_linear_spline
+
+
+class ParameterComp(ExplicitComponent):
+
+    def initialize(self):
+        self.metadata.declare('parameters', type_=dict, required=True)
+        self.metadata.declare('times', type_=np.ndarray, required=True)
+        self.metadata.declare('parameter_times', type_=np.ndarray, required=True)
+
+    def setup(self):
+        times = self.metadata['times']
+        parameter_times = self.metadata['parameter_times']
+
+        num_times = len(times)
+        num_parameter_times = len(parameter_times)
+
+        data0, rows0, cols0 = get_sparse_linear_spline(times, parameter_times)
+        nnz = len(data0)
+
+        self.mtx = scipy.sparse.csc_matrix((data0, (rows0, cols0)),
+            shape=(num_parameter_times, num_times))
+
+        for parameter_name, parameter in iteritems(self.metadata['parameters']):
+            size = np.prod(parameter['shape'])
+            shape = parameter['shape']
+
+            in_name = get_name('in', parameter_name)
+            out_name = get_name('out', parameter_name)
+
+            self.add_input(in_name,
+                shape=(num_times,) + shape,
+                units=parameter['units'])
+
+            self.add_output(out_name,
+                shape=(num_parameter_times,) + shape,
+                units=parameter['units'])
+
+            # (num_parameter_times, num_out,) + shape
+            data = np.einsum('i,...->i...', data0, np.ones(shape)).flatten()
+            rows = (
+                np.einsum('i,...->i...', rows0, size * np.ones(shape, int))
+                + np.einsum('i,...->i...', np.ones(nnz, int), np.arange(size).reshape(shape))
+            ).flatten()
+            cols = (
+                np.einsum('i,...->i...', cols0, size * np.ones(shape, int))
+                + np.einsum('i,...->i...', np.ones(nnz, int), np.arange(size).reshape(shape))
+            ).flatten()
+
+            self.declare_partials(out_name, in_name, val=data, rows=rows, cols=cols)
+
+    def compute(self, inputs, outputs):
+        for parameter_name, parameter in iteritems(self.metadata['parameters']):
+            in_name = get_name('in', parameter_name)
+            out_name = get_name('out', parameter_name)
+
+            outputs[out_name] = self.mtx.dot(inputs[in_name])

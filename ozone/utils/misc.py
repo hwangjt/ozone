@@ -1,7 +1,55 @@
+import numpy as np
+from six import iteritems
+
 from ozone.schemes.runge_kutta import ForwardEuler, BackwardEuler, ExplicitMidpoint, \
     ImplicitMidpoint, KuttaThirdOrder, RK4, RalstonsMethod, HeunsMethod, RK4ST, GaussLegendre, \
     LobattoIIIA, Radau, TrapezoidalRule
 from ozone.schemes.multistep import AdamsPEC, AdamsPECE, AB, AM, ABalt, AMalt, BDF
+
+
+def ODEIntegrator(ode_function, integrator_name, scheme_name, **kwargs):
+    scheme = get_scheme(scheme_name)
+    explicit = scheme.explicit
+    integrator_class = get_integrator(integrator_name, explicit)
+
+    # Ensure that all initial_conditions are valid
+    if 'initial_conditions' in kwargs:
+        initial_conditions = kwargs['initial_conditions']
+        for state_name, value in iteritems(initial_conditions):
+            assert state_name in ode_function._states, \
+                'State name %s is not valid in the initial conditions' % state_name
+
+            if np.isscalar(value):
+                assert ode_function._states[state_name]['shape'] == (1,), \
+                    'The initial condition for state %s has the wrong shape' % state_name
+            else:
+                assert ode_function._states[state_name]['shape'] == value.shape, \
+                    'The initial condition for state %s has the wrong shape' % state_name
+
+    # Ensure that all parameters are valid
+    if 'parameters' in kwargs:
+        if 'times' in kwargs:
+            num_time_steps = len(kwargs['times'])
+        elif 'time_spacing' in kwargs:
+            num_time_steps = len(kwargs['time_spacing'])
+
+        parameters = kwargs['parameters']
+        for parameter_name, value in iteritems(parameters):
+            assert parameter_name in ode_function._parameters, \
+                'Parameter name %s is not valid' % parameter_name
+
+            if not isinstance(value, np.ndarray) or np.isscalar(value):
+                raise ValueError('Parameter %s should be an array' % parameter_name)
+
+            if value.shape[0] != num_time_steps:
+                raise ValueError('Parameter %s has the wrong shape' % parameter_name)
+
+    if integrator_name == 'SAND' or integrator_name == 'MDF':
+        kwargs['formulation'] = integrator_name
+
+    integrator = integrator_class(ode_function=ode_function, scheme=scheme, **kwargs)
+
+    return integrator
 
 
 def _get_class(name, classes, label):

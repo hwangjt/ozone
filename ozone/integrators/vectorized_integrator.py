@@ -37,6 +37,8 @@ class VectorizedIntegrator(Integrator):
         states, time_units, starting_times, my_times = self._get_meta()
         glm_A, glm_B, glm_U, glm_V, num_stages, num_step_vars = self._get_scheme()
 
+        parameters = ode_function._parameters
+
         num_time_steps = len(my_times)
 
         if formulation == 'SAND':
@@ -54,6 +56,11 @@ class VectorizedIntegrator(Integrator):
             'time_comp.abscissa_times',
             ['.'.join(('coupled_group.ode_comp', t)) for t in ode_function._time_options['paths']],
         )
+        if len(parameters) > 1:
+            self._connect_states(
+                self._get_parameter_names('parameter_comp', 'out'),
+                self._get_parameter_names('coupled_group.ode_comp', 'paths'),
+            )
 
         comp = VectorizedStepComp(states=states, time_units=time_units,
             num_time_steps=num_time_steps, num_stages=num_stages, num_step_vars=num_step_vars,
