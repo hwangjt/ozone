@@ -24,7 +24,7 @@ scheme_name = 'ImplicitMidpoint'
 # scheme_name = 'BDF2'
 
 integrator_name = 'SAND'
-# integrator_name = 'MDF'
+integrator_name = 'MDF'
 # integrator_name = 'TM'
 
 # ode_function = LinearODEFunction()
@@ -62,7 +62,7 @@ for key in exact_soln:
         np.linalg.norm(prob['state:%s' % key][-1] - exact_soln[key]))
 print('Runtime (s):', time1 - time0)
 # print(prob['starting:y'])
-# view_model(prob)
+view_model(prob)
 
 import matplotlib.pyplot as plt
 plt.plot(prob['state:x'], prob['state:y'])
