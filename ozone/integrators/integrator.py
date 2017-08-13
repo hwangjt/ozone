@@ -151,7 +151,7 @@ class Integrator(Group):
 
         return names_list
 
-    def _connect_states(self, srcs_list, tgts_list, src_indices_list=None):
+    def _connect_multiple(self, srcs_list, tgts_list, src_indices_list=None):
         if src_indices_list is None:
             for srcs, tgts in zip(srcs_list, tgts_list):
                 self.connect(srcs, tgts)

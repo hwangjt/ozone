@@ -57,7 +57,7 @@ class ImplicitTMIntegrator(Integrator):
                         ((len(my_times) - 1, num_stages,) + shape))
                     src_indices = arange[i_step, :, :]
                     src_indices_list.append(src_indices)
-                self._connect_states(
+                self._connect_multiple(
                     self._get_parameter_names('parameter_comp', 'out'),
                     self._get_parameter_names(group_new_name + '.ode_comp', 'paths'),
                     src_indices_list,
@@ -79,36 +79,36 @@ class ImplicitTMIntegrator(Integrator):
             group.add_subsystem('step_comp', comp)
             self.connect('time_comp.h_vec', group_new_name + '.step_comp.h', src_indices=i_step)
 
-            self._connect_states(
+            self._connect_multiple(
                 self._get_names(group_new_name + '.ode_comp', 'rate_path'),
                 self._get_names(group_new_name + '.step_comp', 'F', i_step=i_step),
             )
 
-            self._connect_states(
+            self._connect_multiple(
                 self._get_names(group_new_name + '.ode_comp', 'rate_path'),
                 self._get_names(group_new_name + '.stage_comp', 'F', i_step=i_step),
             )
 
-            self._connect_states(
+            self._connect_multiple(
                 self._get_names(group_new_name + '.stage_comp', 'Y', i_step=i_step),
                 self._get_names(group_new_name + '.ode_comp', 'paths'),
             )
 
             if i_step == 0:
-                self._connect_states(
+                self._connect_multiple(
                     self._get_names('starting_system', 'starting'),
                     self._get_names(group_new_name + '.step_comp', 'y_old', i_step=i_step),
                 )
-                self._connect_states(
+                self._connect_multiple(
                     self._get_names('starting_system', 'starting'),
                     self._get_names(group_new_name + '.stage_comp', 'y_old', i_step=i_step),
                 )
             else:
-                self._connect_states(
+                self._connect_multiple(
                     self._get_names(group_old_name + '.step_comp', 'y_new', i_step=i_step - 1),
                     self._get_names(group_new_name + '.step_comp', 'y_old', i_step=i_step),
                 )
-                self._connect_states(
+                self._connect_multiple(
                     self._get_names(group_old_name + '.step_comp', 'y_new', i_step=i_step - 1),
                     self._get_names(group_new_name + '.stage_comp', 'y_old', i_step=i_step),
                 )
@@ -131,19 +131,19 @@ class ImplicitTMIntegrator(Integrator):
             starting_coeffs=starting_coeffs)
         self.add_subsystem('output_comp', comp, promotes_outputs=promotes_outputs)
         if has_starting_method:
-            self._connect_states(
+            self._connect_multiple(
                 self._get_names('starting_system', 'state'),
                 self._get_names('output_comp', 'starting_state'),
             )
 
         for i_step in range(len(my_times)):
             if i_step == 0:
-                self._connect_states(
+                self._connect_multiple(
                     self._get_names('starting_system', 'starting'),
                     self._get_names('output_comp', 'y', i_step=i_step),
                 )
             else:
-                self._connect_states(
+                self._connect_multiple(
                     self._get_names('step_%i' % (i_step - 1) + '.step_comp', 'y_new', i_step=i_step - 1),
                     self._get_names('output_comp', 'y', i_step=i_step),
                 )
