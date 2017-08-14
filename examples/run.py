@@ -25,7 +25,7 @@ scheme_name = 'ForwardEuler'
 # scheme_name = 'BDF2'
 
 integrator_name = 'SAND'
-integrator_name = 'MDF'
+# integrator_name = 'MDF'
 # integrator_name = 'TM'
 
 # ode_function = LinearODEFunction()
@@ -43,16 +43,14 @@ if integrator_name == 'SAND':
     prob.driver.options['tol'] = 1e-9
     prob.driver.options['disp'] = True
 
-    integrator.add_subsystem('dummy_comp1', IndepVarComp('x', val=1.0))
-    integrator.add_subsystem('dummy_comp2', ExecComp('y=x'))
-    integrator.connect('dummy_comp1.x', 'dummy_comp2.x')
-    integrator.add_objective('dummy_comp2.y')
+    integrator.add_subsystem('dummy_comp', IndepVarComp('dummy_var'))
+    integrator.add_objective('dummy_comp.dummy_var')
 
 prob.setup()
 time0 = time.time()
 prob.run_driver()
 time1 = time.time()
-prob.check_partials(compact_print=True)
+# prob.check_partials(compact_print=True)
 # prob.check_partials(compact_print=False)
 
 np.set_printoptions(precision=10)
