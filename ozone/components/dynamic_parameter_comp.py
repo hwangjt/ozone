@@ -9,10 +9,10 @@ from ozone.utils.units import get_rate_units
 from ozone.utils.sparse_linear_spline import get_sparse_linear_spline
 
 
-class ParameterComp(ExplicitComponent):
+class DynamicParameterComp(ExplicitComponent):
 
     def initialize(self):
-        self.metadata.declare('parameters', type_=dict, required=True)
+        self.metadata.declare('dynamic_parameters', type_=dict, required=True)
         self.metadata.declare('normalized_times', type_=np.ndarray, required=True)
         self.metadata.declare('stage_norm_times', type_=np.ndarray, required=True)
 
@@ -29,7 +29,7 @@ class ParameterComp(ExplicitComponent):
         self.mtx = scipy.sparse.csc_matrix((data0, (rows0, cols0)),
             shape=(num_stage_times, num_time_steps))
 
-        for parameter_name, parameter in iteritems(self.metadata['parameters']):
+        for parameter_name, parameter in iteritems(self.metadata['dynamic_parameters']):
             size = np.prod(parameter['shape'])
             shape = parameter['shape']
 
@@ -58,7 +58,7 @@ class ParameterComp(ExplicitComponent):
             self.declare_partials(out_name, in_name, val=data, rows=rows, cols=cols)
 
     def compute(self, inputs, outputs):
-        for parameter_name, parameter in iteritems(self.metadata['parameters']):
+        for parameter_name, parameter in iteritems(self.metadata['dynamic_parameters']):
             in_name = get_name('in', parameter_name)
             out_name = get_name('out', parameter_name)
 

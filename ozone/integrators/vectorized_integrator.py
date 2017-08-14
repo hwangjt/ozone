@@ -32,7 +32,7 @@ class VectorizedIntegrator(Integrator):
         is_starting_method = starting_coeffs is not None
 
         states = ode_function._states
-        parameters = ode_function._parameters
+        dynamic_parameters = ode_function._dynamic_parameters
         time_units = ode_function._time_options['units']
 
         starting_norm_times, my_norm_times = self._get_meta()
@@ -54,6 +54,13 @@ class VectorizedIntegrator(Integrator):
                     units=state['units'])
                 comp.add_design_var('Y:%s' % state_name)
             coupled_group.add_subsystem('desvars_comp', comp)
+        elif formulation == 'MDF':
+            comp = IndepVarComp()
+            for state_name, state in iteritems(states):
+                comp.add_output('Y:%s' % state_name, val=0.,
+                    shape=(num_time_steps - 1, num_stages,) + state['shape'],
+                    units=state['units'])
+            coupled_group.add_subsystem('dummy_comp', comp)
 
         comp = self._create_ode((num_time_steps - 1) * num_stages)
         coupled_group.add_subsystem('ode_comp', comp)
@@ -61,10 +68,10 @@ class VectorizedIntegrator(Integrator):
             'time_comp.stage_times',
             ['.'.join(('coupled_group.ode_comp', t)) for t in ode_function._time_options['paths']],
         )
-        if len(parameters) > 0:
+        if len(dynamic_parameters) > 0:
             self._connect_multiple(
-                self._get_parameter_names('parameter_comp', 'out'),
-                self._get_parameter_names('coupled_group.ode_comp', 'paths'),
+                self._get_dynamic_parameter_names('dynamic_parameter_comp', 'out'),
+                self._get_dynamic_parameter_names('coupled_group.ode_comp', 'paths'),
             )
 
         comp = VectorizedStepComp(states=states, time_units=time_units,
@@ -141,6 +148,10 @@ class VectorizedIntegrator(Integrator):
                 self._get_state_names('coupled_group.vectorized_stage_comp', 'Y_out'),
                 self._get_state_names('coupled_group.ode_comp', 'paths'),
                 src_indices_to_ode,
+            )
+            self._connect_multiple(
+                self._get_state_names('coupled_group.dummy_comp', 'Y'),
+                self._get_state_names('coupled_group.vectorized_stage_comp', 'Y_in'),
             )
         elif formulation == 'SAND':
             self._connect_multiple(

@@ -71,7 +71,7 @@ class CannonballODEFunction(ODEFunction):
         self.declare_state('y', rate_path='ydot', paths=[], units='m')
         self.declare_state('vx', rate_path='vxdot', paths=['vx'], units='m/s')
         self.declare_state('vy', rate_path='vydot', paths=['vy'], units='m/s')
-        self.declare_parameter('g', paths=['g'], units='m/s/s')
+        self.declare_dynamic_parameter('g', paths=['g'], units='m/s/s')
         self.declare_time(units='s')
 
     def compute_exact_soln(self, initial_conditions, t0, t):

@@ -3,7 +3,7 @@ from six import iteritems
 
 
 def ODEIntegrator(ode_function, integrator_name, scheme_name,
-        initial_conditions=None, parameters=None,
+        initial_conditions=None, dynamic_parameters=None,
         initial_time=None, final_time=None, normalized_times=None, times=None,
         **kwargs):
     scheme = get_scheme(scheme_name)
@@ -45,18 +45,18 @@ def ODEIntegrator(ode_function, integrator_name, scheme_name,
             initial_conditions[state_name] = np.atleast_1d(value)
 
     # ------------------------------------------------------------------------------------
-    # Ensure that all parameters are valid
-    if parameters is not None:
+    # Ensure that all dynamic parameters are valid
+    if dynamic_parameters is not None:
         num_time_steps = len(normalized_times)
 
-        for parameter_name, value in iteritems(parameters):
-            assert parameter_name in ode_function._parameters, \
+        for parameter_name, value in iteritems(dynamic_parameters):
+            assert parameter_name in ode_function._dynamic_parameters, \
                 'Parameter (%s) was not declared in ODEFunction' % parameter_name
 
             assert isinstance(value, np.ndarray), \
                 'Parameter %s must be an ndarray' % parameter_name
 
-            shape = ode_function._parameters[parameter_name]['shape']
+            shape = ode_function._dynamic_parameters[parameter_name]['shape']
             assert value.shape == (num_time_steps,) + shape, \
                 'Parameter %s has the wrong shape' % state_name
 
@@ -64,7 +64,7 @@ def ODEIntegrator(ode_function, integrator_name, scheme_name,
         kwargs['formulation'] = integrator_name
 
     integrator = integrator_class(ode_function=ode_function, scheme=scheme,
-        initial_conditions=initial_conditions, parameters=parameters,
+        initial_conditions=initial_conditions, dynamic_parameters=dynamic_parameters,
         initial_time=initial_time, final_time=final_time, normalized_times=normalized_times,
         all_norm_times=normalized_times,
         **kwargs)

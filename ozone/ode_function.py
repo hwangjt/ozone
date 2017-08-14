@@ -21,8 +21,8 @@ class ODEFunction(object):
         Options for the time or time-like variable.
     _states : dict of OptionsDictionary
         Dictionary of options dictionaries for each state.
-    _parameters : dict of OptionsDictionary
-        Dictionary of options dictionaries for each parameter.
+    _dynamic_parameters : dict of OptionsDictionary
+        Dictionary of options dictionaries for each dynamic parameter.
     """
 
     def __init__(self, **kwargs):
@@ -43,13 +43,13 @@ class ODEFunction(object):
 
         self._time_options = time_options
         self._states = {}
-        self._parameters = {}
+        self._dynamic_parameters = {}
 
         self.initialize(**kwargs)
 
     def initialize(self, **kwargs):
         """
-        Optional method that calls declare_time, declare_state, and/or declare_parameter.
+        Optional method that calls declare_time, declare_state, and/or declare_dynamic_parameter.
 
         Parameters
         ----------
@@ -143,7 +143,7 @@ class ODEFunction(object):
 
         self._states[name] = options
 
-    def declare_parameter(self, name, paths, shape=None, units=None):
+    def declare_dynamic_parameter(self, name, paths, shape=None, units=None):
         """
         Declare an input to the ODE.
 
@@ -160,8 +160,8 @@ class ODEFunction(object):
         units : str or None
             Units of the parameter.
         """
-        if name in self._parameters:
-            raise ValueError('Parameter {0} has already been declared.'.format(name))
+        if name in self._dynamic_parameters:
+            raise ValueError('Dynamic parameter {0} has already been declared.'.format(name))
 
         options = OptionsDictionary()
         options.declare('name', type_=string_types)
@@ -180,4 +180,4 @@ class ODEFunction(object):
         if units is not None:
             options['units'] = units
 
-        self._parameters[name] = options
+        self._dynamic_parameters[name] = options

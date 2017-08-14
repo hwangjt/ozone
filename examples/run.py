@@ -9,7 +9,7 @@ from ozone.tests.ode_functions.simple_ode import NonlinearODEFunction, LinearODE
 from ozone.tests.ode_functions.cannonball import CannonballODEFunction
 
 
-num = 5
+num = 50
 
 t0 = 0.
 t1 = 1.e-2
@@ -19,9 +19,9 @@ initial_conditions = {'x': 0., 'y': 0., 'vx': 0.1, 'vy': 0.}
 times = np.linspace(t0, t1, num)
 
 scheme_name = 'ForwardEuler'
-# scheme_name = 'RK4'
+scheme_name = 'RK4'
 # scheme_name = 'ImplicitMidpoint'
-# scheme_name = 'AM4'
+scheme_name = 'AB4'
 # scheme_name = 'BDF2'
 
 integrator_name = 'SAND'
@@ -33,7 +33,7 @@ ode_function = CannonballODEFunction()
 
 integrator = ODEIntegrator(ode_function, integrator_name, scheme_name,
     times=times, initial_conditions=initial_conditions,
-    parameters={'g': np.linspace(9.80665, 9.80665, num).reshape((num, 1))})
+    dynamic_parameters={'g': np.linspace(9.80665, 9.80665, num).reshape((num, 1))})
 
 prob = Problem(integrator)
 
