@@ -1,53 +1,73 @@
 import numpy as np
 from six import iteritems
 
-from ozone.schemes.runge_kutta import ForwardEuler, BackwardEuler, ExplicitMidpoint, \
-    ImplicitMidpoint, KuttaThirdOrder, RK4, RalstonsMethod, HeunsMethod, RK4ST, GaussLegendre, \
-    LobattoIIIA, Radau, TrapezoidalRule
-from ozone.schemes.multistep import AdamsPEC, AdamsPECE, AB, AM, ABalt, AMalt, BDF
 
-
-def ODEIntegrator(ode_function, integrator_name, scheme_name, **kwargs):
+def ODEIntegrator(ode_function, integrator_name, scheme_name,
+        initial_conditions=None, parameters=None,
+        initial_time=None, final_time=None, normalized_times=None, times=None,
+        **kwargs):
     scheme = get_scheme(scheme_name)
     explicit = scheme.explicit
     integrator_class = get_integrator(integrator_name, explicit)
 
+    # ------------------------------------------------------------------------------------
+    assert normalized_times is not None or times is not None, \
+        'Either normalized_times or times must be provided'
+
+    if normalized_times is not None:
+        assert isinstance(normalized_times, np.ndarray) and len(normalized_times) == 1, \
+            'normalized_times must be a 1-D array'
+
+    if times is not None:
+        assert isinstance(times, np.ndarray) and len(times.shape) == 1, \
+            'times must be a 1-D array'
+
+        assert initial_time is None and final_time is None and normalized_times is None, \
+            'If times is provided: initial_time, final_time, and normalized_times cannot be'
+
+        initial_time = times[0]
+        final_time = times[-1]
+        normalized_times = (times - times[0]) / (times[-1] - times[0])
+
+    # ------------------------------------------------------------------------------------
     # Ensure that all initial_conditions are valid
-    if 'initial_conditions' in kwargs:
-        initial_conditions = kwargs['initial_conditions']
+    if initial_conditions is not None:
         for state_name, value in iteritems(initial_conditions):
             assert state_name in ode_function._states, \
-                'State name %s is not valid in the initial conditions' % state_name
+                'Initial condition (%s) was not declared in ODEFunction' % state_name
 
-            if np.isscalar(value):
-                assert ode_function._states[state_name]['shape'] == (1,), \
-                    'The initial condition for state %s has the wrong shape' % state_name
-            else:
-                assert ode_function._states[state_name]['shape'] == value.shape, \
-                    'The initial condition for state %s has the wrong shape' % state_name
+            assert isinstance(value, np.ndarray) or np.isscalar(value), \
+                'The initial condition for state %s must be an ndarray or a scalar' % state_name
 
+            assert np.atleast_1d(value).shape == ode_function._states[state_name]['shape'], \
+                'The initial condition for state %s has the wrong shape' % state_name
+
+            initial_conditions[state_name] = np.atleast_1d(value)
+
+    # ------------------------------------------------------------------------------------
     # Ensure that all parameters are valid
-    if 'parameters' in kwargs:
-        if 'times' in kwargs:
-            num_time_steps = len(kwargs['times'])
-        elif 'time_spacing' in kwargs:
-            num_time_steps = len(kwargs['time_spacing'])
+    if parameters is not None:
+        num_time_steps = len(normalized_times)
 
-        parameters = kwargs['parameters']
         for parameter_name, value in iteritems(parameters):
             assert parameter_name in ode_function._parameters, \
-                'Parameter name %s is not valid' % parameter_name
+                'Parameter (%s) was not declared in ODEFunction' % parameter_name
 
-            if not isinstance(value, np.ndarray) or np.isscalar(value):
-                raise ValueError('Parameter %s should be an array' % parameter_name)
+            assert isinstance(value, np.ndarray), \
+                'Parameter %s must be an ndarray' % parameter_name
 
-            if value.shape[0] != num_time_steps:
-                raise ValueError('Parameter %s has the wrong shape' % parameter_name)
+            shape = ode_function._parameters[parameter_name]['shape']
+            assert value.shape == (num_time_steps,) + shape, \
+                'Parameter %s has the wrong shape' % state_name
 
     if integrator_name == 'SAND' or integrator_name == 'MDF':
         kwargs['formulation'] = integrator_name
 
-    integrator = integrator_class(ode_function=ode_function, scheme=scheme, **kwargs)
+    integrator = integrator_class(ode_function=ode_function, scheme=scheme,
+        initial_conditions=initial_conditions, parameters=parameters,
+        initial_time=initial_time, final_time=final_time, normalized_times=normalized_times,
+        all_norm_times=normalized_times,
+        **kwargs)
 
     return integrator
 
@@ -63,6 +83,11 @@ def _get_class(name, classes, label):
 
 
 def get_scheme(scheme_name):
+    from ozone.schemes.runge_kutta import ForwardEuler, BackwardEuler, ExplicitMidpoint, \
+        ImplicitMidpoint, KuttaThirdOrder, RK4, RalstonsMethod, HeunsMethod, RK4ST, GaussLegendre, \
+        LobattoIIIA, Radau, TrapezoidalRule
+    from ozone.schemes.multistep import AdamsPEC, AdamsPECE, AB, AM, ABalt, AMalt, BDF
+
     scheme_classes = {
         # First-order methods
         'ForwardEuler': ForwardEuler(),

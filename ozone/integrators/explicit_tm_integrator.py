@@ -19,22 +19,31 @@ class ExplicitTMIntegrator(Integrator):
     def setup(self):
         super(ExplicitTMIntegrator, self).setup()
 
-        states, time_units, starting_times, my_times = self._get_meta()
+        ode_function = self.metadata['ode_function']
         scheme = self.metadata['scheme']
-        glm_A = scheme.A
-        glm_B = scheme.B
-        glm_U = scheme.U
-        glm_V = scheme.V
-        num_stages = scheme.num_stages
-        num_step_vars = scheme.num_values
         starting_coeffs = self.metadata['starting_coeffs']
-        ode_function =  self.metadata['ode_function']
-        parameters = ode_function._parameters
 
         has_starting_method = scheme.starting_method is not None
         is_starting_method = starting_coeffs is not None
 
-        for i_step in range(len(my_times) - 1):
+        states = ode_function._states
+        parameters = ode_function._parameters
+        time_units = ode_function._time_options['units']
+
+        starting_norm_times, my_norm_times = self._get_meta()
+
+        glm_A, glm_B, glm_U, glm_V, num_stages, num_step_vars = self._get_scheme()
+
+        num_time_steps = len(my_norm_times)
+        num_stages = scheme.num_stages
+        num_step_vars = scheme.num_values
+
+        glm_A = scheme.A
+        glm_B = scheme.B
+        glm_U = scheme.U
+        glm_V = scheme.V
+
+        for i_step in range(len(my_norm_times) - 1):
 
             step_comp_old_name = 'step_comp_%i' % (i_step - 1)
             step_comp_new_name = 'step_comp_%i' % (i_step)
@@ -43,7 +52,7 @@ class ExplicitTMIntegrator(Integrator):
                 stage_comp_name = 'stage_comp_%i_%i' % (i_step, i_stage)
                 ode_comp_name = 'ode_comp_%i_%i' % (i_step, i_stage)
 
-                self.connect('time_comp.abscissa_times',
+                self.connect('time_comp.stage_times',
                              ['.'.join((ode_comp_name, t)) for t in
                               ode_function._time_options['paths']],
                              src_indices=i_step * (num_stages) + i_stage
@@ -60,25 +69,25 @@ class ExplicitTMIntegrator(Integrator):
                 for j_stage in range(i_stage):
                     ode_comp_tmp_name = 'ode_comp_%i_%i' % (i_step, j_stage)
                     self._connect_multiple(
-                        self._get_names(ode_comp_tmp_name, 'rate_path'),
-                        self._get_names(stage_comp_name, 'F', i_step=i_step, i_stage=i_stage, j_stage=j_stage),
+                        self._get_state_names(ode_comp_tmp_name, 'rate_path'),
+                        self._get_state_names(stage_comp_name, 'F', i_step=i_step, i_stage=i_stage, j_stage=j_stage),
                     )
 
                 comp = self._create_ode(1)
                 self.add_subsystem(ode_comp_name, comp)
                 self._connect_multiple(
-                    self._get_names(stage_comp_name, 'Y', i_step=i_step, i_stage=i_stage),
-                    self._get_names(ode_comp_name, 'paths'),
+                    self._get_state_names(stage_comp_name, 'Y', i_step=i_step, i_stage=i_stage),
+                    self._get_state_names(ode_comp_name, 'paths'),
                 )
 
-                if len(parameters) > 1:
+                if len(parameters) > 0:
                     src_indices_list = []
                     for parameter_name, value in iteritems(parameters):
                         size = np.prod(value['shape'])
                         shape = value['shape']
 
-                        arange = np.arange(((len(my_times) - 1) * num_stages * size)).reshape(
-                            ((len(my_times) - 1, num_stages,) + shape))
+                        arange = np.arange(((len(my_norm_times) - 1) * num_stages * size)).reshape(
+                            ((len(my_norm_times) - 1, num_stages,) + shape))
                         src_indices = arange[i_step, i_stage, :]
                         src_indices_list.append(src_indices)
                     self._connect_multiple(
@@ -97,31 +106,31 @@ class ExplicitTMIntegrator(Integrator):
             for j_stage in range(num_stages):
                 ode_comp_tmp_name = 'ode_comp_%i_%i' % (i_step, j_stage)
                 self._connect_multiple(
-                    self._get_names(ode_comp_tmp_name, 'rate_path'),
-                    self._get_names(step_comp_new_name, 'F', i_step=i_step, j_stage=j_stage),
+                    self._get_state_names(ode_comp_tmp_name, 'rate_path'),
+                    self._get_state_names(step_comp_new_name, 'F', i_step=i_step, j_stage=j_stage),
                 )
 
             if i_step == 0:
                 self._connect_multiple(
-                    self._get_names('starting_system', 'starting'),
-                    self._get_names(step_comp_new_name, 'y_old', i_step=i_step),
+                    self._get_state_names('starting_system', 'starting'),
+                    self._get_state_names(step_comp_new_name, 'y_old', i_step=i_step),
                 )
                 for i_stage in range(num_stages):
                     stage_comp_name = 'stage_comp_%i_%i' % (i_step, i_stage)
                     self._connect_multiple(
-                        self._get_names('starting_system', 'starting'),
-                        self._get_names(stage_comp_name, 'y_old', i_step=i_step, i_stage=i_stage),
+                        self._get_state_names('starting_system', 'starting'),
+                        self._get_state_names(stage_comp_name, 'y_old', i_step=i_step, i_stage=i_stage),
                     )
             else:
                 self._connect_multiple(
-                    self._get_names(step_comp_old_name, 'y_new', i_step=i_step - 1),
-                    self._get_names(step_comp_new_name, 'y_old', i_step=i_step),
+                    self._get_state_names(step_comp_old_name, 'y_new', i_step=i_step - 1),
+                    self._get_state_names(step_comp_new_name, 'y_old', i_step=i_step),
                 )
                 for i_stage in range(num_stages):
                     stage_comp_name = 'stage_comp_%i_%i' % (i_step, i_stage)
                     self._connect_multiple(
-                        self._get_names(step_comp_old_name, 'y_new', i_step=i_step - 1),
-                        self._get_names(stage_comp_name, 'y_old', i_step=i_step, i_stage=i_stage),
+                        self._get_state_names(step_comp_old_name, 'y_new', i_step=i_step - 1),
+                        self._get_state_names(stage_comp_name, 'y_old', i_step=i_step, i_stage=i_stage),
                     )
 
         promotes_outputs = []
@@ -133,24 +142,24 @@ class ExplicitTMIntegrator(Integrator):
                 promotes_outputs.append(starting_name)
 
         comp = TMOutputComp(
-            states=states, num_starting_time_steps=len(starting_times),
-            num_my_time_steps=len(my_times), num_step_vars=num_step_vars,
+            states=states, num_starting_time_steps=len(starting_norm_times),
+            num_my_time_steps=len(my_norm_times), num_step_vars=num_step_vars,
             starting_coeffs=starting_coeffs)
         self.add_subsystem('output_comp', comp, promotes_outputs=promotes_outputs)
         if has_starting_method:
             self._connect_multiple(
-                self._get_names('starting_system', 'state'),
-                self._get_names('output_comp', 'starting_state'),
+                self._get_state_names('starting_system', 'state'),
+                self._get_state_names('output_comp', 'starting_state'),
             )
 
-        for i_step in range(len(my_times)):
+        for i_step in range(len(my_norm_times)):
             if i_step == 0:
                 self._connect_multiple(
-                    self._get_names('starting_system', 'starting'),
-                    self._get_names('output_comp', 'y', i_step=i_step),
+                    self._get_state_names('starting_system', 'starting'),
+                    self._get_state_names('output_comp', 'y', i_step=i_step),
                 )
             else:
                 self._connect_multiple(
-                    self._get_names('step_comp_%i' % (i_step - 1), 'y_new', i_step=i_step - 1),
-                    self._get_names('output_comp', 'y', i_step=i_step),
+                    self._get_state_names('step_comp_%i' % (i_step - 1), 'y_new', i_step=i_step - 1),
+                    self._get_state_names('output_comp', 'y', i_step=i_step),
                 )

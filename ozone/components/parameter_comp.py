@@ -13,21 +13,21 @@ class ParameterComp(ExplicitComponent):
 
     def initialize(self):
         self.metadata.declare('parameters', type_=dict, required=True)
-        self.metadata.declare('times', type_=np.ndarray, required=True)
-        self.metadata.declare('parameter_times', type_=np.ndarray, required=True)
+        self.metadata.declare('normalized_times', type_=np.ndarray, required=True)
+        self.metadata.declare('stage_norm_times', type_=np.ndarray, required=True)
 
     def setup(self):
-        times = self.metadata['times']
-        parameter_times = self.metadata['parameter_times']
+        normalized_times = self.metadata['normalized_times']
+        stage_norm_times = self.metadata['stage_norm_times']
 
-        num_times = len(times)
-        num_parameter_times = len(parameter_times)
+        num_time_steps = len(normalized_times)
+        num_stage_times = len(stage_norm_times)
 
-        data0, rows0, cols0 = get_sparse_linear_spline(times, parameter_times)
+        data0, rows0, cols0 = get_sparse_linear_spline(normalized_times, stage_norm_times)
         nnz = len(data0)
 
         self.mtx = scipy.sparse.csc_matrix((data0, (rows0, cols0)),
-            shape=(num_parameter_times, num_times))
+            shape=(num_stage_times, num_time_steps))
 
         for parameter_name, parameter in iteritems(self.metadata['parameters']):
             size = np.prod(parameter['shape'])
@@ -37,14 +37,14 @@ class ParameterComp(ExplicitComponent):
             out_name = get_name('out', parameter_name)
 
             self.add_input(in_name,
-                shape=(num_times,) + shape,
+                shape=(num_time_steps,) + shape,
                 units=parameter['units'])
 
             self.add_output(out_name,
-                shape=(num_parameter_times,) + shape,
+                shape=(num_stage_times,) + shape,
                 units=parameter['units'])
 
-            # (num_parameter_times, num_out,) + shape
+            # (num_stage_times, num_out,) + shape
             data = np.einsum('i,...->i...', data0, np.ones(shape)).flatten()
             rows = (
                 np.einsum('i,...->i...', rows0, size * np.ones(shape, int))

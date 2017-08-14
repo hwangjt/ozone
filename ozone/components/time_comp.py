@@ -11,55 +11,38 @@ class TimeComp(ExplicitComponent):
 
     def initialize(self):
         self.metadata.declare('time_units', type_=(str, type(None)), required=True)
-        self.metadata.declare('glm_abscissa', type_=np.ndarray, required=True)
-        self.metadata.declare('num_time_steps', type_=int, required=True)
+        self.metadata.declare('normalized_times', type_=np.ndarray, required=True)
+        self.metadata.declare('stage_norm_times', type_=np.ndarray, required=True)
 
     def setup(self):
         time_units = self.metadata['time_units']
-        abscissa = self.metadata['glm_abscissa']
-        num_time_steps = self.metadata['num_time_steps']
-        num_abscissa = len(abscissa)
+        normalized_times = self.metadata['normalized_times']
+        stage_norm_times = self.metadata['stage_norm_times']
+
+        num_time_steps = len(normalized_times)
+        num_stage_times = len(stage_norm_times)
         num_h_vec = num_time_steps - 1
 
-        self.add_input('times', shape=num_time_steps, units=time_units)
+        self.add_input('initial_time', units=time_units)
+        self.add_input('final_time', units=time_units)
         self.add_output('h_vec', shape=num_h_vec, units=time_units)
-        self.add_output('abscissa_times', shape=num_h_vec * num_abscissa)
+        self.add_output('stage_times', shape=num_stage_times, units=time_units)
 
-        arange_h = np.arange(num_h_vec)
+        self.declare_partials('h_vec', 'initial_time',
+            val=normalized_times[:-1] - normalized_times[1:])
+        self.declare_partials('h_vec', 'final_time',
+            val=normalized_times[1:] - normalized_times[:-1])
 
-        data1 = np.ones(num_h_vec)
-        rows1 = arange_h
-        cols1 = arange_h + 1
-
-        data2 = -np.ones(num_h_vec)
-        rows2 = arange_h
-        cols2 = arange_h
-
-        data = np.concatenate([data1, data2])
-        rows = np.concatenate([rows1, rows2])
-        cols = np.concatenate([cols1, cols2])
-
-        self.declare_partials('h_vec', 'times', val=data, rows=rows, cols=cols)
-
-        arange_a = np.arange(num_h_vec * num_abscissa)
-
-        data1 = np.tile(abscissa, num_h_vec)
-        rows1 = arange_a
-        cols1 = np.repeat(arange_h, num_abscissa) + 1
-
-        data2 = np.tile(1 - abscissa, num_h_vec)
-        rows2 = arange_a
-        cols2 = np.repeat(arange_h, num_abscissa)
-
-        data = np.concatenate([data1, data2])
-        rows = np.concatenate([rows1, rows2])
-        cols = np.concatenate([cols1, cols2])
-
-        self.declare_partials('abscissa_times', 'times', val=data, rows=rows, cols=cols)
+        val = stage_norm_times
+        self.declare_partials('stage_times', 'initial_time', val=np.array(1 - stage_norm_times))
+        self.declare_partials('stage_times', 'final_time', val=np.array(stage_norm_times))
 
     def compute(self, inputs, outputs):
-        abscissa = self.metadata['glm_abscissa']
+        normalized_times = self.metadata['normalized_times']
+        stage_norm_times = self.metadata['stage_norm_times']
 
-        outputs['h_vec'] = h_vec = inputs['times'][1:] - inputs['times'][:-1]
-        outputs['abscissa_times'] = (inputs['times'][:-1, np.newaxis]
-            + np.outer(h_vec, abscissa)).ravel()
+        t0 = inputs['initial_time']
+        t1 = inputs['final_time']
+
+        outputs['h_vec'] = (normalized_times[1:] - normalized_times[:-1]) * (t1 - t0)
+        outputs['stage_times'] = t0 + stage_norm_times * (t1 - t0)
