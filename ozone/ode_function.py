@@ -21,6 +21,8 @@ class ODEFunction(object):
         Options for the time or time-like variable.
     _states : dict of OptionsDictionary
         Dictionary of options dictionaries for each state.
+    _static_parameters : dict of OptionsDictionary
+        Dictionary of options dictionaries for each static parameter.
     _dynamic_parameters : dict of OptionsDictionary
         Dictionary of options dictionaries for each dynamic parameter.
     """
@@ -43,6 +45,7 @@ class ODEFunction(object):
 
         self._time_options = time_options
         self._states = {}
+        self._static_parameters = {}
         self._dynamic_parameters = {}
 
         self.initialize(**kwargs)
@@ -142,6 +145,45 @@ class ODEFunction(object):
             options['units'] = units
 
         self._states[name] = options
+
+    def declare_static_parameter(self, name, paths, shape=None, units=None):
+        """
+        Declare an input to the ODE.
+
+        Parameters
+        ----------
+        name : str
+            The name of the state variable as seen by the driver. This variable will
+            exist as an interface to the ODE.
+        paths : string_types or Iterable or None
+            Paths to inputs in the ODE to which the incoming value of the state variable
+            needs to be connected.
+        shape : int or tuple or None
+            Shape of the parameter.
+        units : str or None
+            Units of the parameter.
+        """
+        if name in self._static_parameters:
+            raise ValueError('static parameter {0} has already been declared.'.format(name))
+
+        options = OptionsDictionary()
+        options.declare('name', type_=string_types)
+        options.declare('paths', default=[], type_=Iterable)
+        options.declare('shape', default=(1,), type_=tuple)
+        options.declare('units', default=None, type_=string_types)
+
+        options['name'] = name
+        options['paths'] = paths
+        if np.isscalar(shape):
+            options['shape'] = (shape,)
+        elif isinstance(shape, Iterable):
+            options['shape'] = tuple(shape)
+        elif shape is not None:
+            raise ValueError('shape must be of type int or Iterable or None')
+        if units is not None:
+            options['units'] = units
+
+        self._static_parameters[name] = options
 
     def declare_dynamic_parameter(self, name, paths, shape=None, units=None):
         """

@@ -32,6 +32,7 @@ class VectorizedIntegrator(Integrator):
         is_starting_method = starting_coeffs is not None
 
         states = ode_function._states
+        static_parameters = ode_function._static_parameters
         dynamic_parameters = ode_function._dynamic_parameters
         time_units = ode_function._time_options['units']
 
@@ -68,6 +69,11 @@ class VectorizedIntegrator(Integrator):
             'time_comp.stage_times',
             ['.'.join(('coupled_group.ode_comp', t)) for t in ode_function._time_options['paths']],
         )
+        if len(static_parameters) > 0:
+            self._connect_multiple(
+                self._get_static_parameter_names('static_parameter_comp', 'out'),
+                self._get_static_parameter_names('coupled_group.ode_comp', 'paths'),
+            )
         if len(dynamic_parameters) > 0:
             self._connect_multiple(
                 self._get_dynamic_parameter_names('dynamic_parameter_comp', 'out'),

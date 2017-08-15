@@ -27,6 +27,7 @@ class ExplicitTMIntegrator(Integrator):
         is_starting_method = starting_coeffs is not None
 
         states = ode_function._states
+        static_parameters = ode_function._static_parameters
         dynamic_parameters = ode_function._dynamic_parameters
         time_units = ode_function._time_options['units']
 
@@ -80,6 +81,11 @@ class ExplicitTMIntegrator(Integrator):
                     self._get_state_names(ode_comp_name, 'paths'),
                 )
 
+                if len(static_parameters) > 0:
+                    self._connect_multiple(
+                        self._get_static_parameter_names('static_parameter_comp', 'out'),
+                        self._get_static_parameter_names(ode_comp_name, 'paths'),
+                    )
                 if len(dynamic_parameters) > 0:
                     src_indices_list = []
                     for parameter_name, value in iteritems(dynamic_parameters):

@@ -7,6 +7,7 @@ from six import iteritems
 import ozone.schemes.scheme as schemes
 from ozone.components.time_comp import TimeComp
 from ozone.components.starting_comp import StartingComp
+from ozone.components.static_parameter_comp import StaticParameterComp
 from ozone.components.dynamic_parameter_comp import DynamicParameterComp
 from ozone.schemes.scheme import GLMScheme
 from ozone.schemes.runge_kutta import RK4
@@ -26,7 +27,9 @@ class Integrator(Group):
         self.metadata.declare('starting_coeffs', type_=(np.ndarray, type(None)))
 
         self.metadata.declare('initial_conditions', type_=(dict, type(None)))
+        self.metadata.declare('static_parameters', type_=(dict, type(None)))
         self.metadata.declare('dynamic_parameters', type_=(dict, type(None)))
+
         self.metadata.declare('initial_time')
         self.metadata.declare('final_time')
         self.metadata.declare('normalized_times', type_=np.ndarray, required=True)
@@ -38,7 +41,9 @@ class Integrator(Group):
         starting_coeffs = self.metadata['starting_coeffs']
 
         initial_conditions = self.metadata['initial_conditions']
+        given_static_parameters = self.metadata['static_parameters']
         given_dynamic_parameters = self.metadata['dynamic_parameters']
+
         initial_time = self.metadata['initial_time']
         final_time = self.metadata['final_time']
 
@@ -48,6 +53,7 @@ class Integrator(Group):
         is_starting_method = starting_coeffs is not None
 
         states = ode_function._states
+        static_parameters = ode_function._static_parameters
         dynamic_parameters = ode_function._dynamic_parameters
         time_units = ode_function._time_options['units']
 
@@ -71,7 +77,8 @@ class Integrator(Group):
 
         # ------------------------------------------------------------------------------------
         # inputs
-        if initial_conditions is not None or given_dynamic_parameters is not None \
+        if initial_conditions is not None \
+                or given_static_parameters is not None or given_dynamic_parameters is not None \
                 or initial_time is not None or final_time is not None:
             comp = IndepVarComp()
             promotes = []
@@ -83,6 +90,15 @@ class Integrator(Group):
                 state = ode_function._states[state_name]
 
                 comp.add_output(name, val=value, units=state['units'])
+                promotes.append(name)
+
+        # Given static_parameters
+        if given_static_parameters is not None:
+            for parameter_name, value in iteritems(given_static_parameters):
+                name = get_name('static_parameter', parameter_name)
+                parameter = ode_function._static_parameters[parameter_name]
+
+                comp.add_output(name, val=value, units=parameter['units'])
                 promotes.append(name)
 
         # Given dynamic_parameters
@@ -104,7 +120,8 @@ class Integrator(Group):
             comp.add_output('final_time', val=final_time, units=time_units)
             promotes.append('final_time')
 
-        if initial_conditions is not None or given_dynamic_parameters is not None \
+        if initial_conditions is not None \
+                or given_static_parameters is not None or given_dynamic_parameters is not None \
                 or initial_time is not None or final_time is not None:
             self.add_subsystem('inputs', comp, promotes_outputs=promotes)
 
@@ -113,6 +130,16 @@ class Integrator(Group):
         comp = TimeComp(time_units=time_units,
             normalized_times=my_norm_times, stage_norm_times=stage_norm_times)
         self.add_subsystem('time_comp', comp, promotes_inputs=['initial_time', 'final_time'])
+
+        # ------------------------------------------------------------------------------------
+        # Static parameter comp
+        if len(static_parameters) > 0:
+            promotes = [
+                (get_name('in', parameter_name), get_name('static_parameter', parameter_name))
+                for parameter_name in static_parameters]
+            self.add_subsystem('static_parameter_comp',
+                StaticParameterComp(static_parameters=static_parameters),
+                promotes_inputs=promotes)
 
         # ------------------------------------------------------------------------------------
         # Dynamic parameter comp
@@ -154,6 +181,10 @@ class Integrator(Group):
         return self._get_names('states',
             comp, type_, i_step=i_step, i_stage=i_stage, j_stage=j_stage)
 
+    def _get_static_parameter_names(self, comp, type_, i_step=None, i_stage=None, j_stage=None):
+        return self._get_names('static_parameters',
+            comp, type_, i_step=i_step, i_stage=i_stage, j_stage=j_stage)
+
     def _get_dynamic_parameter_names(self, comp, type_, i_step=None, i_stage=None, j_stage=None):
         return self._get_names('dynamic_parameters',
             comp, type_, i_step=i_step, i_stage=i_stage, j_stage=j_stage)
@@ -161,6 +192,8 @@ class Integrator(Group):
     def _get_names(self, variable_type, comp, type_, i_step=None, i_stage=None, j_stage=None):
         if variable_type == 'states':
             variables_dict = self.metadata['ode_function']._states
+        elif variable_type == 'static_parameters':
+            variables_dict = self.metadata['ode_function']._static_parameters
         elif variable_type == 'dynamic_parameters':
             variables_dict = self.metadata['ode_function']._dynamic_parameters
 

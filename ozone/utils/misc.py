@@ -3,7 +3,7 @@ from six import iteritems
 
 
 def ODEIntegrator(ode_function, integrator_name, scheme_name,
-        initial_conditions=None, dynamic_parameters=None,
+        initial_conditions=None, static_parameters=None, dynamic_parameters=None,
         initial_time=None, final_time=None, normalized_times=None, times=None,
         **kwargs):
     scheme = get_scheme(scheme_name)
@@ -11,6 +11,7 @@ def ODEIntegrator(ode_function, integrator_name, scheme_name,
     integrator_class = get_integrator(integrator_name, explicit)
 
     # ------------------------------------------------------------------------------------
+    # time-related option
     assert normalized_times is not None or times is not None, \
         'Either normalized_times or times must be provided'
 
@@ -45,26 +46,45 @@ def ODEIntegrator(ode_function, integrator_name, scheme_name,
             initial_conditions[state_name] = np.atleast_1d(value)
 
     # ------------------------------------------------------------------------------------
+    # Ensure that all static parameters are valid
+    if static_parameters is not None:
+        for parameter_name, value in iteritems(static_parameters):
+            assert parameter_name in ode_function._static_parameters, \
+                'Static parameter (%s) was not declared in ODEFunction' % parameter_name
+
+            assert isinstance(value, np.ndarray) or np.isscalar(value), \
+                'Static parameter (%s) must be an ndarray or a scalar' % parameter_name
+
+            shape = ode_function._static_parameters[parameter_name]['shape']
+            assert np.atleast_1d(value).shape == shape, \
+                'Static parameter (%s) has the wrong shape' % parameter_name
+
+            static_parameters[parameter_name] = np.atleast_1d(value)
+
+    # ------------------------------------------------------------------------------------
     # Ensure that all dynamic parameters are valid
     if dynamic_parameters is not None:
         num_time_steps = len(normalized_times)
 
         for parameter_name, value in iteritems(dynamic_parameters):
             assert parameter_name in ode_function._dynamic_parameters, \
-                'Parameter (%s) was not declared in ODEFunction' % parameter_name
+                'Dynamic parameter (%s) was not declared in ODEFunction' % parameter_name
 
             assert isinstance(value, np.ndarray), \
-                'Parameter %s must be an ndarray' % parameter_name
+                'Dynamic parameter %s must be an ndarray' % parameter_name
 
             shape = ode_function._dynamic_parameters[parameter_name]['shape']
             assert value.shape == (num_time_steps,) + shape, \
-                'Parameter %s has the wrong shape' % state_name
+                'Dynamic parameter %s has the wrong shape' % state_name
+
+    # ------------------------------------------------------------------------------------
 
     if integrator_name == 'SAND' or integrator_name == 'MDF':
         kwargs['formulation'] = integrator_name
 
     integrator = integrator_class(ode_function=ode_function, scheme=scheme,
-        initial_conditions=initial_conditions, dynamic_parameters=dynamic_parameters,
+        initial_conditions=initial_conditions,
+        static_parameters=static_parameters, dynamic_parameters=dynamic_parameters,
         initial_time=initial_time, final_time=final_time, normalized_times=normalized_times,
         all_norm_times=normalized_times,
         **kwargs)
