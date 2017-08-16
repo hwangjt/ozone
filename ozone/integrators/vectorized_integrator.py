@@ -44,8 +44,8 @@ class VectorizedIntegrator(Integrator):
 
         # ------------------------------------------------------------------------------------
 
-        coupled_group = Group()
-        self.add_subsystem('coupled_group', coupled_group)
+        integration_group = Group()
+        self.add_subsystem('integration_group', integration_group)
 
         if formulation == 'SAND':
             comp = IndepVarComp()
@@ -54,49 +54,49 @@ class VectorizedIntegrator(Integrator):
                     shape=(num_time_steps - 1, num_stages,) + state['shape'],
                     units=state['units'])
                 comp.add_design_var('Y:%s' % state_name)
-            coupled_group.add_subsystem('desvars_comp', comp)
+            integration_group.add_subsystem('desvars_comp', comp)
         elif formulation == 'MDF':
             comp = IndepVarComp()
             for state_name, state in iteritems(states):
                 comp.add_output('Y:%s' % state_name, val=0.,
                     shape=(num_time_steps - 1, num_stages,) + state['shape'],
                     units=state['units'])
-            coupled_group.add_subsystem('dummy_comp', comp)
+            integration_group.add_subsystem('dummy_comp', comp)
 
         comp = self._create_ode((num_time_steps - 1) * num_stages)
-        coupled_group.add_subsystem('ode_comp', comp)
+        integration_group.add_subsystem('ode_comp', comp)
         self.connect(
             'time_comp.stage_times',
-            ['.'.join(('coupled_group.ode_comp', t)) for t in ode_function._time_options['paths']],
+            ['.'.join(('integration_group.ode_comp', t)) for t in ode_function._time_options['paths']],
         )
         if len(static_parameters) > 0:
             self._connect_multiple(
                 self._get_static_parameter_names('static_parameter_comp', 'out'),
-                self._get_static_parameter_names('coupled_group.ode_comp', 'paths'),
+                self._get_static_parameter_names('integration_group.ode_comp', 'paths'),
             )
         if len(dynamic_parameters) > 0:
             self._connect_multiple(
                 self._get_dynamic_parameter_names('dynamic_parameter_comp', 'out'),
-                self._get_dynamic_parameter_names('coupled_group.ode_comp', 'paths'),
+                self._get_dynamic_parameter_names('integration_group.ode_comp', 'paths'),
             )
 
         comp = VectorizedStepComp(states=states, time_units=time_units,
             num_time_steps=num_time_steps, num_stages=num_stages, num_step_vars=num_step_vars,
             glm_B=glm_B, glm_V=glm_V,
         )
-        coupled_group.add_subsystem('vectorized_step_comp', comp)
-        self.connect('time_comp.h_vec', 'coupled_group.vectorized_step_comp.h_vec')
+        integration_group.add_subsystem('vectorized_step_comp', comp)
+        self.connect('time_comp.h_vec', 'integration_group.vectorized_step_comp.h_vec')
         self._connect_multiple(
             self._get_state_names('starting_system', 'starting'),
-            self._get_state_names('coupled_group.vectorized_step_comp', 'y0'),
+            self._get_state_names('integration_group.vectorized_step_comp', 'y0'),
         )
 
         comp = VectorizedStageComp(states=states, time_units=time_units,
             num_time_steps=num_time_steps, num_stages=num_stages, num_step_vars=num_step_vars,
             glm_A=glm_A, glm_U=glm_U,
         )
-        coupled_group.add_subsystem('vectorized_stage_comp', comp)
-        self.connect('time_comp.h_vec', 'coupled_group.vectorized_stage_comp.h_vec')
+        integration_group.add_subsystem('vectorized_stage_comp', comp)
+        self.connect('time_comp.h_vec', 'integration_group.vectorized_stage_comp.h_vec')
 
         comp = VectorizedOutputComp(states=states,
             num_starting_time_steps=len(starting_norm_times), num_my_time_steps=len(my_norm_times),
@@ -110,7 +110,7 @@ class VectorizedIntegrator(Integrator):
 
         self.add_subsystem('output_comp', comp, promotes_outputs=promotes)
         self._connect_multiple(
-            self._get_state_names('coupled_group.vectorized_step_comp', 'y'),
+            self._get_state_names('integration_group.vectorized_step_comp', 'y'),
             self._get_state_names('output_comp', 'y'),
         )
         if has_starting_method:
@@ -134,45 +134,45 @@ class VectorizedIntegrator(Integrator):
                     (num_time_steps - 1, num_stages,) + shape ))
 
         self._connect_multiple(
-            self._get_state_names('coupled_group.ode_comp', 'rate_path'),
-            self._get_state_names('coupled_group.vectorized_step_comp', 'F'),
+            self._get_state_names('integration_group.ode_comp', 'rate_path'),
+            self._get_state_names('integration_group.vectorized_step_comp', 'F'),
             src_indices_from_ode,
         )
         self._connect_multiple(
-            self._get_state_names('coupled_group.ode_comp', 'rate_path'),
-            self._get_state_names('coupled_group.vectorized_stage_comp', 'F'),
+            self._get_state_names('integration_group.ode_comp', 'rate_path'),
+            self._get_state_names('integration_group.vectorized_stage_comp', 'F'),
             src_indices_from_ode,
         )
 
         self._connect_multiple(
-            self._get_state_names('coupled_group.vectorized_step_comp', 'y'),
-            self._get_state_names('coupled_group.vectorized_stage_comp', 'y'),
+            self._get_state_names('integration_group.vectorized_step_comp', 'y'),
+            self._get_state_names('integration_group.vectorized_stage_comp', 'y'),
         )
 
         if formulation == 'MDF':
             self._connect_multiple(
-                self._get_state_names('coupled_group.vectorized_stage_comp', 'Y_out'),
-                self._get_state_names('coupled_group.ode_comp', 'paths'),
+                self._get_state_names('integration_group.vectorized_stage_comp', 'Y_out'),
+                self._get_state_names('integration_group.ode_comp', 'paths'),
                 src_indices_to_ode,
             )
             self._connect_multiple(
-                self._get_state_names('coupled_group.dummy_comp', 'Y'),
-                self._get_state_names('coupled_group.vectorized_stage_comp', 'Y_in'),
+                self._get_state_names('integration_group.dummy_comp', 'Y'),
+                self._get_state_names('integration_group.vectorized_stage_comp', 'Y_in'),
             )
         elif formulation == 'SAND':
             self._connect_multiple(
-                self._get_state_names('coupled_group.desvars_comp', 'Y'),
-                self._get_state_names('coupled_group.ode_comp', 'paths'),
+                self._get_state_names('integration_group.desvars_comp', 'Y'),
+                self._get_state_names('integration_group.ode_comp', 'paths'),
                 src_indices_to_ode,
             )
             self._connect_multiple(
-                self._get_state_names('coupled_group.desvars_comp', 'Y'),
-                self._get_state_names('coupled_group.vectorized_stage_comp', 'Y_in'),
+                self._get_state_names('integration_group.desvars_comp', 'Y'),
+                self._get_state_names('integration_group.vectorized_stage_comp', 'Y_in'),
             )
             for state_name, state in iteritems(states):
-                coupled_group.add_constraint('vectorized_stage_comp.Y_out:%s' % state_name, equals=0.)
+                integration_group.add_constraint('vectorized_stage_comp.Y_out:%s' % state_name, equals=0.)
 
         if formulation == 'MDF':
-            coupled_group.nonlinear_solver = NewtonSolver(iprint=2, maxiter=100)
-            coupled_group.linear_solver = DirectSolver()
-            coupled_group.jacobian = DenseJacobian()
+            integration_group.nonlinear_solver = NewtonSolver(iprint=2, maxiter=100)
+            integration_group.linear_solver = DirectSolver()
+            integration_group.jacobian = DenseJacobian()

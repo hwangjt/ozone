@@ -9,7 +9,7 @@ from ozone.tests.ode_functions.simple_ode import NonlinearODEFunction, LinearODE
 from ozone.tests.ode_functions.cannonball import CannonballODEFunction
 
 
-num = 50
+num = 3
 
 t0 = 0.
 t1 = 1.e-2
@@ -20,13 +20,13 @@ times = np.linspace(t0, t1, num)
 
 scheme_name = 'ForwardEuler'
 scheme_name = 'RK4'
-# scheme_name = 'ImplicitMidpoint'
-scheme_name = 'AB4'
+scheme_name = 'ImplicitMidpoint'
+# scheme_name = 'AB4'
 # scheme_name = 'BDF2'
 
 integrator_name = 'SAND'
-# integrator_name = 'MDF'
-# integrator_name = 'TM'
+integrator_name = 'MDF'
+integrator_name = 'TM'
 
 # ode_function = LinearODEFunction()
 ode_function = CannonballODEFunction()
@@ -53,6 +53,9 @@ time1 = time.time()
 # prob.check_partials(compact_print=True)
 # prob.check_partials(compact_print=False)
 
+view_model(prob)
+exit()
+
 np.set_printoptions(precision=10)
 
 exact_soln = ode_function.compute_exact_soln(initial_conditions, t0, t1)
@@ -62,7 +65,6 @@ for key in exact_soln:
         np.linalg.norm(prob['state:%s' % key][-1] - exact_soln[key]))
 print('Runtime (s):', time1 - time0)
 # print(prob['starting:y'])
-# view_model(prob)
 
 import matplotlib.pyplot as plt
 plt.plot(prob['state:x'], prob['state:y'])

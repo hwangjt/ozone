@@ -44,14 +44,19 @@ class ExplicitTMIntegrator(Integrator):
         glm_U = scheme.U
         glm_V = scheme.V
 
+        # ------------------------------------------------------------------------------------
+
+        integration_group = Group()
+        self.add_subsystem('integration_group', integration_group)
+
         for i_step in range(len(my_norm_times) - 1):
 
-            step_comp_old_name = 'step_comp_%i' % (i_step - 1)
-            step_comp_new_name = 'step_comp_%i' % (i_step)
+            step_comp_old_name = 'integration_group.step_comp_%i' % (i_step - 1)
+            step_comp_new_name = 'integration_group.step_comp_%i' % (i_step)
 
             for i_stage in range(num_stages):
-                stage_comp_name = 'stage_comp_%i_%i' % (i_step, i_stage)
-                ode_comp_name = 'ode_comp_%i_%i' % (i_step, i_stage)
+                stage_comp_name = 'integration_group.stage_comp_%i_%i' % (i_step, i_stage)
+                ode_comp_name = 'integration_group.ode_comp_%i_%i' % (i_step, i_stage)
 
                 self.connect('time_comp.stage_times',
                              ['.'.join((ode_comp_name, t)) for t in
@@ -64,18 +69,18 @@ class ExplicitTMIntegrator(Integrator):
                     num_stages=num_stages, num_step_vars=num_step_vars,
                     glm_A=glm_A, glm_U=glm_U, i_stage=i_stage, i_step=i_step,
                 )
-                self.add_subsystem(stage_comp_name, comp)
+                integration_group.add_subsystem(stage_comp_name.split('.')[1], comp)
                 self.connect('time_comp.h_vec', '%s.h' % stage_comp_name, src_indices=i_step)
 
                 for j_stage in range(i_stage):
-                    ode_comp_tmp_name = 'ode_comp_%i_%i' % (i_step, j_stage)
+                    ode_comp_tmp_name = 'integration_group.ode_comp_%i_%i' % (i_step, j_stage)
                     self._connect_multiple(
                         self._get_state_names(ode_comp_tmp_name, 'rate_path'),
                         self._get_state_names(stage_comp_name, 'F', i_step=i_step, i_stage=i_stage, j_stage=j_stage),
                     )
 
                 comp = self._create_ode(1)
-                self.add_subsystem(ode_comp_name, comp)
+                integration_group.add_subsystem(ode_comp_name.split('.')[1], comp)
                 self._connect_multiple(
                     self._get_state_names(stage_comp_name, 'Y', i_step=i_step, i_stage=i_stage),
                     self._get_state_names(ode_comp_name, 'paths'),
@@ -107,10 +112,10 @@ class ExplicitTMIntegrator(Integrator):
                 num_stages=num_stages, num_step_vars=num_step_vars,
                 glm_B=glm_B, glm_V=glm_V, i_step=i_step,
             )
-            self.add_subsystem(step_comp_new_name, comp)
+            integration_group.add_subsystem(step_comp_new_name.split('.')[1], comp)
             self.connect('time_comp.h_vec', '%s.h' % step_comp_new_name, src_indices=i_step)
             for j_stage in range(num_stages):
-                ode_comp_tmp_name = 'ode_comp_%i_%i' % (i_step, j_stage)
+                ode_comp_tmp_name = 'integration_group.ode_comp_%i_%i' % (i_step, j_stage)
                 self._connect_multiple(
                     self._get_state_names(ode_comp_tmp_name, 'rate_path'),
                     self._get_state_names(step_comp_new_name, 'F', i_step=i_step, j_stage=j_stage),
@@ -122,7 +127,7 @@ class ExplicitTMIntegrator(Integrator):
                     self._get_state_names(step_comp_new_name, 'y_old', i_step=i_step),
                 )
                 for i_stage in range(num_stages):
-                    stage_comp_name = 'stage_comp_%i_%i' % (i_step, i_stage)
+                    stage_comp_name = 'integration_group.stage_comp_%i_%i' % (i_step, i_stage)
                     self._connect_multiple(
                         self._get_state_names('starting_system', 'starting'),
                         self._get_state_names(stage_comp_name, 'y_old', i_step=i_step, i_stage=i_stage),
@@ -133,7 +138,7 @@ class ExplicitTMIntegrator(Integrator):
                     self._get_state_names(step_comp_new_name, 'y_old', i_step=i_step),
                 )
                 for i_stage in range(num_stages):
-                    stage_comp_name = 'stage_comp_%i_%i' % (i_step, i_stage)
+                    stage_comp_name = 'integration_group.stage_comp_%i_%i' % (i_step, i_stage)
                     self._connect_multiple(
                         self._get_state_names(step_comp_old_name, 'y_new', i_step=i_step - 1),
                         self._get_state_names(stage_comp_name, 'y_old', i_step=i_step, i_stage=i_stage),
@@ -166,6 +171,7 @@ class ExplicitTMIntegrator(Integrator):
                 )
             else:
                 self._connect_multiple(
-                    self._get_state_names('step_comp_%i' % (i_step - 1), 'y_new', i_step=i_step - 1),
+                    self._get_state_names(
+                        'integration_group.step_comp_%i' % (i_step - 1), 'y_new', i_step=i_step - 1),
                     self._get_state_names('output_comp', 'y', i_step=i_step),
                 )

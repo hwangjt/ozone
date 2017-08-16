@@ -44,11 +44,16 @@ class ImplicitTMIntegrator(Integrator):
         glm_U = scheme.U
         glm_V = scheme.V
 
+        # ------------------------------------------------------------------------------------
+
+        integration_group = Group()
+        self.add_subsystem('integration_group', integration_group)
+
         for i_step in range(len(my_norm_times) - 1):
             group = Group()
-            group_old_name = 'step_%i' % (i_step - 1)
-            group_new_name = 'step_%i' % i_step
-            self.add_subsystem(group_new_name, group)
+            group_old_name = 'integration_group.step_%i' % (i_step - 1)
+            group_new_name = 'integration_group.step_%i' % i_step
+            integration_group.add_subsystem(group_new_name.split('.')[1], group)
 
             comp = self._create_ode(num_stages)
             group.add_subsystem('ode_comp', comp)
@@ -156,6 +161,6 @@ class ImplicitTMIntegrator(Integrator):
                 )
             else:
                 self._connect_multiple(
-                    self._get_state_names('step_%i' % (i_step - 1) + '.step_comp', 'y_new', i_step=i_step - 1),
+                    self._get_state_names('integration_group.step_%i' % (i_step - 1) + '.step_comp', 'y_new', i_step=i_step - 1),
                     self._get_state_names('output_comp', 'y', i_step=i_step),
                 )
