@@ -129,7 +129,9 @@ class Integrator(Group):
         # Time comp
         comp = TimeComp(time_units=time_units,
             normalized_times=my_norm_times, stage_norm_times=stage_norm_times)
-        self.add_subsystem('time_comp', comp, promotes_inputs=['initial_time', 'final_time'])
+        self.add_subsystem('time_comp', comp,
+            promotes_inputs=['initial_time', 'final_time'],
+            promotes_outputs=['times'])
 
         # ------------------------------------------------------------------------------------
         # Static parameter comp

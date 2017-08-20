@@ -170,7 +170,10 @@ class VectorizedIntegrator(Integrator):
                 self._get_state_names('integration_group.vectorized_stage_comp', 'Y_in'),
             )
             for state_name, state in iteritems(states):
-                integration_group.add_constraint('vectorized_stage_comp.Y_out:%s' % state_name, equals=0.)
+                integration_group.add_constraint('vectorized_stage_comp.Y_out:%s' % state_name,
+                    equals=0.,
+                    rhs_group=1,
+                )
 
         if formulation == 'MDF':
             integration_group.nonlinear_solver = NewtonSolver(iprint=2, maxiter=100)

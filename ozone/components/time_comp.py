@@ -25,8 +25,14 @@ class TimeComp(ExplicitComponent):
 
         self.add_input('initial_time', units=time_units)
         self.add_input('final_time', units=time_units)
+        self.add_output('times', shape=num_time_steps, units=time_units)
         self.add_output('h_vec', shape=num_h_vec, units=time_units)
         self.add_output('stage_times', shape=num_stage_times, units=time_units)
+
+        self.declare_partials('times', 'initial_time',
+            val=1 - normalized_times)
+        self.declare_partials('times', 'final_time',
+            val=normalized_times)
 
         self.declare_partials('h_vec', 'initial_time',
             val=normalized_times[:-1] - normalized_times[1:])
@@ -44,5 +50,6 @@ class TimeComp(ExplicitComponent):
         t0 = inputs['initial_time']
         t1 = inputs['final_time']
 
+        outputs['times'] = t0 + normalized_times * (t1 - t0)
         outputs['h_vec'] = (normalized_times[1:] - normalized_times[:-1]) * (t1 - t0)
         outputs['stage_times'] = t0 + stage_norm_times * (t1 - t0)
