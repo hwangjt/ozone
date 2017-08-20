@@ -5,7 +5,6 @@ from openmdao.api import Group, IndepVarComp, NewtonSolver, DirectSolver, DenseJ
 
 from ozone.integrators.integrator import Integrator
 from ozone.components.vectorized_step_comp import VectorizedStepComp
-from ozone.components.vectorized_step2_comp import VectorizedStep2Comp
 from ozone.components.vectorized_stage_comp import VectorizedStageComp
 from ozone.components.vectorized_output_comp import VectorizedOutputComp
 from ozone.utils.var_names import get_name
@@ -20,7 +19,6 @@ class VectorizedIntegrator(Integrator):
         super(VectorizedIntegrator, self).initialize()
 
         self.metadata.declare('formulation', default='MDF', values=['MDF', 'SAND'])
-        self.metadata.declare('iter_mode', default=False, type_=bool)
 
     def setup(self):
         super(VectorizedIntegrator, self).setup()
@@ -82,16 +80,10 @@ class VectorizedIntegrator(Integrator):
                 self._get_dynamic_parameter_names('integration_group.ode_comp', 'paths'),
             )
 
-        if self.metadata['iter_mode']:
-            comp = VectorizedStep2Comp(states=states, time_units=time_units,
-                num_time_steps=num_time_steps, num_stages=num_stages, num_step_vars=num_step_vars,
-                glm_B=glm_B, glm_V=glm_V,
-            )
-        else:
-            comp = VectorizedStepComp(states=states, time_units=time_units,
-                num_time_steps=num_time_steps, num_stages=num_stages, num_step_vars=num_step_vars,
-                glm_B=glm_B, glm_V=glm_V,
-            )
+        comp = VectorizedStepComp(states=states, time_units=time_units,
+            num_time_steps=num_time_steps, num_stages=num_stages, num_step_vars=num_step_vars,
+            glm_B=glm_B, glm_V=glm_V,
+        )
         integration_group.add_subsystem('vectorized_step_comp', comp)
         self.connect('time_comp.h_vec', 'integration_group.vectorized_step_comp.h_vec')
         self._connect_multiple(
@@ -181,24 +173,13 @@ class VectorizedIntegrator(Integrator):
             for state_name, state in iteritems(states):
                 integration_group.add_constraint('vectorized_stage_comp.Y_out:%s' % state_name,
                     equals=0.,
-                    rhs_group=1,
                 )
 
         if has_starting_method:
             self.starting_system.metadata['formulation'] = self.metadata['formulation']
 
-        if formulation[:3] == 'MDF':
-            if self.metadata['iter_mode']:
-                integration_group.nonlinear_solver = NonlinearBlockGS(iprint=2, maxiter=100)
-                integration_group.linear_solver = LinearBlockGS(iprint=1, maxiter=100)
-
-                # integration_group.nonlinear_solver = NewtonSolver(iprint=2, maxiter=100, solve_subsystems=True)
-                # integration_group.linear_solver = PetscKSP(iprint=2, atol=1e-10, rtol=1e-10)
-                # integration_group.linear_solver.precon = LinearBlockGS(iprint=-1, maxiter=5)
-                # integration_group.linear_solver = ScipyIterativeSolver(iprint=2, atol=1e-10, rtol=1e-10)
-            else:
-                # integration_group.nonlinear_solver = NewtonSolver(iprint=2, maxiter=100)
-                # integration_group.nonlinear_solver.linear_solver = PetscKSP(iprint=2, maxiter=20, atol=1e-10, rtol=1e-10)
-                integration_group.nonlinear_solver = NonlinearBlockGS(iprint=2, maxiter=100)
-                integration_group.linear_solver = DirectSolver()
-                integration_group.jacobian = DenseJacobian()
+        if formulation == 'MDF':
+            # integration_group.nonlinear_solver = NewtonSolver(iprint=2, maxiter=100)
+            integration_group.nonlinear_solver = NonlinearBlockGS(iprint=2, maxiter=40, atol=1e-14, rtol=1e-8)
+            integration_group.linear_solver = DirectSolver(iprint=2)
+            integration_group.jacobian = DenseJacobian()

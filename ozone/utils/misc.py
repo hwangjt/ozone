@@ -79,7 +79,7 @@ def ODEIntegrator(ode_function, integrator_name, scheme_name,
 
     # ------------------------------------------------------------------------------------
 
-    if integrator_name == 'SAND' or integrator_name[:3] == 'MDF':
+    if integrator_name == 'SAND' or integrator_name == 'MDF':
         kwargs['formulation'] = integrator_name
 
     integrator = integrator_class(ode_function=ode_function, scheme=scheme,

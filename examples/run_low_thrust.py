@@ -1,6 +1,7 @@
 import numpy as np
+import time
 
-from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp, view_model, ExecComp, pyOptSparseDriver
+from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp, view_model, ExecComp, pyOptSparseDriver, DefaultMultiVector
 
 from ozone.api import ODEFunction, ODEIntegrator
 
@@ -180,8 +181,8 @@ class ConstraintComp(ExplicitComponent):
 
 
 if __name__ == '__main__':
-    num = 40
     num = 100
+    # num = 100
     # num = 180
     t0 = 0.
     t1 = 348.795 * 24 * 3600
@@ -204,16 +205,13 @@ if __name__ == '__main__':
     scheme_name = 'RK4'
     scheme_name = 'ImplicitMidpoint'
     # scheme_name = 'ExplicitMidpoint'
-    # scheme_name = 'AM5'
-    # scheme_name = 'GaussLegendre6'
+    # scheme_name = 'AM2'
+    # scheme_name = 'GaussLegendre4'
     # scheme_name = 'BDF2'
 
     integrator_name = 'SAND'
     integrator_name = 'MDF'
     # integrator_name = 'TM'
-
-    iter_mode = True
-    iter_mode = False
 
     prob = Problem()
 
@@ -227,7 +225,7 @@ if __name__ == '__main__':
     prob.model.add_subsystem('inputs', comp, promotes=['*'])
 
     group = ODEIntegrator(ode_function, integrator_name, scheme_name,
-        times=times, initial_conditions=initial_conditions, iter_mode=iter_mode)
+        times=times, initial_conditions=initial_conditions)
     group.add_constraint('state:r', indices=[num-1], )
     prob.model.add_subsystem('integrator', group, promotes=['*'])
     prob.model.connect('d', 'dynamic_parameter:d')
@@ -256,58 +254,50 @@ if __name__ == '__main__':
     prob.driver.opt_settings['Major feasibility tolerance'] = 2e-6
     prob.driver.opt_settings['Verify level'] = -1
 
+    # prob.setup(multi_vector_class=DefaultMultiVector)
     prob.setup()
 
     print('done setup')
 
-    # for k in range(3):
-    #     prob['state:r'][k, :] = initial_conditions['r'][k]
-    #     prob['state:v'][k, :] = initial_conditions['v'][k]
-
-    prob.model.integrator.integration_group.nonlinear_solver.options['atol'] = 1e-14
-    prob.model.integrator.integration_group.nonlinear_solver.options['rtol'] = 1e-8
-    prob.model.integrator.integration_group.nonlinear_solver.options['maxiter'] = 40
-    # prob.model.integrator.integration_group.linear_solver.options['iprint'] = 2
-
-    # prob.final_setup()
-
-    prob.run_model()
+    # t1 = time.time()
+    # prob.run_model()
+    # t2 = time.time()
+    # prob.compute_total_derivs(
+    #     of=['objective_comp.f', 'constraints_comp.con_r', 'constraints_comp.con_v',
+    #         'integration_group.vectorized_stage_comp.Y_out:r',
+    #         'integration_group.vectorized_stage_comp.Y_out:v',
+    #     ],
+    #     wrt=['d', 'a', 'b'],
+    # )
+    # t3 = time.time()
+    # print(t2-t1, t3-t2)
 
     # prob.check_partials(compact_print=True)
     # exit()
 
     prob.run_driver()
 
-    if 0:
-        import matplotlib.pyplot as plt
-        from mpl_toolkits.mplot3d import Axes3D
-        fig = plt.figure()
-        ax = fig.gca(projection='3d')
-        r = prob['state:r']
-        ax.plot(r[:, 0], r[:, 1], r[:, 2], 'o')
-        plt.show()
-    else:
-        import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt
 
-        print()
-        print(initial_conditions['r'])
-        print(initial_conditions['v'])
-        print()
-        print(prob['state:r'][0, :])
-        print(prob['state:v'][0, :])
-        print(prob['state:m'][0, 0])
-        print()
-        print(final_conditions['r'])
-        print(final_conditions['v'])
-        print()
-        print(prob['state:r'][-1, :])
-        print(prob['state:v'][-1, :])
-        print(prob['state:m'][-1, 0])
+    print()
+    print(initial_conditions['r'])
+    print(initial_conditions['v'])
+    print()
+    print(prob['state:r'][0, :])
+    print(prob['state:v'][0, :])
+    print(prob['state:m'][0, 0])
+    print()
+    print(final_conditions['r'])
+    print(final_conditions['v'])
+    print()
+    print(prob['state:r'][-1, :])
+    print(prob['state:v'][-1, :])
+    print(prob['state:m'][-1, 0])
 
-        au = 149597870.7 * 1e3 / r_scal
-        r = prob['state:r']
-        plt.subplot(2,1,1)
-        plt.plot(r[:, 0] / au, r[:, 1] / au, '-o')
-        plt.subplot(2,1,2)
-        plt.plot(prob['times'], prob['d'], '-o')
-        plt.show()
+    au = 149597870.7 * 1e3 / r_scal
+    r = prob['state:r']
+    plt.subplot(2,1,1)
+    plt.plot(r[:, 0] / au, r[:, 1] / au, '-o')
+    plt.subplot(2,1,2)
+    plt.plot(prob['times'], prob['d'], '-o')
+    plt.show()
