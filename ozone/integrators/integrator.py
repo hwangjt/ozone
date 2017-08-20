@@ -87,7 +87,7 @@ class Integrator(Group):
         # Initial conditions
         if initial_conditions is not None:
             for state_name, value in iteritems(initial_conditions):
-                name = get_name('IC', state_name)
+                name = get_name('initial_condition', state_name)
                 state = ode_function._states[state_name]
 
                 comp.add_output(name, val=value, units=state['units'])
@@ -159,7 +159,7 @@ class Integrator(Group):
         # ------------------------------------------------------------------------------------
         # Starting system
         promotes = []
-        promotes.extend([get_name('IC', state_name) for state_name in states])
+        promotes.extend([get_name('initial_condition', state_name) for state_name in states])
 
         if not has_starting_method:
             starting_system = StartingComp(states=states, num_step_vars=num_step_vars)
