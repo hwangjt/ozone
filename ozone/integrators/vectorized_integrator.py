@@ -175,6 +175,9 @@ class VectorizedIntegrator(Integrator):
                     rhs_group=1,
                 )
 
+        if has_starting_method:
+            self.starting_system.metadata['formulation'] = self.metadata['formulation']
+
         if formulation == 'MDF':
             integration_group.nonlinear_solver = NewtonSolver(iprint=2, maxiter=100)
             integration_group.linear_solver = DirectSolver()

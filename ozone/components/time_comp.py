@@ -12,16 +12,19 @@ class TimeComp(ExplicitComponent):
     def initialize(self):
         self.metadata.declare('time_units', type_=(str, type(None)), required=True)
         self.metadata.declare('normalized_times', type_=np.ndarray, required=True)
+        self.metadata.declare('my_norm_times', type_=np.ndarray, required=True)
         self.metadata.declare('stage_norm_times', type_=np.ndarray, required=True)
 
     def setup(self):
         time_units = self.metadata['time_units']
         normalized_times = self.metadata['normalized_times']
+        my_norm_times = self.metadata['my_norm_times']
         stage_norm_times = self.metadata['stage_norm_times']
 
         num_time_steps = len(normalized_times)
+        num_my_time_steps = len(my_norm_times)
         num_stage_times = len(stage_norm_times)
-        num_h_vec = num_time_steps - 1
+        num_h_vec = num_my_time_steps - 1
 
         self.add_input('initial_time', units=time_units)
         self.add_input('final_time', units=time_units)
@@ -35,9 +38,9 @@ class TimeComp(ExplicitComponent):
             val=normalized_times)
 
         self.declare_partials('h_vec', 'initial_time',
-            val=normalized_times[:-1] - normalized_times[1:])
+            val=my_norm_times[:-1] - my_norm_times[1:])
         self.declare_partials('h_vec', 'final_time',
-            val=normalized_times[1:] - normalized_times[:-1])
+            val=my_norm_times[1:] - my_norm_times[:-1])
 
         val = stage_norm_times
         self.declare_partials('stage_times', 'initial_time', val=np.array(1 - stage_norm_times))
@@ -45,11 +48,12 @@ class TimeComp(ExplicitComponent):
 
     def compute(self, inputs, outputs):
         normalized_times = self.metadata['normalized_times']
+        my_norm_times = self.metadata['my_norm_times']
         stage_norm_times = self.metadata['stage_norm_times']
 
         t0 = inputs['initial_time']
         t1 = inputs['final_time']
 
         outputs['times'] = t0 + normalized_times * (t1 - t0)
-        outputs['h_vec'] = (normalized_times[1:] - normalized_times[:-1]) * (t1 - t0)
+        outputs['h_vec'] = (my_norm_times[1:] - my_norm_times[:-1]) * (t1 - t0)
         outputs['stage_times'] = t0 + stage_norm_times * (t1 - t0)
