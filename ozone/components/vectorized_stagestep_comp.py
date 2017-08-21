@@ -32,15 +32,9 @@ class VectorizedStageStepComp(ExplicitComponent):
         glm_B = self.metadata['glm_B']
         glm_V = self.metadata['glm_V']
 
-        self.mtx_lu_dict = {}
-        self.mtx_y0_dict_dict = {}
+        self.mtx_y0_dict = {}
+        self.mtx_dict = {}
         self.mtx_h_dict = {}
-        self.mtx_hf_dict = {}
-
-        self.num_y0_dict = {}
-        self.num_F_dict = {}
-        self.num_Y_dict = {}
-        self.num_y_dict = {}
 
         h_arange = np.arange(num_time_steps - 1)
         num_h = num_time_steps - 1
@@ -53,8 +47,8 @@ class VectorizedStageStepComp(ExplicitComponent):
 
             y0_name = get_name('y0', state_name)
             F_name = get_name('F', state_name)
-            Y_name = get_name('Y', state_name)
-            y_name = get_name('y', state_name)
+            Y_in_name = get_name('Y_in', state_name)
+            Y_out_name = get_name('Y_out', state_name)
 
             # --------------------------------------------------------------------------------
 
@@ -69,10 +63,10 @@ class VectorizedStageStepComp(ExplicitComponent):
             y_arange = np.arange(num_time_steps * num_step_vars * size).reshape(
                 (num_time_steps, num_step_vars,) + shape)
 
-            self.num_y0_dict[state_name] = num_y0 = np.prod(y0_arange.shape)
-            self.num_F_dict[state_name] = num_F = np.prod(F_arange.shape)
-            self.num_Y_dict[state_name] = num_Y = np.prod(Y_arange.shape)
-            self.num_y_dict[state_name] = num_y = np.prod(y_arange.shape)
+            num_y0 = np.prod(y0_arange.shape)
+            num_F = np.prod(F_arange.shape)
+            num_Y = np.prod(Y_arange.shape)
+            num_y = np.prod(y_arange.shape)
 
             # --------------------------------------------------------------------------------
 
@@ -84,42 +78,75 @@ class VectorizedStageStepComp(ExplicitComponent):
                 shape=(num_time_steps - 1, num_stages,) + shape,
                 units=get_rate_units(state['units'], time_units))
 
-            self.add_output(y_name,
-                shape=(num_time_steps, num_step_vars,) + shape,
-                units=state['units'])
-
-            self.add_output(Y_name,
+            self.add_input(Y_in_name, val=0.,
                 shape=(num_time_steps - 1, num_stages,) + shape,
                 units=state['units'])
 
+            self.add_output(Y_out_name,
+                shape=(num_time_steps - 1, num_stages,) + shape,
+                units=state['units'])
+
+            # -----------------
+
+            ones = -np.ones((num_time_steps - 1) * num_stages * size)
+            arange = np.arange((num_time_steps - 1) * num_stages * size)
+            self.declare_partials(Y_out_name, Y_in_name, val=ones, rows=arange, cols=arange)
+
             # --------------------------------------------------------------------------------
+            # mtx_y0: num_stages x num_step_vars x ...
+
+            data = np.ones((num_step_vars,) + shape).flatten()
+            rows = y_arange[0, :, :].flatten()
+            cols = y0_arange.flatten()
+            mtx_y0 = scipy.sparse.csc_matrix((data, (rows, cols)), shape=(num_y, num_y0)).toarray()
+
+            # --------------------------------------------------------------------------------
+            # mtx_A: (num_time_steps - 1) x num_stages x num_stages x ...
+
+            data = np.einsum('jk,i...->ijk...',
+                glm_A, np.ones((num_time_steps - 1,) + shape)).flatten()
+            rows = np.einsum('ij...,k->ijk...',
+                Y_arange, np.ones(num_stages, int)).flatten()
+            cols = np.einsum('ik...,j->ijk...',
+                F_arange, np.ones(num_stages, int)).flatten()
+            mtx_A = scipy.sparse.csc_matrix((data, (rows, cols)), shape=(num_Y, num_F)).toarray()
+
+            # --------------------------------------------------------------------------------
+            # mtx_B: (num_time_steps - 1) x num_step_vars x num_stages x ...
+
+            data = np.einsum('jk,i...->ijk...',
+                glm_B, np.ones((num_time_steps - 1,) + shape)).flatten()
+            rows = np.einsum('ij...,k->ijk...',
+                y_arange[1:, :, :], np.ones(num_stages, int)).flatten()
+            cols = np.einsum('ik...,j->ijk...',
+                F_arange, np.ones(num_step_vars, int)).flatten()
+            mtx_B = scipy.sparse.csc_matrix((data, (rows, cols)), shape=(num_y, num_F)).toarray()
+
+            # --------------------------------------------------------------------------------
+            # mtx_U: (num_time_steps - 1) x num_stages x num_step_vars x ...
+
+            data = np.einsum('jk,i...->ijk...',
+                glm_U, np.ones((num_time_steps - 1,) + shape)).flatten()
+            rows = np.einsum('ij...,k->ijk...',
+                Y_arange, np.ones(num_step_vars, int)).flatten()
+            cols = np.einsum('ik...,j->ijk...',
+                y_arange[:-1, :, :], np.ones(num_stages, int)).flatten()
+            mtx_U = scipy.sparse.csc_matrix((data, (rows, cols)), shape=(num_Y, num_y)).toarray()
+
+            # --------------------------------------------------------------------------------
+            # mtx_y
 
             data_list = []
             rows_list = []
             cols_list = []
 
-            # Y identity
-            data = np.ones(num_Y)
-            rows = np.arange(num_Y)
-            cols = np.arange(num_Y)
-            data_list.append(data); rows_list.append(rows); cols_list.append(cols)
-
-            # y identity
+            # identity
             data = np.ones(num_y)
-            rows = np.arange(num_y) + num_Y
-            cols = np.arange(num_y) + num_Y
+            rows = np.arange(num_y)
+            cols = np.arange(num_y)
             data_list.append(data); rows_list.append(rows); cols_list.append(cols)
 
-            # U blocks: (num_time_steps - 1) x num_stage x num_step_var x ...
-            data = np.einsum('jk,i...->ijk...',
-                -glm_U, np.ones((num_time_steps - 1,) + shape)).flatten()
-            rows = np.einsum('ij...,k->ijk...',
-                Y_arange, np.ones(num_step_vars, int)).flatten()
-            cols = np.einsum('ik...,j->ijk...',
-                y_arange[:-1, :, :], np.ones(num_stages, int)).flatten()
-            data_list.append(data); rows_list.append(rows); cols_list.append(cols)
-
-            # V blocks: (num_time_steps - 1) x num_step_var x num_step_var x ...
+            # (num_time_steps - 1) x num_step_var x num_step_var x ...
             data = np.einsum('jk,i...->ijk...',
                 -glm_V, np.ones((num_time_steps - 1,) + shape)).flatten()
             rows = np.einsum('ij...,k->ijk...',
@@ -133,66 +160,22 @@ class VectorizedStageStepComp(ExplicitComponent):
             rows = np.concatenate(rows_list)
             cols = np.concatenate(cols_list)
 
-            mtx = scipy.sparse.csc_matrix(
-                (data, (rows, cols)),
-                shape=(num_Y + num_y, num_Y + num_y))
-
-            print(mtx.todense())
-            print(num_time_steps, num_step_vars, num_stages, size)
-
-            self.mtx_lu_dict[state_name] = scipy.sparse.linalg.splu(mtx)
+            mtx_y = scipy.sparse.csc_matrix((data, (rows, cols)), shape=(num_y, num_y))
+            mtx_y_inv = scipy.sparse.linalg.splu(mtx_y)
 
             # --------------------------------------------------------------------------------
-
-            data = np.ones(num_y0)
-            rows = num_Y + y_arange[0, :, :].flatten()
-            cols = np.arange(num_y0)
-            self.mtx_y0_dict[state_name] = scipy.sparse.csc_matrix(
-                (data, (rows, cols)),
-                shape=(num_Y + num_y, num_y0))
-
-            # --------------------------------------------------------------------------------
+            # mtx_h
 
             data = np.ones(num_F)
             rows = np.arange(num_F)
             cols = np.einsum('i,j...->ij...',
                 h_arange, np.ones((num_stages,) + shape, int)).flatten()
-            self.mtx_h_dict[state_name] = scipy.sparse.csc_matrix(
-                (data, (rows, cols)),
-                shape=(num_F, num_h))
+            mtx_h = scipy.sparse.csc_matrix((data, (rows, cols)), shape=(num_F, num_h)).toarray()
 
             # --------------------------------------------------------------------------------
-
-            data_list = []
-            rows_list = []
-            cols_list = []
-
-            # A blocks: (num_time_steps - 1) x num_stage x num_stage x ...
-            data = np.einsum('jk,i...->ijk...',
-                glm_A, np.ones((num_time_steps - 1,) + shape)).flatten()
-            rows = np.einsum('ij...,k->ijk...',
-                Y_arange, np.ones(num_stage, int)).flatten()
-            cols = np.einsum('ik...,j->ijk...',
-                F_arange, np.ones(num_stage, int)).flatten()
-            data_list.append(data); rows_list.append(rows); cols_list.append(cols)
-
-            # B blocks: (num_time_steps - 1) x num_step_vars x num_stage x ...
-            data = np.einsum('jk,i...->ijk...',
-                glm_B, np.ones((num_time_steps - 1,) + shape)).flatten()
-            rows = np.einsum('ij...,k->ijk...',
-                Y_arange, np.ones(num_stage, int)).flatten()
-            cols = np.einsum('ik...,j->ijk...',
-                F_arange, np.ones(num_step_vars, int)).flatten()
-            data_list.append(data); rows_list.append(rows); cols_list.append(cols)
-
-            # concatenate
-            data = np.concatenate(data_list)
-            rows = np.concatenate(rows_list)
-            cols = np.concatenate(cols_list)
-
-            self.mtx_hf_dict[state_name] = scipy.sparse.csc_matrix(
-                (data, (rows, cols)),
-                shape=(num_Y + num_y, num_F))
+            self.mtx_y0_dict[state_name] = mtx_U.dot(mtx_y_inv.solve(mtx_y0))
+            self.mtx_dict[state_name] = mtx_A + mtx_U.dot(mtx_y_inv.solve(mtx_B))
+            self.mtx_h_dict[state_name] = mtx_h
 
     def compute(self, inputs, outputs):
         num_time_steps = self.metadata['num_time_steps']
@@ -203,108 +186,39 @@ class VectorizedStageStepComp(ExplicitComponent):
             size = np.prod(state['shape'])
             shape = state['shape']
 
-            y0_name = get_name('y0', state_name)
             F_name = get_name('F', state_name)
-            Y_name = get_name('Y', state_name)
-            y_name = get_name('y', state_name)
+            Y_out_name = get_name('Y_out', state_name)
+            Y_in_name = get_name('Y_in', state_name)
+            y0_name = get_name('y0', state_name)
 
-            mtx_lu = self.mtx_lu_dict[state_name]
             mtx_y0 = self.mtx_y0_dict[state_name]
+            mtx = self.mtx_dict[state_name]
             mtx_h = self.mtx_h_dict[state_name]
-            mtx_hf = self.mtx_hf_dict[state_name]
 
-            num_Y = self.num_Y_dict[state_name]
+            Y_shape = outputs[Y_out_name].shape
 
-            # ------------------------------------------------------------------------------
+            outputs[Y_out_name] = -inputs[Y_in_name] \
+                + mtx.dot(mtx_h.dot(inputs['h_vec']) * inputs[F_name].flatten()).reshape(Y_shape) \
+                + mtx_y0.dot(inputs[y0_name].flatten()).reshape(Y_shape)
 
-            vec = mtx_h.dot(inputs['h_vec']) * inputs[F_name].flatten()
-            vec = mtx_hf.dot(vec)
-            vec = mtx_lu.solve(vec)
-
-            outputs[Y_name] = vec[:num_Y].reshape((num_time_steps - 1, num_stages,) + shape)
-            outputs[y_name] = vec[num_Y:].reshape((num_time_steps, num_step_vars,) + shape)
-
-            outputs[y_name][0, :, :] -= inputs[y0_name]
-
-    def compute_jacvec_product(self, inputs, outputs, d_inputs, d_outputs, mode):
-        glm_A = self.metadata['glm_A']
-        glm_U = self.metadata['glm_U']
-        glm_B = self.metadata['glm_B']
-        glm_V = self.metadata['glm_V']
+    def compute_partials(self, inputs, partials):
+        num_time_steps = self.metadata['num_time_steps']
+        num_stages = self.metadata['num_stages']
+        num_step_vars = self.metadata['num_step_vars']
 
         for state_name, state in iteritems(self.metadata['states']):
-            y0_name = get_name('y0', state_name)
+            size = np.prod(state['shape'])
+            shape = state['shape']
+
             F_name = get_name('F', state_name)
-            Y_name = get_name('Y', state_name)
-            y_name = get_name('y', state_name)
+            Y_out_name = get_name('Y_out', state_name)
+            Y_in_name = get_name('Y_in', state_name)
+            y0_name = get_name('y0', state_name)
 
-            mtx_lu = self.mtx_lu_dict[state_name]
             mtx_y0 = self.mtx_y0_dict[state_name]
+            mtx = self.mtx_dict[state_name]
             mtx_h = self.mtx_h_dict[state_name]
-            mtx_hf = self.mtx_hf_dict[state_name]
 
-            num_Y = self.num_Y_dict[state_name]
-
-            # ------------------------------------------------------------------------------
-
-            if mode == 'fwd':
-                if y_name in d_outputs:
-                    if y0_name in d_inputs:
-                        d_outputs[y_name][0, :, :] -= d_inputs[y0_name]
-
-                if F_name in d_inputs:
-                    vec = mtx_h.dot(inputs['h_vec']) * d_inputs[F_name].flatten()
-                    vec = mtx_hf.dot(vec)
-                    vec = mtx_lu.solve(vec)
-
-                    if Y_name in d_outputs:
-                        d_outputs[Y_name] += vec[:num_Y].reshape(
-                            (num_time_steps - 1, num_stages,) + shape)
-
-                    if y_name in d_outputs:
-                        d_outputs[y_name] += vec[num_Y:].reshape(
-                            (num_time_steps, num_step_vars,) + shape)
-
-                if 'h_vec' in d_inputs:
-                    vec = mtx_h.dot(d_inputs['h_vec']) * inputs[F_name].flatten()
-                    vec = mtx_hf.dot(vec)
-                    vec = mtx_lu.solve(vec)
-
-                    if Y_name in d_outputs:
-                        d_outputs[Y_name] += vec[:num_Y].reshape(
-                            (num_time_steps - 1, num_stages,) + shape)
-
-                    if y_name in d_outputs:
-                        d_outputs[y_name] += vec[num_Y:].reshape(
-                            (num_time_steps, num_step_vars,) + shape)
-
-            # ------------------------------------------------------------------------------
-
-            elif mode == 'rev':
-                if y_name in d_outputs:
-                    if y0_name in d_inputs:
-                        d_inputs[y0_name] -= d_outputs[y_name][0, :, :]
-
-                if Y_name in d_outputs:
-                    vec = np.concatenate([d_outputs[Y_name].flatten(), np.zeros(num_y)])
-                    vec = mtx_lu.solve(vec, 'T')
-                    vec = mtx_hf.T.dot(vec)
-
-                    if F_name in d_inputs:
-                        d_inputs[F_name] += (mtx_h.dot(inputs['h_vec']) * vec).reshape(
-                            (num_time_steps - 1, num_stages,) + shape)
-
-                    if 'h_vec' in d_inputs:
-                        d_inputs['h_vec'] += (mtx_h.T.dot(vec))
-
-                if y_name in d_outputs:
-                    vec = np.concatenate([np.zeros(num_Y), d_outputs[y_name].flatten()])
-                    vec = mtx_lu.solve(vec, 'T')
-                    vec = mtx_hf.T.dot(vec)
-
-                    if F_name in d_inputs:
-                        d_inputs[F_name] += (mtx_h.dot(inputs['h_vec']) * vec).reshape(
-                            (num_time_steps - 1, num_stages,) + shape)
-
-                    if 'h_vec' in d_inputs:
-                        d_inputs['h_vec'] += (mtx_h.T.dot(vec))
+            partials[Y_out_name, 'h_vec'][:, :] = mtx.dot(np.diag(inputs[F_name].flatten())).dot(mtx_h)
+            partials[Y_out_name, F_name][:, :] = mtx.dot(np.diag(mtx_h.dot(inputs['h_vec'])))
+            partials[Y_out_name, y0_name][:, :] = mtx_y0

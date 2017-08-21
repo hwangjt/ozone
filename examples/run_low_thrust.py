@@ -202,10 +202,10 @@ if __name__ == '__main__':
     ode_function = MyODEFunction()
 
     scheme_name = 'ForwardEuler'
-    scheme_name = 'RK4'
+    # scheme_name = 'RK4'
     scheme_name = 'ImplicitMidpoint'
     # scheme_name = 'ExplicitMidpoint'
-    # scheme_name = 'AM2'
+    # scheme_name = 'AM5'
     # scheme_name = 'GaussLegendre4'
     # scheme_name = 'BDF2'
 
@@ -259,20 +259,22 @@ if __name__ == '__main__':
 
     print('done setup')
 
-    # t1 = time.time()
+    t1 = time.time()
+    prob.run_model()
     # prob.run_model()
-    # t2 = time.time()
-    # prob.compute_total_derivs(
-    #     of=['objective_comp.f', 'constraints_comp.con_r', 'constraints_comp.con_v',
-    #         'integration_group.vectorized_stage_comp.Y_out:r',
-    #         'integration_group.vectorized_stage_comp.Y_out:v',
-    #     ],
-    #     wrt=['d', 'a', 'b'],
-    # )
-    # t3 = time.time()
-    # print(t2-t1, t3-t2)
+    t2 = time.time()
+    prob.compute_total_derivs(
+        of=['objective_comp.f', 'constraints_comp.con_r', 'constraints_comp.con_v',
+            # 'integration_group.vectorized_stage_comp.Y_out:r',
+            # 'integration_group.vectorized_stage_comp.Y_out:v',
+        ],
+        wrt=['d', 'a', 'b'],
+    )
+    t3 = time.time()
+    print(t2-t1, t3-t2)
 
     # prob.check_partials(compact_print=True)
+    # view_model(prob)
     # exit()
 
     prob.run_driver()
