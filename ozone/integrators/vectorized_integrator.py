@@ -244,7 +244,13 @@ class VectorizedIntegrator(Integrator):
             self.starting_system.metadata['formulation'] = self.metadata['formulation']
 
         if formulation == 'MDF':
-            integration_group.nonlinear_solver = NewtonSolver(iprint=2, maxiter=100)
-            # integration_group.nonlinear_solver = NonlinearBlockGS(iprint=2, maxiter=40, atol=1e-14, rtol=1e-8)
-            integration_group.linear_solver = DirectSolver(iprint=2)
-            integration_group.jacobian = DenseJacobian()
+            if 1:
+                integration_group.nonlinear_solver = NonlinearBlockGS(iprint=2, maxiter=40, atol=1e-14, rtol=1e-10)
+            else:
+                integration_group.nonlinear_solver = NewtonSolver(iprint=2, maxiter=100)
+
+            if 1:
+                integration_group.linear_solver = LinearBlockGS(iprint=1, maxiter=40, atol=1e-14, rtol=1e-10)
+            else:
+                integration_group.linear_solver = DirectSolver(iprint=1)
+                integration_group.jacobian = DenseJacobian()

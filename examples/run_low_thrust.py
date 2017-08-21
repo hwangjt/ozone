@@ -181,9 +181,7 @@ class ConstraintComp(ExplicitComponent):
 
 
 if __name__ == '__main__':
-    num = 100
-    # num = 100
-    # num = 180
+    num = 200
     t0 = 0.
     t1 = 348.795 * 24 * 3600
     times = np.linspace(t0, t1, num)
@@ -202,11 +200,11 @@ if __name__ == '__main__':
     ode_function = MyODEFunction()
 
     scheme_name = 'ForwardEuler'
-    # scheme_name = 'RK4'
+    scheme_name = 'RK4'
     scheme_name = 'ImplicitMidpoint'
     # scheme_name = 'ExplicitMidpoint'
-    # scheme_name = 'AM5'
-    # scheme_name = 'GaussLegendre4'
+    # scheme_name = 'AM4'
+    scheme_name = 'GaussLegendre4'
     # scheme_name = 'BDF2'
 
     integrator_name = 'SAND'
