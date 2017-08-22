@@ -165,24 +165,14 @@ class VectorizedIntegrator(Integrator):
                 self._get_state_names('integration_group.ode_comp', 'paths'),
                 src_indices_to_ode,
             )
-            if stagestep:
-                self._connect_multiple(
-                    self._get_state_names('integration_group.desvars_comp', 'Y'),
-                    self._get_state_names('integration_group.vectorized_stagestep_comp', 'Y_in'),
+            self._connect_multiple(
+                self._get_state_names('integration_group.desvars_comp', 'Y'),
+                self._get_state_names('integration_group.vectorized_stagestep_comp', 'Y_in'),
+            )
+            for state_name, state in iteritems(states):
+                integration_group.add_constraint('vectorized_stagestep_comp.Y_out:%s' % state_name,
+                    equals=0.,
                 )
-                for state_name, state in iteritems(states):
-                    integration_group.add_constraint('vectorized_stagestep_comp.Y_out:%s' % state_name,
-                        equals=0.,
-                    )
-            else:
-                self._connect_multiple(
-                    self._get_state_names('integration_group.desvars_comp', 'Y'),
-                    self._get_state_names('integration_group.vectorized_stage_comp', 'Y_in'),
-                )
-                for state_name, state in iteritems(states):
-                    integration_group.add_constraint('vectorized_stage_comp.Y_out:%s' % state_name,
-                        equals=0.,
-                    )
 
         if has_starting_method:
             self.starting_system.metadata['formulation'] = self.metadata['formulation']

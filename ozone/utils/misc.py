@@ -105,7 +105,7 @@ def _get_class(name, classes, label):
 def get_scheme(scheme_name):
     from ozone.schemes.runge_kutta import ForwardEuler, BackwardEuler, ExplicitMidpoint, \
         ImplicitMidpoint, KuttaThirdOrder, RK4, RalstonsMethod, HeunsMethod, RK4ST, GaussLegendre, \
-        LobattoIIIA, Radau, TrapezoidalRule
+        LobattoIIIA, Radau, TrapezoidalRule, RK6, RK6ST, KuttaThirdOrderST, ExplicitMidpointST
     from ozone.schemes.multistep import AdamsPEC, AdamsPECE, AB, AM, ABalt, AMalt, BDF
 
     scheme_classes = {
@@ -117,6 +117,7 @@ def get_scheme(scheme_name):
         'ImplicitMidpoint': ImplicitMidpoint(),
         'KuttaThirdOrder': KuttaThirdOrder(),
         'RK4': RK4(),
+        'RK6': RK6(),
         'RalstonsMethod': RalstonsMethod(),
         'HeunsMethod': HeunsMethod(),
         'GaussLegendre2': GaussLegendre(2),
@@ -166,7 +167,10 @@ def get_scheme(scheme_name):
         'BDF5': BDF(5),
         'BDF6': BDF(6),
         # Starting methods with derivatives
+        'ExplicitMidpointST': ExplicitMidpointST(),
+        'KuttaThirdOrderST': KuttaThirdOrderST(),
         'RK4ST': RK4ST(),
+        'RK6ST': RK6ST(),
     }
     return _get_class(scheme_name, scheme_classes, 'Scheme')
 
