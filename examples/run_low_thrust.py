@@ -143,6 +143,7 @@ class MyComp(ExplicitComponent):
         sub_jac[:, 0] = -d * Tmax_N / m ** 2 * np.sin(a) * np.cos(b) / v_scal
         sub_jac[:, 1] = -d * Tmax_N / m ** 2 * np.sin(a) * np.sin(b) / v_scal
         sub_jac[:, 2] = -d * Tmax_N / m ** 2 * np.cos(a) / v_scal
+        t2 = time.time()
 
 
 class MyODEFunction(ODEFunction):
@@ -181,7 +182,7 @@ class ConstraintComp(ExplicitComponent):
 
 
 if __name__ == '__main__':
-    num = 200
+    num = 100
     t0 = 0.
     t1 = 348.795 * 24 * 3600
     times = np.linspace(t0, t1, num)
@@ -204,7 +205,7 @@ if __name__ == '__main__':
     scheme_name = 'ImplicitMidpoint'
     # scheme_name = 'ExplicitMidpoint'
     # scheme_name = 'AM4'
-    scheme_name = 'GaussLegendre4'
+    # scheme_name = 'GaussLegendre4'
     # scheme_name = 'BDF2'
 
     integrator_name = 'SAND'
@@ -256,10 +257,10 @@ if __name__ == '__main__':
     prob.setup()
 
     print('done setup')
+    prob.run_model()
 
     t1 = time.time()
     prob.run_model()
-    # prob.run_model()
     t2 = time.time()
     prob.compute_total_derivs(
         of=['objective_comp.f', 'constraints_comp.con_r', 'constraints_comp.con_v',
