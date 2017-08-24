@@ -274,7 +274,7 @@ if __name__ == '__main__':
 
     # prob.check_partials(compact_print=True)
     # view_model(prob)
-    # exit()
+    exit()
 
     prob.run_driver()
 

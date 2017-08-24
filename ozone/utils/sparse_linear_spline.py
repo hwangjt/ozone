@@ -2,7 +2,8 @@ import numpy as np
 
 
 def get_sparse_linear_spline(in_vec, out_vec):
-    if np.max(out_vec) > in_vec[-1] or np.min(out_vec) < in_vec[0]:
+    print(in_vec.shape, out_vec.shape)
+    if np.max(out_vec) > in_vec[-1] + 1e-16 or np.min(out_vec) < in_vec[0] - 1e-16:
         raise Exception('Internal error: cannot extrapolate using sparse linear spline')
 
     num_in = len(in_vec)

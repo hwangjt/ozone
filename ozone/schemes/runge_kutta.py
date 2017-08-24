@@ -5,6 +5,7 @@ from ozone.schemes.scheme import GLMScheme
 
 
 class RungeKutta(GLMScheme):
+
     def __init__(self, A, B):
         A = np.atleast_2d(A)
         B = np.atleast_2d(B)
@@ -16,6 +17,7 @@ class RungeKutta(GLMScheme):
 
 
 class RungeKuttaST(GLMScheme):
+
     def __init__(self, A, B):
         A = np.atleast_2d(A)
         B = np.atleast_2d(B)
@@ -29,7 +31,10 @@ class RungeKuttaST(GLMScheme):
 
 
 class ForwardEuler(RungeKutta):
+
     def __init__(self):
+        self.order = 1
+
         super(ForwardEuler, self).__init__(A=0., B=1.)
 
 
@@ -47,7 +52,10 @@ def get_ExplicitMidpoint():
 
 
 class ExplicitMidpoint(RungeKutta):
+
     def __init__(self):
+        self.order = 2
+
         ExplicitMidpoint_A, ExplicitMidpoint_B = get_ExplicitMidpoint()
 
         A = np.array(ExplicitMidpoint_A)
@@ -57,7 +65,10 @@ class ExplicitMidpoint(RungeKutta):
 
 
 class ExplicitMidpointST(RungeKuttaST):
+
     def __init__(self):
+        self.order = 2
+
         ExplicitMidpoint_A, ExplicitMidpoint_B = get_ExplicitMidpoint()
 
         A = np.zeros((3, 3))
@@ -72,7 +83,10 @@ class ExplicitMidpointST(RungeKuttaST):
 
 
 class HeunsMethod(RungeKutta):
+
     def __init__(self):
+        self.order = 2
+
         super(HeunsMethod, self).__init__(
             A=np.array([
                 [0., 0.],
@@ -85,7 +99,10 @@ class HeunsMethod(RungeKutta):
 
 
 class RalstonsMethod(RungeKutta):
+
     def __init__(self):
+        self.order = 2
+
         super(RalstonsMethod, self).__init__(
             A=np.array([
                 [0., 0.],
@@ -112,7 +129,10 @@ def get_KuttaThirdOrder():
 
 
 class KuttaThirdOrder(RungeKutta):
+
     def __init__(self):
+        self.order = 3
+
         KuttaThirdOrder_A, KuttaThirdOrder_B = get_KuttaThirdOrder()
 
         A = np.array(KuttaThirdOrder_A)
@@ -122,7 +142,10 @@ class KuttaThirdOrder(RungeKutta):
 
 
 class KuttaThirdOrderST(RungeKuttaST):
+
     def __init__(self):
+        self.order = 3
+
         KuttaThirdOrder_A, KuttaThirdOrder_B = get_KuttaThirdOrder()
 
         A = np.zeros((4, 4))
@@ -152,7 +175,10 @@ def get_RK4():
 
 
 class RK4(RungeKutta):
+
     def __init__(self):
+        self.order = 4
+
         RK4_A, RK4_B = get_RK4()
 
         A = np.array(RK4_A)
@@ -162,7 +188,10 @@ class RK4(RungeKutta):
 
 
 class RK4ST(RungeKuttaST):
+
     def __init__(self):
+        self.order = 4
+
         RK4_A, RK4_B = get_RK4()
 
         A = np.zeros((5, 5))
@@ -198,7 +227,10 @@ def get_RK6(s):
 
 
 class RK6(RungeKutta):
+
     def __init__(self, s=1.):
+        self.order = 6
+
         RK6_A, RK6_B = get_RK6(s)
 
         A = np.array(RK6_A)
@@ -208,7 +240,10 @@ class RK6(RungeKutta):
 
 
 class RK6ST(RungeKuttaST):
+
     def __init__(self, s=1.):
+        self.order = 6
+
         RK6_A, RK6_B = get_RK6(s)
 
         A = np.zeros((8, 8))
@@ -223,12 +258,18 @@ class RK6ST(RungeKuttaST):
 
 
 class BackwardEuler(RungeKutta):
+
     def __init__(self):
+        self.order = 1
+
         super(BackwardEuler, self).__init__(A=1., B=1.)
 
 
 class ImplicitMidpoint(RungeKutta):
+
     def __init__(self):
+        self.order = 2
+
         super(ImplicitMidpoint, self).__init__(A=1/2, B=1.)
 
 _gl_coeffs = {
@@ -250,7 +291,10 @@ _gl_coeffs = {
 }
 
 class GaussLegendre(RungeKutta):
+
     def __init__(self, order=4):
+        self.order = order
+
         if order not in _gl_coeffs:
             raise ValueError('GaussLengdre order must be one of the following: {}'.format(
                 sorted(_gl_coeffs.keys())
@@ -273,7 +317,10 @@ _lobatto_coeffs = {
 }
 
 class LobattoIIIA(RungeKutta):
+
     def __init__(self, order=4):
+        self.order = order
+
         if order not in _lobatto_coeffs:
             raise ValueError('LobattoIIIA order must be one of the following: {}'.format(
                 sorted(_lobatto_coeffs.keys())
@@ -310,7 +357,10 @@ _radau_II_coeffs = {
 }
 
 class Radau(RungeKutta):
+
     def __init__(self, type_, order=5):
+        self.order = order
+
         if type_ == 'I':
             coeffs = _radau_I_coeffs
         elif type_ == 'II':
@@ -324,6 +374,9 @@ class Radau(RungeKutta):
         super(Radau, self).__init__(A=A, B=B)
 
 class TrapezoidalRule(RungeKutta):
+
     def __init__(self):
+        self.order = 2
+
         super(TrapezoidalRule, self).__init__(A=np.array([[0., 0.], [1 / 2, 1 / 2]]),
                                               B=np.array([1 / 2, 1 / 2]))

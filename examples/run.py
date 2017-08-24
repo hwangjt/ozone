@@ -53,7 +53,7 @@ time1 = time.time()
 # prob.check_partials(compact_print=True)
 # prob.check_partials(compact_print=False)
 
-view_model(prob)
+# view_model(prob)
 exit()
 
 np.set_printoptions(precision=10)

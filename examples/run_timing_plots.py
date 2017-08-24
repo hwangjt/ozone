@@ -9,7 +9,7 @@ from ozone.api import ODEFunction, ODEIntegrator
 from ozone.tests.ode_functions.simple_ode import LinearODEFunction, SimpleODEFunction, \
     NonlinearODEFunction
 from ozone.utils.suppress_printing import nostdout
-from ozone.utils.misc import get_scheme_families
+from ozone.utils.misc import scheme_families
 
 
 ode_function = NonlinearODEFunction()
@@ -26,10 +26,6 @@ nums = [21, 26, 31, 36]
 
 integrator_names = ['TM', 'MDF', 'SAND']
 
-scheme_family_name = 'basic'
-
-scheme_families = get_scheme_families()
-
 colors = ['b', 'g', 'r', 'c', 'm', 'k']
 
 
@@ -42,7 +38,7 @@ for scheme_family_name, scheme_family in iteritems(scheme_families):
     plot_index += 1
     plt.subplot(3, 3, plot_index)
 
-    scheme_name, order = scheme_family[1]
+    scheme_name = scheme_family[1]
 
     for j, integrator_name in enumerate(integrator_names):
 
