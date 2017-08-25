@@ -200,7 +200,8 @@ if __name__ == '__main__':
 
     ode_function = MyODEFunction()
 
-    scheme_name = 'ForwardEuler'
+    # scheme_name = 'ForwardEuler'
+    scheme_name = 'BackwardEuler'
     scheme_name = 'RK4'
     scheme_name = 'ImplicitMidpoint'
     # scheme_name = 'ExplicitMidpoint'
@@ -274,7 +275,7 @@ if __name__ == '__main__':
 
     # prob.check_partials(compact_print=True)
     # view_model(prob)
-    exit()
+    # exit()
 
     prob.run_driver()
 
