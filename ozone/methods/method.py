@@ -1,11 +1,12 @@
 from __future__ import division
 import numpy as np
 
+
 class GLMMethod(object):
     """
     Base class for all GLM methods.
     """
-    def __init__(self, A, B, U, V, abscissa, starting_method=None):
+    def __init__(self, A, B, U, V, abscissa, starting_method):
 
         s, s2 = A.shape
 

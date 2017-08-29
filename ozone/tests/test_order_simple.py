@@ -6,7 +6,7 @@ from parameterized import parameterized
 from ozone.api import ODEIntegrator
 from ozone.tests.ode_functions.simple_ode import SimpleODEFunction
 from ozone.utils.compute_order import compute_convergence_order, compute_ideal_error
-from ozone.utils.misc import method_classes, method_families
+from ozone.methods_list import method_classes, method_families
 
 
 class Test(unittest.TestCase):

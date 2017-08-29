@@ -10,10 +10,9 @@ from ozone.components.starting_comp import StartingComp
 from ozone.components.static_parameter_comp import StaticParameterComp
 from ozone.components.dynamic_parameter_comp import DynamicParameterComp
 from ozone.methods.method import GLMMethod
-from ozone.methods.runge_kutta import RK4
 from ozone.ode_function import ODEFunction
 from ozone.utils.var_names import get_name
-from ozone.utils.misc import get_method
+from ozone.methods_list import get_method
 
 
 class Integrator(Group):
@@ -23,7 +22,7 @@ class Integrator(Group):
 
     def initialize(self):
         self.metadata.declare('ode_function', type_=ODEFunction, required=True)
-        self.metadata.declare('method', default=RK4(), type_=GLMMethod)
+        self.metadata.declare('method', type_=GLMMethod, required=True)
         self.metadata.declare('starting_coeffs', type_=(np.ndarray, type(None)))
 
         self.metadata.declare('initial_conditions', type_=(dict, type(None)))

@@ -4,7 +4,7 @@ from openmdao.api import Problem
 
 from ozone.api import ODEIntegrator
 from ozone.utils.suppress_printing import nostdout
-from ozone.utils.misc import get_method
+from ozone.methods_list import get_method
 
 
 def compute_convergence_order(num_times_vector, t0, t1, state_name,
