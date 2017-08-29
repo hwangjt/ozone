@@ -24,7 +24,7 @@ t1 = 1.
 
 state_name = 'y'
 
-integrator_name = 'MDF'
+integrator_name = 'solver-based'
 
 colors = ['b', 'g', 'r', 'c', 'm', 'k', 'y']
 plt.figure(figsize=(30, 15))

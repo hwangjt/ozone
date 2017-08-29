@@ -209,9 +209,9 @@ if __name__ == '__main__':
     # method_name = 'GaussLegendre4'
     # method_name = 'BDF2'
 
-    integrator_name = 'SAND'
-    integrator_name = 'MDF'
-    # integrator_name = 'TM'
+    integrator_name = 'optimizer-based'
+    integrator_name = 'solver-based'
+    # integrator_name = 'time-marching'
 
     prob = Problem()
 

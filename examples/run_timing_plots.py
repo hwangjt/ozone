@@ -24,7 +24,7 @@ nums = [21, 26, 31, 36]
 # nums = [5]
 # nums = [11, 21, 31, 41]
 
-integrator_names = ['TM', 'MDF', 'SAND']
+integrator_names = ['time-marching', 'solver-based', 'optimizer-based']
 
 colors = ['b', 'g', 'r', 'c', 'm', 'k']
 
@@ -51,7 +51,7 @@ for method_family_name, method_family in iteritems(method_families):
                 times=times, initial_conditions=initial_conditions)
             prob = Problem(integrator)
 
-            if integrator_name == 'SAND':
+            if integrator_name == 'optimizer-based':
                 prob.driver = ScipyOptimizer()
                 prob.driver.options['optimizer'] = 'SLSQP'
                 prob.driver.options['tol'] = 1e-9

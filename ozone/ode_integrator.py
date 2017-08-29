@@ -82,7 +82,7 @@ def ODEIntegrator(ode_function, integrator_name, method_name,
 
     # ------------------------------------------------------------------------------------
 
-    if integrator_name == 'SAND' or integrator_name == 'MDF':
+    if integrator_name == 'optimizer-based' or integrator_name == 'solver-based':
         kwargs['formulation'] = integrator_name
 
     integrator = integrator_class(ode_function=ode_function, method=method,
@@ -101,8 +101,8 @@ def get_integrator(integrator_name, explicit):
     from ozone.integrators.vectorized_integrator import VectorizedIntegrator
 
     integrator_classes = {
-        'SAND': VectorizedIntegrator,
-        'MDF': VectorizedIntegrator,
-        'TM': ExplicitTMIntegrator if explicit else ImplicitTMIntegrator,
+        'optimizer-based': VectorizedIntegrator,
+        'solver-based': VectorizedIntegrator,
+        'time-marching': ExplicitTMIntegrator if explicit else ImplicitTMIntegrator,
     }
     return _get_class(integrator_name, integrator_classes, 'Integrator')

@@ -22,9 +22,9 @@ nums = [11, 16, 21, 26, 31, 36]
 # method_name = 'Lobatto4'
 method_name = 'RadauI5'
 
-# integrator_name = 'SAND'
-integrator_name = 'MDF'
-# integrator_name = 'TM'
+# integrator_name = 'optimizer-based'
+integrator_name = 'solver-based'
+# integrator_name = 'time-marching'
 
 t0 = 0.
 t1 = 1.
@@ -50,7 +50,7 @@ for i, num in enumerate(nums):
         times=times, initial_conditions=initial_conditions)
     prob = Problem(integrator)
 
-    if integrator_name == 'SAND':
+    if integrator_name == 'optimizer-based':
         prob.driver = ScipyOptimizer()
         prob.driver.options['optimizer'] = 'SLSQP'
         prob.driver.options['tol'] = 1e-9

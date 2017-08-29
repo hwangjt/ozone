@@ -22,7 +22,7 @@ class Test(unittest.TestCase):
 
         self.state_name = 'y'
 
-        self.integrator_name = 'MDF'
+        self.integrator_name = 'solver-based'
 
     def perform_test(self, method_name):
         errors_vector, step_sizes_vector, orders_vector = compute_convergence_order(

@@ -27,7 +27,7 @@ class Test(unittest.TestCase):
 
         prob = Problem(integrator)
 
-        if integrator_name == 'SAND':
+        if integrator_name == 'optimizer-based':
             prob.driver = ScipyOptimizer()
             prob.driver.options['optimizer'] = 'SLSQP'
             prob.driver.options['tol'] = 1e-9
@@ -57,18 +57,18 @@ class Test(unittest.TestCase):
             'AdamsPECE2', 'AdamsPECE5',
         ],  # method
         [LinearODEFunction(), NonlinearODEFunction()],  # ODE Function
-        ['TM', 'MDF', 'SAND']
+        ['time-marching', 'solver-based', 'optimizer-based']
     ))
     def test_tm(self, method_name, ode_function, integrator_name):
 
-        y_ref = self.run_ode('TM', method_name, ode_function)['state:y']
+        y_ref = self.run_ode('time-marching', method_name, ode_function)['state:y']
         diff = self.compute_diff(integrator_name, method_name, ode_function, y_ref)
         print('%20s %5s %16.9e' % (method_name, integrator_name, diff))
         self.assertTrue(diff < 1e-10, 'Error when integrating with %s %s' % (
             integrator_name, method_name))
 
     @parameterized.expand(product(
-        ['TM', 'MDF', 'SAND']
+        ['time-marching', 'solver-based', 'optimizer-based']
     ))
     def test_derivs(self, integrator_name):
         ode_function = NonlinearODEFunction()

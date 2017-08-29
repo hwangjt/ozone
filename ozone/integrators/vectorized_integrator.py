@@ -18,7 +18,7 @@ class VectorizedIntegrator(Integrator):
     def initialize(self):
         super(VectorizedIntegrator, self).initialize()
 
-        self.metadata.declare('formulation', default='MDF', values=['MDF', 'SAND'])
+        self.metadata.declare('formulation', default='solver-based', values=['solver-based', 'optimizer-based'])
 
     def setup(self):
         super(VectorizedIntegrator, self).setup()
@@ -47,7 +47,7 @@ class VectorizedIntegrator(Integrator):
         integration_group = Group()
         self.add_subsystem('integration_group', integration_group)
 
-        if formulation == 'SAND':
+        if formulation == 'optimizer-based':
             comp = IndepVarComp()
             for state_name, state in iteritems(states):
                 comp.add_output('Y:%s' % state_name,
@@ -55,7 +55,7 @@ class VectorizedIntegrator(Integrator):
                     units=state['units'])
                 comp.add_design_var('Y:%s' % state_name)
             integration_group.add_subsystem('desvars_comp', comp)
-        elif formulation == 'MDF':
+        elif formulation == 'solver-based':
             comp = IndepVarComp()
             for state_name, state in iteritems(states):
                 comp.add_output('Y:%s' % state_name, val=0.,
@@ -149,7 +149,7 @@ class VectorizedIntegrator(Integrator):
             src_indices_from_ode,
         )
 
-        if formulation == 'MDF':
+        if formulation == 'solver-based':
             self._connect_multiple(
                 self._get_state_names('integration_group.vectorized_stagestep_comp', 'Y_out'),
                 self._get_state_names('integration_group.ode_comp', 'paths'),
@@ -159,7 +159,7 @@ class VectorizedIntegrator(Integrator):
                 self._get_state_names('integration_group.dummy_comp', 'Y'),
                 self._get_state_names('integration_group.vectorized_stagestep_comp', 'Y_in'),
             )
-        elif formulation == 'SAND':
+        elif formulation == 'optimizer-based':
             self._connect_multiple(
                 self._get_state_names('integration_group.desvars_comp', 'Y'),
                 self._get_state_names('integration_group.ode_comp', 'paths'),
@@ -177,7 +177,7 @@ class VectorizedIntegrator(Integrator):
         if has_starting_method:
             self.starting_system.metadata['formulation'] = self.metadata['formulation']
 
-        if formulation == 'MDF':
+        if formulation == 'solver-based':
             if 1:
                 integration_group.nonlinear_solver = NonlinearBlockGS(iprint=2, maxiter=40, atol=1e-14, rtol=1e-12)
             else:

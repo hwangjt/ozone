@@ -24,9 +24,9 @@ method_name = 'ImplicitMidpoint'
 # method_name = 'AB4'
 # method_name = 'BDF2'
 
-integrator_name = 'SAND'
-integrator_name = 'MDF'
-integrator_name = 'TM'
+integrator_name = 'optimizer-based'
+integrator_name = 'solver-based'
+integrator_name = 'time-marching'
 
 # ode_function = LinearODEFunction()
 ode_function = CannonballODEFunction()
@@ -37,7 +37,7 @@ integrator = ODEIntegrator(ode_function, integrator_name, method_name,
 
 prob = Problem(integrator)
 
-if integrator_name == 'SAND':
+if integrator_name == 'optimizer-based':
     prob.driver = ScipyOptimizer()
     prob.driver.options['optimizer'] = 'SLSQP'
     prob.driver.options['tol'] = 1e-9
