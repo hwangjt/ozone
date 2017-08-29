@@ -12,7 +12,7 @@ from ozone.utils.compute_order import compute_convergence_order, compute_ideal_e
 from ozone.utils.misc import method_families
 
 
-num_time_steps_vector = np.array([10, 15, 20])
+num_times_vector = np.array([10, 15, 20])
 
 ode_function = NonlinearODEFunction()
 # ode_function = LinearODEFunction()
@@ -40,7 +40,7 @@ for method_family_name, method_family in iteritems(method_families):
     for j, method_name in enumerate(method_family):
 
         errors_vector, step_sizes_vector, orders_vector, ideal_order = compute_convergence_order(
-            num_time_steps_vector, t0, t1, state_name,
+            num_times_vector, t0, t1, state_name,
             ode_function, integrator_name, method_name, initial_conditions)
 
         ideal_step_sizes_vector, ideal_errors_vector = compute_ideal_error(

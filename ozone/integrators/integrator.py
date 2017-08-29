@@ -65,12 +65,12 @@ class Integrator(Group):
         # ------------------------------------------------------------------------------------
         # Check starting_coeffs
         if is_starting_method:
-            # (num_starting, num_time_steps, num_step_vars,)
+            # (num_starting, num_times, num_step_vars,)
             assert len(starting_coeffs.shape) == 3, \
                 'starting_coeffs must be a rank-3 array, but its rank is %i' \
                 % len(starting_coeffs.shape)
             assert starting_coeffs.shape[1:] == (len(my_norm_times), method.num_values), \
-                'starting_coeffs must have shape (num_starting, num_time_steps, num_step_vars,).' \
+                'starting_coeffs must have shape (num_starting, num_times, num_step_vars,).' \
                 + 'It has shape %i x %i x %i, but it should have shape (? x %i x %i)' % (
                     starting_coeffs.shape[0], starting_coeffs.shape[1], starting_coeffs.shape[2],
                     len(my_norm_times), method.num_values
@@ -164,7 +164,7 @@ class Integrator(Group):
         if not has_starting_method:
             starting_system = StartingComp(states=states, num_step_vars=num_step_vars)
         else:
-            starting_method_name, starting_coeffs, starting_time_steps = method.starting_method
+            starting_method_name, starting_coeffs, starting_times = method.starting_method
             method = get_method(starting_method_name)
 
             starting_system = self.__class__(ode_function=ode_function, method=method,

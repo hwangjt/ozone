@@ -14,7 +14,7 @@ class VectorizedStageStepComp(ExplicitComponent):
     def initialize(self):
         self.metadata.declare('states', type_=dict, required=True)
         self.metadata.declare('time_units', type_=(str, type(None)), required=True)
-        self.metadata.declare('num_time_steps', type_=int, required=True)
+        self.metadata.declare('num_times', type_=int, required=True)
         self.metadata.declare('num_stages', type_=int, required=True)
         self.metadata.declare('num_step_vars', type_=int, required=True)
         self.metadata.declare('glm_A', type_=np.ndarray, required=True)
@@ -24,7 +24,7 @@ class VectorizedStageStepComp(ExplicitComponent):
 
     def setup(self):
         time_units = self.metadata['time_units']
-        num_time_steps = self.metadata['num_time_steps']
+        num_times = self.metadata['num_times']
         num_stages = self.metadata['num_stages']
         num_step_vars = self.metadata['num_step_vars']
         glm_A = self.metadata['glm_A']
@@ -36,10 +36,10 @@ class VectorizedStageStepComp(ExplicitComponent):
         self.mtx_dict = {}
         self.mtx_h_dict = {}
 
-        h_arange = np.arange(num_time_steps - 1)
-        num_h = num_time_steps - 1
+        h_arange = np.arange(num_times - 1)
+        num_h = num_times - 1
 
-        self.add_input('h_vec', shape=(num_time_steps - 1), units=time_units)
+        self.add_input('h_vec', shape=(num_times - 1), units=time_units)
 
         for state_name, state in iteritems(self.metadata['states']):
             size = np.prod(state['shape'])
@@ -54,14 +54,14 @@ class VectorizedStageStepComp(ExplicitComponent):
 
             y0_arange = np.arange(num_step_vars * size).reshape((num_step_vars,) + shape)
 
-            F_arange = np.arange((num_time_steps - 1) * num_stages * size).reshape(
-                (num_time_steps - 1, num_stages,) + shape)
+            F_arange = np.arange((num_times - 1) * num_stages * size).reshape(
+                (num_times - 1, num_stages,) + shape)
 
-            Y_arange = np.arange((num_time_steps - 1) * num_stages * size).reshape(
-                (num_time_steps - 1, num_stages,) + shape)
+            Y_arange = np.arange((num_times - 1) * num_stages * size).reshape(
+                (num_times - 1, num_stages,) + shape)
 
-            y_arange = np.arange(num_time_steps * num_step_vars * size).reshape(
-                (num_time_steps, num_step_vars,) + shape)
+            y_arange = np.arange(num_times * num_step_vars * size).reshape(
+                (num_times, num_step_vars,) + shape)
 
             num_y0 = np.prod(y0_arange.shape)
             num_F = np.prod(F_arange.shape)
@@ -75,21 +75,21 @@ class VectorizedStageStepComp(ExplicitComponent):
                 units=state['units'])
 
             self.add_input(F_name,
-                shape=(num_time_steps - 1, num_stages,) + shape,
+                shape=(num_times - 1, num_stages,) + shape,
                 units=get_rate_units(state['units'], time_units))
 
             self.add_input(Y_in_name, val=0.,
-                shape=(num_time_steps - 1, num_stages,) + shape,
+                shape=(num_times - 1, num_stages,) + shape,
                 units=state['units'])
 
             self.add_output(Y_out_name,
-                shape=(num_time_steps - 1, num_stages,) + shape,
+                shape=(num_times - 1, num_stages,) + shape,
                 units=state['units'])
 
             # -----------------
 
-            ones = -np.ones((num_time_steps - 1) * num_stages * size)
-            arange = np.arange((num_time_steps - 1) * num_stages * size)
+            ones = -np.ones((num_times - 1) * num_stages * size)
+            arange = np.arange((num_times - 1) * num_stages * size)
             self.declare_partials(Y_out_name, Y_in_name, val=ones, rows=arange, cols=arange)
 
             # --------------------------------------------------------------------------------
@@ -101,10 +101,10 @@ class VectorizedStageStepComp(ExplicitComponent):
             mtx_y0 = scipy.sparse.csc_matrix((data, (rows, cols)), shape=(num_y, num_y0)).toarray()
 
             # --------------------------------------------------------------------------------
-            # mtx_A: (num_time_steps - 1) x num_stages x num_stages x ...
+            # mtx_A: (num_times - 1) x num_stages x num_stages x ...
 
             data = np.einsum('jk,i...->ijk...',
-                glm_A, np.ones((num_time_steps - 1,) + shape)).flatten()
+                glm_A, np.ones((num_times - 1,) + shape)).flatten()
             rows = np.einsum('ij...,k->ijk...',
                 Y_arange, np.ones(num_stages, int)).flatten()
             cols = np.einsum('ik...,j->ijk...',
@@ -112,10 +112,10 @@ class VectorizedStageStepComp(ExplicitComponent):
             mtx_A = scipy.sparse.csc_matrix((data, (rows, cols)), shape=(num_Y, num_F)).toarray()
 
             # --------------------------------------------------------------------------------
-            # mtx_B: (num_time_steps - 1) x num_step_vars x num_stages x ...
+            # mtx_B: (num_times - 1) x num_step_vars x num_stages x ...
 
             data = np.einsum('jk,i...->ijk...',
-                glm_B, np.ones((num_time_steps - 1,) + shape)).flatten()
+                glm_B, np.ones((num_times - 1,) + shape)).flatten()
             rows = np.einsum('ij...,k->ijk...',
                 y_arange[1:, :, :], np.ones(num_stages, int)).flatten()
             cols = np.einsum('ik...,j->ijk...',
@@ -123,10 +123,10 @@ class VectorizedStageStepComp(ExplicitComponent):
             mtx_B = scipy.sparse.csc_matrix((data, (rows, cols)), shape=(num_y, num_F)).toarray()
 
             # --------------------------------------------------------------------------------
-            # mtx_U: (num_time_steps - 1) x num_stages x num_step_vars x ...
+            # mtx_U: (num_times - 1) x num_stages x num_step_vars x ...
 
             data = np.einsum('jk,i...->ijk...',
-                glm_U, np.ones((num_time_steps - 1,) + shape)).flatten()
+                glm_U, np.ones((num_times - 1,) + shape)).flatten()
             rows = np.einsum('ij...,k->ijk...',
                 Y_arange, np.ones(num_step_vars, int)).flatten()
             cols = np.einsum('ik...,j->ijk...',
@@ -146,9 +146,9 @@ class VectorizedStageStepComp(ExplicitComponent):
             cols = np.arange(num_y)
             data_list.append(data); rows_list.append(rows); cols_list.append(cols)
 
-            # (num_time_steps - 1) x num_step_var x num_step_var x ...
+            # (num_times - 1) x num_step_var x num_step_var x ...
             data = np.einsum('jk,i...->ijk...',
-                -glm_V, np.ones((num_time_steps - 1,) + shape)).flatten()
+                -glm_V, np.ones((num_times - 1,) + shape)).flatten()
             rows = np.einsum('ij...,k->ijk...',
                 y_arange[1:, :, :], np.ones(num_step_vars, int)).flatten()
             cols = np.einsum('ik...,j->ijk...',
@@ -178,7 +178,7 @@ class VectorizedStageStepComp(ExplicitComponent):
             self.mtx_h_dict[state_name] = mtx_h
 
     def compute(self, inputs, outputs):
-        num_time_steps = self.metadata['num_time_steps']
+        num_times = self.metadata['num_times']
         num_stages = self.metadata['num_stages']
         num_step_vars = self.metadata['num_step_vars']
 
@@ -202,7 +202,7 @@ class VectorizedStageStepComp(ExplicitComponent):
                 + mtx_y0.dot(inputs[y0_name].flatten()).reshape(Y_shape)
 
     def compute_partials(self, inputs, partials):
-        num_time_steps = self.metadata['num_time_steps']
+        num_times = self.metadata['num_times']
         num_stages = self.metadata['num_stages']
         num_step_vars = self.metadata['num_step_vars']
 

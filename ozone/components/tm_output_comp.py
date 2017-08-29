@@ -13,20 +13,20 @@ class TMOutputComp(ExplicitComponent):
 
     def initialize(self):
         self.metadata.declare('states', type_=dict, required=True)
-        self.metadata.declare('num_starting_time_steps', type_=int, required=True)
-        self.metadata.declare('num_my_time_steps', type_=int, required=True)
+        self.metadata.declare('num_starting_times', type_=int, required=True)
+        self.metadata.declare('num_my_times', type_=int, required=True)
         self.metadata.declare('num_step_vars', type_=int, required=True)
         self.metadata.declare('starting_coeffs', type_=(np.ndarray, type(None)))
 
     def setup(self):
-        num_starting_time_steps = self.metadata['num_starting_time_steps']
-        num_my_time_steps = self.metadata['num_my_time_steps']
+        num_starting_times = self.metadata['num_starting_times']
+        num_my_times = self.metadata['num_my_times']
         num_step_vars = self.metadata['num_step_vars']
         starting_coeffs = self.metadata['starting_coeffs']
 
-        num_time_steps = num_starting_time_steps + num_my_time_steps - 1
+        num_times = num_starting_times + num_my_times - 1
 
-        has_starting_method = num_starting_time_steps > 1
+        has_starting_method = num_starting_times > 1
         is_starting_method = starting_coeffs is not None
 
         if is_starting_method:
@@ -42,7 +42,7 @@ class TMOutputComp(ExplicitComponent):
             out_state_name = get_name('state', state_name)
             starting_name = get_name('starting', state_name)
 
-            for i_step in range(num_my_time_steps):
+            for i_step in range(num_my_times):
                 y_name = get_name('y', state_name, i_step=i_step)
 
                 self.add_input(y_name,
@@ -51,11 +51,11 @@ class TMOutputComp(ExplicitComponent):
 
             if has_starting_method:
                 self.add_input(starting_state_name,
-                    shape=(num_starting_time_steps,) + shape,
+                    shape=(num_starting_times,) + shape,
                     units=state['units'])
 
             self.add_output(out_state_name,
-                shape=(num_time_steps,) + state['shape'],
+                shape=(num_times,) + state['shape'],
                 units=state['units'])
 
             if is_starting_method:
@@ -65,12 +65,12 @@ class TMOutputComp(ExplicitComponent):
 
             y_arange = np.arange(num_step_vars * size).reshape((num_step_vars,) + shape)
 
-            state_arange = np.arange(num_time_steps * size).reshape(
-                (num_time_steps,) + shape)
+            state_arange = np.arange(num_times * size).reshape(
+                (num_times,) + shape)
 
             if has_starting_method:
-                out_state_arange = np.arange(num_time_steps * size).reshape(
-                    (num_time_steps,) + shape)
+                out_state_arange = np.arange(num_times * size).reshape(
+                    (num_times,) + shape)
 
             if is_starting_method:
                 starting_arange = np.arange(num_starting * size).reshape(
@@ -78,21 +78,21 @@ class TMOutputComp(ExplicitComponent):
 
             if has_starting_method:
 
-                starting_state_arange = np.arange(num_starting_time_steps * size).reshape(
-                    (num_starting_time_steps,) + shape)
+                starting_state_arange = np.arange(num_starting_times * size).reshape(
+                    (num_starting_times,) + shape)
 
-                data = np.ones((num_starting_time_steps - 1) * size, int)
-                rows = out_state_arange[:num_starting_time_steps - 1, :].flatten()
+                data = np.ones((num_starting_times - 1) * size, int)
+                rows = out_state_arange[:num_starting_times - 1, :].flatten()
                 cols = starting_state_arange[:-1, :].flatten()
 
                 self.declare_partials(out_state_name, starting_state_name,
                     val=data, rows=rows, cols=cols)
 
-            for i_step in range(num_my_time_steps):
+            for i_step in range(num_my_times):
                 y_name = get_name('y', state_name, i_step=i_step)
 
                 data = np.ones(size)
-                rows = state_arange[i_step + num_starting_time_steps - 1, :]
+                rows = state_arange[i_step + num_starting_times - 1, :]
                 cols = y_arange[0, :]
 
                 self.declare_partials(out_state_name, y_name, val=data, rows=rows, cols=cols)
@@ -109,12 +109,12 @@ class TMOutputComp(ExplicitComponent):
                     self.declare_partials(starting_name, y_name, val=data, rows=rows, cols=cols)
 
     def compute(self, inputs, outputs):
-        num_starting_time_steps = self.metadata['num_starting_time_steps']
-        num_my_time_steps = self.metadata['num_my_time_steps']
+        num_starting_times = self.metadata['num_starting_times']
+        num_my_times = self.metadata['num_my_times']
         num_step_vars = self.metadata['num_step_vars']
         starting_coeffs = self.metadata['starting_coeffs']
 
-        has_starting_method = num_starting_time_steps > 1
+        has_starting_method = num_starting_times > 1
         is_starting_method = starting_coeffs is not None
 
         for state_name, state in iteritems(self.metadata['states']):
@@ -124,16 +124,16 @@ class TMOutputComp(ExplicitComponent):
 
             if has_starting_method:
 
-                outputs[out_state_name][:num_starting_time_steps - 1] = \
+                outputs[out_state_name][:num_starting_times - 1] = \
                     inputs[starting_state_name][:-1, :]
 
             if is_starting_method:
                 outputs[starting_name] = 0.
 
-            for i_step in range(num_my_time_steps):
+            for i_step in range(num_my_times):
                 y_name = get_name('y', state_name, i_step=i_step)
 
-                outputs[out_state_name][i_step + num_starting_time_steps - 1, :] = \
+                outputs[out_state_name][i_step + num_starting_times - 1, :] = \
                     inputs[y_name][0, :]
 
                 if is_starting_method:

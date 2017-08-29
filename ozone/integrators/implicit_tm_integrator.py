@@ -35,7 +35,7 @@ class ImplicitTMIntegrator(Integrator):
 
         glm_A, glm_B, glm_U, glm_V, num_stages, num_step_vars = self._get_method()
 
-        num_time_steps = len(my_norm_times)
+        num_times = len(my_norm_times)
         num_stages = method.num_stages
         num_step_vars = method.num_values
 
@@ -143,8 +143,8 @@ class ImplicitTMIntegrator(Integrator):
             promotes.extend([get_name('starting', state_name) for state_name in states])
 
         comp = TMOutputComp(
-            states=states, num_starting_time_steps=len(starting_norm_times),
-            num_my_time_steps=len(my_norm_times), num_step_vars=num_step_vars,
+            states=states, num_starting_times=len(starting_norm_times),
+            num_my_times=len(my_norm_times), num_step_vars=num_step_vars,
             starting_coeffs=starting_coeffs)
         self.add_subsystem('output_comp', comp, promotes_outputs=promotes)
         if has_starting_method:

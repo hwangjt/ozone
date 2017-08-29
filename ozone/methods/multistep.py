@@ -58,11 +58,11 @@ class Adams(GLMMethod):
         for i in range(num_steps):
             starting_coeffs[i + 1, -i - 1, 1] = 1.0
 
-        starting_time_steps = num_steps
+        starting_times = num_steps
 
         super(Adams, self).__init__(A=A, B=B, U=U, V=V,
             abscissa=np.ones(1),
-            starting_method=(starting_method_name, starting_coeffs, starting_time_steps))
+            starting_method=(starting_method_name, starting_coeffs, starting_times))
 
 
 class AdamsAlt(GLMMethod):
@@ -103,11 +103,11 @@ class AdamsAlt(GLMMethod):
         starting_coeffs = np.zeros((num_steps, num_steps, 1))
         starting_coeffs[::-1, :, 0] = np.eye(num_steps)
 
-        starting_time_steps = num_steps - 1
+        starting_times = num_steps - 1
 
         super(AdamsAlt, self).__init__(A=A, B=B, U=U, V=V,
             abscissa=np.linspace(-num_steps + 1, 1, num_steps + 1),
-            starting_method=(starting_method_name, starting_coeffs, starting_time_steps))
+            starting_method=(starting_method_name, starting_coeffs, starting_times))
 
 
 class AdamsPEC(GLMMethod):
@@ -142,11 +142,11 @@ class AdamsPEC(GLMMethod):
         for i in range(num_steps):
             starting_coeffs[i + 1, -i - 1, 1] = 1.0
 
-        starting_time_steps = num_steps
+        starting_times = num_steps
 
         super(AdamsPEC, self).__init__(A=A, B=B, U=U, V=V,
             abscissa=np.ones(1),
-            starting_method=(starting_method_name, starting_coeffs, starting_time_steps))
+            starting_method=(starting_method_name, starting_coeffs, starting_times))
 
 
 class AdamsPECE(GLMMethod):
@@ -185,11 +185,11 @@ class AdamsPECE(GLMMethod):
         for i in range(num_steps):
             starting_coeffs[i + 1, -i - 1, 1] = 1.0
 
-        starting_time_steps = num_steps
+        starting_times = num_steps
 
         super(AdamsPECE, self).__init__(A=A, B=B, U=U, V=V,
             abscissa=np.ones(2),
-            starting_method=(starting_method_name, starting_coeffs, starting_time_steps))
+            starting_method=(starting_method_name, starting_coeffs, starting_times))
 
 
 class AB(Adams):
@@ -263,7 +263,7 @@ class BDF(GLMMethod):
         starting_coeffs = np.zeros((num_steps, num_steps, 1))
         starting_coeffs[::-1, :, 0] = np.eye(num_steps)
 
-        starting_time_steps = num_steps - 1
+        starting_times = num_steps - 1
 
         super(BDF, self).__init__(A=A, B=B, U=U, V=V, abscissa=np.ones(1),
-            starting_method=(starting_method_name, starting_coeffs, starting_time_steps))
+            starting_method=(starting_method_name, starting_coeffs, starting_times))

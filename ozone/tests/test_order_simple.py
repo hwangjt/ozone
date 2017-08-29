@@ -12,7 +12,7 @@ from ozone.utils.misc import method_classes, method_families
 class Test(unittest.TestCase):
 
     def setUp(self):
-        self.num_time_steps_vector = np.array([10, 15, 20])
+        self.num_times_vector = np.array([10, 15, 20])
 
         self.ode_function = SimpleODEFunction()
 
@@ -26,7 +26,7 @@ class Test(unittest.TestCase):
 
     def perform_test(self, method_name):
         errors_vector, step_sizes_vector, orders_vector = compute_convergence_order(
-            self.num_time_steps_vector, self.t0, self.t1, self.state_name,
+            self.num_times_vector, self.t0, self.t1, self.state_name,
             self.ode_function, self.integrator_name, method_name, self.initial_conditions)
 
         average_order = np.sum(orders_vector) / len(orders_vector)
@@ -36,7 +36,7 @@ class Test(unittest.TestCase):
     @parameterized.expand(method_classes.keys())
     def test(self, method_name):
         errors_vector, step_sizes_vector, orders_vector, ideal_order = compute_convergence_order(
-            self.num_time_steps_vector, self.t0, self.t1, self.state_name,
+            self.num_times_vector, self.t0, self.t1, self.state_name,
             self.ode_function, self.integrator_name, method_name, self.initial_conditions)
 
         average_order = np.sum(orders_vector) / len(orders_vector)

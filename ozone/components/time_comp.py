@@ -21,14 +21,14 @@ class TimeComp(ExplicitComponent):
         my_norm_times = self.metadata['my_norm_times']
         stage_norm_times = self.metadata['stage_norm_times']
 
-        num_time_steps = len(normalized_times)
-        num_my_time_steps = len(my_norm_times)
+        num_times = len(normalized_times)
+        num_my_times = len(my_norm_times)
         num_stage_times = len(stage_norm_times)
-        num_h_vec = num_my_time_steps - 1
+        num_h_vec = num_my_times - 1
 
         self.add_input('initial_time', units=time_units)
         self.add_input('final_time', units=time_units)
-        self.add_output('times', shape=num_time_steps, units=time_units)
+        self.add_output('times', shape=num_times, units=time_units)
         self.add_output('h_vec', shape=num_h_vec, units=time_units)
         self.add_output('stage_times', shape=num_stage_times, units=time_units)
 

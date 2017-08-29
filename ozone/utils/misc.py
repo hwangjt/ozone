@@ -197,7 +197,7 @@ def ODEIntegrator(ode_function, integrator_name, method_name,
     # ------------------------------------------------------------------------------------
     # Ensure that all dynamic parameters are valid
     if dynamic_parameters is not None:
-        num_time_steps = len(normalized_times)
+        num_times = len(normalized_times)
 
         for parameter_name, value in iteritems(dynamic_parameters):
             assert parameter_name in ode_function._dynamic_parameters, \
@@ -207,7 +207,7 @@ def ODEIntegrator(ode_function, integrator_name, method_name,
                 'Dynamic parameter %s must be an ndarray' % parameter_name
 
             shape = ode_function._dynamic_parameters[parameter_name]['shape']
-            assert value.shape == (num_time_steps,) + shape, \
+            assert value.shape == (num_times,) + shape, \
                 'Dynamic parameter %s has the wrong shape' % state_name
 
     # ------------------------------------------------------------------------------------

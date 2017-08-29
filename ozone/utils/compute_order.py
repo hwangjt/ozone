@@ -7,17 +7,17 @@ from ozone.utils.suppress_printing import nostdout
 from ozone.utils.misc import get_method
 
 
-def compute_convergence_order(num_time_steps_vector, t0, t1, state_name,
+def compute_convergence_order(num_times_vector, t0, t1, state_name,
         ode_function, integrator_name, method_name, initial_conditions):
 
-    num = len(num_time_steps_vector)
+    num = len(num_times_vector)
 
     errors_vector = np.zeros(num)
     step_sizes_vector = np.zeros(num)
     orders_vector = np.zeros(num)
 
-    for ind, num_time_steps in enumerate(num_time_steps_vector):
-        times = np.linspace(t0, t1, num_time_steps)
+    for ind, num_times in enumerate(num_times_vector):
+        times = np.linspace(t0, t1, num_times)
 
         integrator = ODEIntegrator(ode_function, integrator_name, method_name,
             times=times, initial_conditions=initial_conditions)
@@ -31,7 +31,7 @@ def compute_convergence_order(num_time_steps_vector, t0, t1, state_name,
         true_y = ode_function.compute_exact_soln(initial_conditions, t0, t1)[state_name]
 
         errors_vector[ind] = np.linalg.norm(approx_y - true_y)
-        step_sizes_vector[ind] = (t1 - t0) / (num_time_steps - 1)
+        step_sizes_vector[ind] = (t1 - t0) / (num_times - 1)
 
     errors0 = errors_vector[:-1]
     errors1 = errors_vector[1:]

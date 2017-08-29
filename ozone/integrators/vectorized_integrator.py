@@ -40,7 +40,7 @@ class VectorizedIntegrator(Integrator):
 
         glm_A, glm_B, glm_U, glm_V, num_stages, num_step_vars = self._get_method()
 
-        num_time_steps = len(my_norm_times)
+        num_times = len(my_norm_times)
 
         # ------------------------------------------------------------------------------------
 
@@ -51,7 +51,7 @@ class VectorizedIntegrator(Integrator):
             comp = IndepVarComp()
             for state_name, state in iteritems(states):
                 comp.add_output('Y:%s' % state_name,
-                    shape=(num_time_steps - 1, num_stages,) + state['shape'],
+                    shape=(num_times - 1, num_stages,) + state['shape'],
                     units=state['units'])
                 comp.add_design_var('Y:%s' % state_name)
             integration_group.add_subsystem('desvars_comp', comp)
@@ -59,11 +59,11 @@ class VectorizedIntegrator(Integrator):
             comp = IndepVarComp()
             for state_name, state in iteritems(states):
                 comp.add_output('Y:%s' % state_name, val=0.,
-                    shape=(num_time_steps - 1, num_stages,) + state['shape'],
+                    shape=(num_times - 1, num_stages,) + state['shape'],
                     units=state['units'])
             integration_group.add_subsystem('dummy_comp', comp)
 
-        comp = self._create_ode((num_time_steps - 1) * num_stages)
+        comp = self._create_ode((num_times - 1) * num_stages)
         integration_group.add_subsystem('ode_comp', comp)
         self.connect(
             'time_comp.stage_times',
@@ -81,14 +81,14 @@ class VectorizedIntegrator(Integrator):
             )
 
         comp = VectorizedStageStepComp(states=states, time_units=time_units,
-            num_time_steps=num_time_steps, num_stages=num_stages, num_step_vars=num_step_vars,
+            num_times=num_times, num_stages=num_stages, num_step_vars=num_step_vars,
             glm_A=glm_A, glm_U=glm_U, glm_B=glm_B, glm_V=glm_V,
         )
         integration_group.add_subsystem('vectorized_stagestep_comp', comp)
         self.connect('time_comp.h_vec', 'integration_group.vectorized_stagestep_comp.h_vec')
 
         comp = VectorizedStepComp(states=states, time_units=time_units,
-            num_time_steps=num_time_steps, num_stages=num_stages, num_step_vars=num_step_vars,
+            num_times=num_times, num_stages=num_stages, num_step_vars=num_step_vars,
             glm_B=glm_B, glm_V=glm_V,
         )
         self.add_subsystem('vectorized_step_comp', comp)
@@ -103,7 +103,7 @@ class VectorizedIntegrator(Integrator):
         )
 
         comp = VectorizedOutputComp(states=states,
-            num_starting_time_steps=len(starting_norm_times), num_my_time_steps=len(my_norm_times),
+            num_starting_times=len(starting_norm_times), num_my_times=len(my_norm_times),
             num_step_vars=num_step_vars, starting_coeffs=starting_coeffs,
         )
 
@@ -126,12 +126,12 @@ class VectorizedIntegrator(Integrator):
             shape = state['shape']
 
             src_indices_to_ode.append(
-                np.arange((num_time_steps - 1) * num_stages * size).reshape(
-                    ((num_time_steps - 1) * num_stages,) + shape ))
+                np.arange((num_times - 1) * num_stages * size).reshape(
+                    ((num_times - 1) * num_stages,) + shape ))
 
             src_indices_from_ode.append(
-                np.arange((num_time_steps - 1) * num_stages * size).reshape(
-                    (num_time_steps - 1, num_stages,) + shape ))
+                np.arange((num_times - 1) * num_stages * size).reshape(
+                    (num_times - 1, num_stages,) + shape ))
 
         self._connect_multiple(
             self._get_state_names('vectorized_step_comp', 'y'),
