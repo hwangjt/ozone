@@ -17,14 +17,14 @@ ode_function = TwoDOrbitFunction()
 # nums = [51, 76, 101, 151]
 nums = [101]
 
-# scheme_name = 'AdamsPECE3'
-# scheme_name = 'BDF4'
-# scheme_name = 'ForwardEuler'
-# scheme_name = 'RK4'
-scheme_name = 'GaussLegendre4'
-# scheme_name = 'Trapezoidal'
-# scheme_name = 'Lobatto4'
-# scheme_name = 'Radau5'
+# method_name = 'AdamsPECE3'
+# method_name = 'BDF4'
+# method_name = 'ForwardEuler'
+# method_name = 'RK4'
+method_name = 'GaussLegendre4'
+# method_name = 'Trapezoidal'
+# method_name = 'Lobatto4'
+# method_name = 'Radau5'
 
 # integrator_name = 'SAND'
 integrator_name = 'MDF'
@@ -44,7 +44,7 @@ for i, num in enumerate(nums):
 
     y_true = np.array([ode_function.compute_exact_soln(initial_conditions, t0, t) for t in times])
 
-    integrator = ODEIntegrator(ode_function, integrator_name, scheme_name,
+    integrator = ODEIntegrator(ode_function, integrator_name, method_name,
         times=times, initial_conditions=initial_conditions)
     prob = Problem(integrator)
 

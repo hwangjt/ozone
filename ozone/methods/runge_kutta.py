@@ -1,10 +1,10 @@
 from __future__ import division
 
 import numpy as np
-from ozone.schemes.scheme import GLMScheme
+from ozone.methods.method import GLMMethod
 
 
-class RungeKutta(GLMScheme):
+class RungeKutta(GLMMethod):
 
     def __init__(self, A, B):
         A = np.atleast_2d(A)
@@ -16,7 +16,7 @@ class RungeKutta(GLMScheme):
         super(RungeKutta, self).__init__(A=A, B=B, U=U, V=V, abscissa=np.sum(A, 1))
 
 
-class RungeKuttaST(GLMScheme):
+class RungeKuttaST(GLMMethod):
 
     def __init__(self, A, B):
         A = np.atleast_2d(A)

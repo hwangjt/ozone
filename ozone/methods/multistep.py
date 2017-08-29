@@ -1,7 +1,7 @@
 from __future__ import division
 
 import numpy as np
-from ozone.schemes.scheme import GLMScheme
+from ozone.methods.method import GLMMethod
 
 
 ab_coeffs = {
@@ -19,7 +19,7 @@ am_coeffs = {
 }
 
 
-class Adams(GLMScheme):
+class Adams(GLMMethod):
 
     def __init__(self, type_, order):
         assert isinstance(order, int) and 2 <= order <= 5, \
@@ -51,7 +51,7 @@ class Adams(GLMScheme):
         V[0, 1:] = coeffs[num_steps][1:]
         V[1, 0] = 0.0
 
-        starting_scheme_name = 'RK6ST'
+        starting_method_name = 'RK6ST'
 
         starting_coeffs = np.zeros((num_steps + 1, num_steps + 1, 2))
         starting_coeffs[0, -1, 0] = 1.0
@@ -62,10 +62,10 @@ class Adams(GLMScheme):
 
         super(Adams, self).__init__(A=A, B=B, U=U, V=V,
             abscissa=np.ones(1),
-            starting_method=(starting_scheme_name, starting_coeffs, starting_time_steps))
+            starting_method=(starting_method_name, starting_coeffs, starting_time_steps))
 
 
-class AdamsAlt(GLMScheme):
+class AdamsAlt(GLMMethod):
 
     def __init__(self, type_, order):
         if type_ == 'b':
@@ -98,7 +98,7 @@ class AdamsAlt(GLMScheme):
         U[-1, 0] = 1.0
         U[np.arange(num_steps), np.arange(num_steps)[::-1]] = 1.0
 
-        starting_scheme_name = 'RK6'
+        starting_method_name = 'RK6'
 
         starting_coeffs = np.zeros((num_steps, num_steps, 1))
         starting_coeffs[::-1, :, 0] = np.eye(num_steps)
@@ -107,10 +107,10 @@ class AdamsAlt(GLMScheme):
 
         super(AdamsAlt, self).__init__(A=A, B=B, U=U, V=V,
             abscissa=np.linspace(-num_steps + 1, 1, num_steps + 1),
-            starting_method=(starting_scheme_name, starting_coeffs, starting_time_steps))
+            starting_method=(starting_method_name, starting_coeffs, starting_time_steps))
 
 
-class AdamsPEC(GLMScheme):
+class AdamsPEC(GLMMethod):
 
     def __init__(self, order):
         assert isinstance(order, int) and 2 <= order <= 5, \
@@ -135,7 +135,7 @@ class AdamsPEC(GLMScheme):
         V[0, 1:] = am_coeffs[num_steps][1:]
         V[1, 0] = 0.0
 
-        starting_scheme_name = 'RK6ST'
+        starting_method_name = 'RK6ST'
 
         starting_coeffs = np.zeros((num_steps + 1, num_steps + 1, 2))
         starting_coeffs[0, -1, 0] = 1.0
@@ -146,10 +146,10 @@ class AdamsPEC(GLMScheme):
 
         super(AdamsPEC, self).__init__(A=A, B=B, U=U, V=V,
             abscissa=np.ones(1),
-            starting_method=(starting_scheme_name, starting_coeffs, starting_time_steps))
+            starting_method=(starting_method_name, starting_coeffs, starting_time_steps))
 
 
-class AdamsPECE(GLMScheme):
+class AdamsPECE(GLMMethod):
 
     def __init__(self, order):
         assert isinstance(order, int) and 2 <= order <= 5, \
@@ -178,7 +178,7 @@ class AdamsPECE(GLMScheme):
         V[0, 1:] = am_coeffs[num_steps][1:]
         V[1, 0] = 0.0
 
-        starting_scheme_name = 'RK6ST'
+        starting_method_name = 'RK6ST'
 
         starting_coeffs = np.zeros((num_steps + 1, num_steps + 1, 2))
         starting_coeffs[0, -1, 0] = 1.0
@@ -189,7 +189,7 @@ class AdamsPECE(GLMScheme):
 
         super(AdamsPECE, self).__init__(A=A, B=B, U=U, V=V,
             abscissa=np.ones(2),
-            starting_method=(starting_scheme_name, starting_coeffs, starting_time_steps))
+            starting_method=(starting_method_name, starting_coeffs, starting_time_steps))
 
 
 class AB(Adams):
@@ -224,7 +224,7 @@ class AMalt(AdamsAlt):
         super(AMalt, self).__init__('m', order)
 
 
-class BDF(GLMScheme):
+class BDF(GLMMethod):
 
     def __init__(self, num_steps):
         assert isinstance(num_steps, int) and 2 <= num_steps <= 6, \
@@ -258,7 +258,7 @@ class BDF(GLMScheme):
         U[0, :] = y_coeffs[num_steps]
         V[0, :] = y_coeffs[num_steps]
 
-        starting_scheme_name = 'RK6'
+        starting_method_name = 'RK6'
 
         starting_coeffs = np.zeros((num_steps, num_steps, 1))
         starting_coeffs[::-1, :, 0] = np.eye(num_steps)
@@ -266,4 +266,4 @@ class BDF(GLMScheme):
         starting_time_steps = num_steps - 1
 
         super(BDF, self).__init__(A=A, B=B, U=U, V=V, abscissa=np.ones(1),
-            starting_method=(starting_scheme_name, starting_coeffs, starting_time_steps))
+            starting_method=(starting_method_name, starting_coeffs, starting_time_steps))

@@ -4,11 +4,11 @@ from openmdao.api import Problem
 
 from ozone.api import ODEIntegrator
 from ozone.utils.suppress_printing import nostdout
-from ozone.utils.misc import get_scheme
+from ozone.utils.misc import get_method
 
 
 def compute_convergence_order(num_time_steps_vector, t0, t1, state_name,
-        ode_function, integrator_name, scheme_name, initial_conditions):
+        ode_function, integrator_name, method_name, initial_conditions):
 
     num = len(num_time_steps_vector)
 
@@ -19,7 +19,7 @@ def compute_convergence_order(num_time_steps_vector, t0, t1, state_name,
     for ind, num_time_steps in enumerate(num_time_steps_vector):
         times = np.linspace(t0, t1, num_time_steps)
 
-        integrator = ODEIntegrator(ode_function, integrator_name, scheme_name,
+        integrator = ODEIntegrator(ode_function, integrator_name, method_name,
             times=times, initial_conditions=initial_conditions)
         prob = Problem(integrator)
 
@@ -41,7 +41,7 @@ def compute_convergence_order(num_time_steps_vector, t0, t1, state_name,
 
     orders_vector = np.log( errors1 / errors0 ) / np.log( step_sizes1 / step_sizes0 )
 
-    ideal_order = get_scheme(scheme_name).order
+    ideal_order = get_method(method_name).order
 
     return errors_vector, step_sizes_vector, orders_vector, ideal_order
 

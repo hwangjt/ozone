@@ -18,11 +18,11 @@ initial_conditions = {'x': 0., 'y': 0., 'vx': 0.1, 'vy': 0.}
 
 times = np.linspace(t0, t1, num)
 
-scheme_name = 'ForwardEuler'
-scheme_name = 'RK4'
-scheme_name = 'ImplicitMidpoint'
-# scheme_name = 'AB4'
-# scheme_name = 'BDF2'
+method_name = 'ForwardEuler'
+method_name = 'RK4'
+method_name = 'ImplicitMidpoint'
+# method_name = 'AB4'
+# method_name = 'BDF2'
 
 integrator_name = 'SAND'
 integrator_name = 'MDF'
@@ -31,7 +31,7 @@ integrator_name = 'TM'
 # ode_function = LinearODEFunction()
 ode_function = CannonballODEFunction()
 
-integrator = ODEIntegrator(ode_function, integrator_name, scheme_name,
+integrator = ODEIntegrator(ode_function, integrator_name, method_name,
     times=times, initial_conditions=initial_conditions,
     dynamic_parameters={'g': np.linspace(9.80665, 9.80665, num).reshape((num, 1))})
 

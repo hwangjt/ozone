@@ -9,7 +9,7 @@ from ozone.api import ODEFunction, ODEIntegrator
 from ozone.tests.ode_functions.simple_ode import LinearODEFunction, SimpleODEFunction, \
     NonlinearODEFunction
 from ozone.utils.suppress_printing import nostdout
-from ozone.utils.misc import scheme_families
+from ozone.utils.misc import method_families
 
 
 ode_function = NonlinearODEFunction()
@@ -32,13 +32,13 @@ colors = ['b', 'g', 'r', 'c', 'm', 'k']
 plt.figure(figsize=(20, 15))
 
 plot_index = 0
-for scheme_family_name, scheme_family in iteritems(scheme_families):
-    print(scheme_family_name)
+for method_family_name, method_family in iteritems(method_families):
+    print(method_family_name)
 
     plot_index += 1
     plt.subplot(3, 3, plot_index)
 
-    scheme_name = scheme_family[1]
+    method_name = method_family[1]
 
     for j, integrator_name in enumerate(integrator_names):
 
@@ -47,7 +47,7 @@ for scheme_family_name, scheme_family in iteritems(scheme_families):
         for i, num in enumerate(nums):
             times = np.linspace(t0, t1, num)
 
-            integrator = ODEIntegrator(ode_function, integrator_name, scheme_name,
+            integrator = ODEIntegrator(ode_function, integrator_name, method_name,
                 times=times, initial_conditions=initial_conditions)
             prob = Problem(integrator)
 
@@ -81,7 +81,7 @@ for scheme_family_name, scheme_family in iteritems(scheme_families):
         legend_entries.append(integrator_name)
         legend_entries.append('linear')
 
-    plt.title(scheme_name)
+    plt.title(method_name)
     plt.legend(legend_entries)
 
 plt.savefig("time_vs_stepsize_plots.pdf")

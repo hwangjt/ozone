@@ -9,7 +9,7 @@ from ozone.tests.ode_functions.simple_ode import LinearODEFunction, SimpleODEFun
     NonlinearODEFunction
 from ozone.utils.suppress_printing import nostdout
 from ozone.utils.compute_order import compute_convergence_order, compute_ideal_error
-from ozone.utils.misc import scheme_families
+from ozone.utils.misc import method_families
 
 
 num_time_steps_vector = np.array([10, 15, 20])
@@ -30,18 +30,18 @@ colors = ['b', 'g', 'r', 'c', 'm', 'k', 'y']
 plt.figure(figsize=(30, 15))
 
 plot_index = 0
-for scheme_family_name, scheme_family in iteritems(scheme_families):
+for method_family_name, method_family in iteritems(method_families):
 
-    print(scheme_family_name)
+    print(method_family_name)
 
     plot_index += 1
     plt.subplot(3, 3, plot_index)
 
-    for j, scheme_name in enumerate(scheme_family):
+    for j, method_name in enumerate(method_family):
 
         errors_vector, step_sizes_vector, orders_vector, ideal_order = compute_convergence_order(
             num_time_steps_vector, t0, t1, state_name,
-            ode_function, integrator_name, scheme_name, initial_conditions)
+            ode_function, integrator_name, method_name, initial_conditions)
 
         ideal_step_sizes_vector, ideal_errors_vector = compute_ideal_error(
             step_sizes_vector, errors_vector, ideal_order)
@@ -54,8 +54,8 @@ for scheme_family_name, scheme_family in iteritems(scheme_families):
         print('(Ideal, observed): ', ideal_order, average_order )
 
     legend_entries = []
-    for scheme_name in scheme_family:
-        legend_entries.append(scheme_name)
+    for method_name in method_family:
+        legend_entries.append(method_name)
         legend_entries.append('order %s' % ideal_order)
 
     plt.legend(legend_entries)

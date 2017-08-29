@@ -1,15 +1,15 @@
 import numpy as np
 from six import iteritems
 
-from ozone.schemes.runge_kutta import ForwardEuler, BackwardEuler, ExplicitMidpoint, \
+from ozone.methods.runge_kutta import ForwardEuler, BackwardEuler, ExplicitMidpoint, \
     ImplicitMidpoint, KuttaThirdOrder, RalstonsMethod, HeunsMethod, \
     TrapezoidalRule, RK4, RK6
-from ozone.schemes.runge_kutta import GaussLegendre, LobattoIIIA, Radau
-from ozone.schemes.runge_kutta import RK4ST, RK6ST, KuttaThirdOrderST, ExplicitMidpointST
-from ozone.schemes.multistep import AdamsPEC, AdamsPECE, AB, AM, ABalt, AMalt, BDF
+from ozone.methods.runge_kutta import GaussLegendre, LobattoIIIA, Radau
+from ozone.methods.runge_kutta import RK4ST, RK6ST, KuttaThirdOrderST, ExplicitMidpointST
+from ozone.methods.multistep import AdamsPEC, AdamsPECE, AB, AM, ABalt, AMalt, BDF
 
 
-scheme_classes = {
+method_classes = {
     # First-order methods
     'ForwardEuler': ForwardEuler(),
     'BackwardEuler': BackwardEuler(),
@@ -74,8 +74,8 @@ scheme_classes = {
 }
 
 
-scheme_families = {}
-scheme_families['Basic'] = [
+method_families = {}
+method_families['Basic'] = [
     'ForwardEuler',
     'BackwardEuler',
     'ExplicitMidpoint',
@@ -84,36 +84,36 @@ scheme_families['Basic'] = [
     'RK4',
     'RK6',
 ]
-scheme_families['GaussLegendre'] = [
+method_families['GaussLegendre'] = [
     'GaussLegendre2',
     'GaussLegendre4',
     'GaussLegendre6',
 ]
-scheme_families['Lobatto'] = [
+method_families['Lobatto'] = [
     'Lobatto2',
     'Lobatto4',
 ]
-scheme_families['Radau'] = [
+method_families['Radau'] = [
     'RadauI3',
     'RadauI5',
     'RadauII3',
     'RadauII5',
 ]
-scheme_families['AB'] = [
+method_families['AB'] = [
     'AB1',
     'AB2',
     'AB3',
     'AB4',
     'AB5',
 ]
-scheme_families['AM'] = [
+method_families['AM'] = [
     'AM1',
     'AM2',
     'AM3',
     'AM4',
     'AM5',
 ]
-scheme_families['BDF'] = [
+method_families['BDF'] = [
     'BDF1',
     'BDF2',
     'BDF3',
@@ -121,13 +121,13 @@ scheme_families['BDF'] = [
     'BDF5',
     'BDF6',
 ]
-scheme_families['AdamsPEC'] = [
+method_families['AdamsPEC'] = [
     'AdamsPEC2',
     'AdamsPEC3',
     'AdamsPEC4',
     'AdamsPEC5',
 ]
-scheme_families['AdamsPECE'] = [
+method_families['AdamsPECE'] = [
     'AdamsPECE2',
     'AdamsPECE3',
     'AdamsPECE4',
@@ -135,12 +135,12 @@ scheme_families['AdamsPECE'] = [
 ]
 
 
-def ODEIntegrator(ode_function, integrator_name, scheme_name,
+def ODEIntegrator(ode_function, integrator_name, method_name,
         initial_conditions=None, static_parameters=None, dynamic_parameters=None,
         initial_time=None, final_time=None, normalized_times=None, times=None,
         **kwargs):
-    scheme = get_scheme(scheme_name)
-    explicit = scheme.explicit
+    method = get_method(method_name)
+    explicit = method.explicit
     integrator_class = get_integrator(integrator_name, explicit)
 
     # ------------------------------------------------------------------------------------
@@ -215,7 +215,7 @@ def ODEIntegrator(ode_function, integrator_name, scheme_name,
     if integrator_name == 'SAND' or integrator_name == 'MDF':
         kwargs['formulation'] = integrator_name
 
-    integrator = integrator_class(ode_function=ode_function, scheme=scheme,
+    integrator = integrator_class(ode_function=ode_function, method=method,
         initial_conditions=initial_conditions,
         static_parameters=static_parameters, dynamic_parameters=dynamic_parameters,
         initial_time=initial_time, final_time=final_time, normalized_times=normalized_times,
@@ -235,8 +235,8 @@ def _get_class(name, classes, label):
         return classes[name]
 
 
-def get_scheme(scheme_name):
-    return _get_class(scheme_name, scheme_classes, 'Scheme')
+def get_method(method_name):
+    return _get_class(method_name, method_classes, 'Method')
 
 
 def get_integrator(integrator_name, explicit):

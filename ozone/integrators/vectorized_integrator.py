@@ -12,7 +12,7 @@ from ozone.utils.var_names import get_name
 
 class VectorizedIntegrator(Integrator):
     """
-    Integrate an explicit scheme with a relaxed time-marching approach.
+    Integrate an explicit method with a relaxed time-marching approach.
     """
 
     def initialize(self):
@@ -24,11 +24,11 @@ class VectorizedIntegrator(Integrator):
         super(VectorizedIntegrator, self).setup()
 
         ode_function = self.metadata['ode_function']
-        scheme = self.metadata['scheme']
+        method = self.metadata['method']
         starting_coeffs = self.metadata['starting_coeffs']
         formulation = self.metadata['formulation']
 
-        has_starting_method = scheme.starting_method is not None
+        has_starting_method = method.starting_method is not None
         is_starting_method = starting_coeffs is not None
 
         states = ode_function._states
@@ -38,7 +38,7 @@ class VectorizedIntegrator(Integrator):
 
         starting_norm_times, my_norm_times = self._get_meta()
 
-        glm_A, glm_B, glm_U, glm_V, num_stages, num_step_vars = self._get_scheme()
+        glm_A, glm_B, glm_U, glm_V, num_stages, num_step_vars = self._get_method()
 
         num_time_steps = len(my_norm_times)
 

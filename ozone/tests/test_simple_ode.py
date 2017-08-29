@@ -18,11 +18,11 @@ class Test(unittest.TestCase):
     def setUp(self):
         pass
 
-    def run_ode(self, integrator_name, scheme_name, ode_function):
+    def run_ode(self, integrator_name, method_name, ode_function):
         times = np.linspace(0., 1.e-2, 7)
         y0 = -1.
 
-        integrator = ODEIntegrator(ode_function, integrator_name, scheme_name,
+        integrator = ODEIntegrator(ode_function, integrator_name, method_name,
             times=times, initial_conditions={'y': y0},)
 
         prob = Problem(integrator)
@@ -42,8 +42,8 @@ class Test(unittest.TestCase):
 
         return prob
 
-    def compute_diff(self, integrator_name, scheme_name, ode_function, y_ref):
-        y = self.run_ode(integrator_name, scheme_name, ode_function)['state:y']
+    def compute_diff(self, integrator_name, method_name, ode_function, y_ref):
+        y = self.run_ode(integrator_name, method_name, ode_function)['state:y']
 
         return np.linalg.norm(y - y_ref) / np.linalg.norm(y_ref)
 
@@ -55,17 +55,17 @@ class Test(unittest.TestCase):
             'BDF2', 'BDF3', 'BDF4', 'BDF5', 'BDF6',
             'AdamsPEC2', 'AdamsPEC5',
             'AdamsPECE2', 'AdamsPECE5',
-        ],  # scheme
+        ],  # method
         [LinearODEFunction(), NonlinearODEFunction()],  # ODE Function
         ['TM', 'MDF', 'SAND']
     ))
-    def test_tm(self, scheme_name, ode_function, integrator_name):
+    def test_tm(self, method_name, ode_function, integrator_name):
 
-        y_ref = self.run_ode('TM', scheme_name, ode_function)['state:y']
-        diff = self.compute_diff(integrator_name, scheme_name, ode_function, y_ref)
-        print('%20s %5s %16.9e' % (scheme_name, integrator_name, diff))
+        y_ref = self.run_ode('TM', method_name, ode_function)['state:y']
+        diff = self.compute_diff(integrator_name, method_name, ode_function, y_ref)
+        print('%20s %5s %16.9e' % (method_name, integrator_name, diff))
         self.assertTrue(diff < 1e-10, 'Error when integrating with %s %s' % (
-            integrator_name, scheme_name))
+            integrator_name, method_name))
 
     @parameterized.expand(product(
         ['TM', 'MDF', 'SAND']

@@ -15,12 +15,12 @@ nums = [11, 16, 21, 26, 31, 36]
 # nums = [5]
 # nums = [11, 21, 31, 41]
 
-# scheme_name = 'AdamsPECE3'
-# scheme_name = 'ForwardEuler'
-# scheme_name = 'RK4'
-# scheme_name = 'GaussLegendre6'
-# scheme_name = 'Lobatto4'
-scheme_name = 'RadauI5'
+# method_name = 'AdamsPECE3'
+# method_name = 'ForwardEuler'
+# method_name = 'RK4'
+# method_name = 'GaussLegendre6'
+# method_name = 'Lobatto4'
+method_name = 'RadauI5'
 
 # integrator_name = 'SAND'
 integrator_name = 'MDF'
@@ -46,7 +46,7 @@ for i, num in enumerate(nums):
 
     y_true = np.array([ode_function.compute_exact_soln(initial_conditions, t0, t) for t in times])
 
-    integrator = ODEIntegrator(ode_function, integrator_name, scheme_name,
+    integrator = ODEIntegrator(ode_function, integrator_name, method_name,
         times=times, initial_conditions=initial_conditions)
     prob = Problem(integrator)
 
