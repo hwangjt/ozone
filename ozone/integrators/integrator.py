@@ -221,7 +221,7 @@ class Integrator(Group):
                 self.connect(srcs, tgts)
         else:
             for srcs, tgts, src_indices in zip(srcs_list, tgts_list, src_indices_list):
-                self.connect(srcs, tgts, src_indices=src_indices)
+                self.connect(srcs, tgts, src_indices=src_indices, flat_src_indices=True)
 
     def _create_ode(self, num):
         ode_function = self.metadata['ode_function']
