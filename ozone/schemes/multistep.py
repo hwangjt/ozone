@@ -3,6 +3,7 @@ from __future__ import division
 import numpy as np
 from ozone.schemes.scheme import GLMScheme
 
+
 ab_coeffs = {
     1: np.array([0., 1.]) ,
     2: np.array([0., 3., -1.]) / 2. ,
@@ -19,9 +20,12 @@ am_coeffs = {
 
 
 class Adams(GLMScheme):
+
     def __init__(self, type_, order):
         assert isinstance(order, int) and 2 <= order <= 5, \
             'For Adams methods, order must be between 2 and 5, inclusive'
+
+        self.order = order
 
         if type_ == 'b':
             num_steps = order
@@ -47,7 +51,7 @@ class Adams(GLMScheme):
         V[0, 1:] = coeffs[num_steps][1:]
         V[1, 0] = 0.0
 
-        starting_scheme_name = 'RK4ST'
+        starting_scheme_name = 'RK6ST'
 
         starting_coeffs = np.zeros((num_steps + 1, num_steps + 1, 2))
         starting_coeffs[0, -1, 0] = 1.0
@@ -62,9 +66,16 @@ class Adams(GLMScheme):
 
 
 class AdamsAlt(GLMScheme):
+
     def __init__(self, type_, order):
-        assert isinstance(order, int) and 2 <= order <= 5, \
-            'For Adams methods, order must be between 2 and 5, inclusive'
+        if type_ == 'b':
+            assert isinstance(order, int) and 2 <= order <= 5, \
+                'For Adams--Bashforth methods (alternate), order must be between 2 and 5, inclusive'
+        elif type_ == 'm':
+            assert isinstance(order, int) and 3 <= order <= 5, \
+                'For Adams--Moulton methods (alternate), order must be between 3 and 5, inclusive'
+
+        self.order = order
 
         if type_ == 'b':
             num_steps = order
@@ -87,7 +98,7 @@ class AdamsAlt(GLMScheme):
         U[-1, 0] = 1.0
         U[np.arange(num_steps), np.arange(num_steps)[::-1]] = 1.0
 
-        starting_scheme_name = 'RK4'
+        starting_scheme_name = 'RK6'
 
         starting_coeffs = np.zeros((num_steps, num_steps, 1))
         starting_coeffs[::-1, :, 0] = np.eye(num_steps)
@@ -100,9 +111,12 @@ class AdamsAlt(GLMScheme):
 
 
 class AdamsPEC(GLMScheme):
+
     def __init__(self, order):
         assert isinstance(order, int) and 2 <= order <= 5, \
             'For Adams methods, order must be between 2 and 5, inclusive'
+
+        self.order = order
 
         num_steps = order - 1
 
@@ -121,7 +135,7 @@ class AdamsPEC(GLMScheme):
         V[0, 1:] = am_coeffs[num_steps][1:]
         V[1, 0] = 0.0
 
-        starting_scheme_name = 'RK4ST'
+        starting_scheme_name = 'RK6ST'
 
         starting_coeffs = np.zeros((num_steps + 1, num_steps + 1, 2))
         starting_coeffs[0, -1, 0] = 1.0
@@ -136,9 +150,12 @@ class AdamsPEC(GLMScheme):
 
 
 class AdamsPECE(GLMScheme):
+
     def __init__(self, order):
         assert isinstance(order, int) and 2 <= order <= 5, \
             'For Adams methods, order must be between 2 and 5, inclusive'
+
+        self.order = order
 
         num_steps = order - 1
 
@@ -161,7 +178,7 @@ class AdamsPECE(GLMScheme):
         V[0, 1:] = am_coeffs[num_steps][1:]
         V[1, 0] = 0.0
 
-        starting_scheme_name = 'RK4ST'
+        starting_scheme_name = 'RK6ST'
 
         starting_coeffs = np.zeros((num_steps + 1, num_steps + 1, 2))
         starting_coeffs[0, -1, 0] = 1.0
@@ -176,29 +193,44 @@ class AdamsPECE(GLMScheme):
 
 
 class AB(Adams):
+
     def __init__(self, order):
+        self.order = order
+
         super(AB, self).__init__('b', order)
 
 
 class AM(Adams):
+
     def __init__(self, order):
+        self.order = order
+
         super(AM, self).__init__('m', order)
 
 
 class ABalt(AdamsAlt):
+
     def __init__(self, order):
+        self.order = order
+
         super(ABalt, self).__init__('b', order)
 
 
 class AMalt(AdamsAlt):
+
     def __init__(self, order):
+        self.order = order
+
         super(AMalt, self).__init__('m', order)
 
 
 class BDF(GLMScheme):
+
     def __init__(self, num_steps):
         assert isinstance(num_steps, int) and 2 <= num_steps <= 6, \
             'For BDF, num_steps must be between 2 and 6, inclusive'
+
+        self.order = num_steps
 
         A = np.zeros((1, 1))
         U = np.zeros((1, num_steps))
@@ -226,7 +258,7 @@ class BDF(GLMScheme):
         U[0, :] = y_coeffs[num_steps]
         V[0, :] = y_coeffs[num_steps]
 
-        starting_scheme_name = 'RK4'
+        starting_scheme_name = 'RK6'
 
         starting_coeffs = np.zeros((num_steps, num_steps, 1))
         starting_coeffs[::-1, :, 0] = np.eye(num_steps)

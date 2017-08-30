@@ -75,13 +75,13 @@ class VectorizedStageComp(ExplicitComponent):
             # -----------------
 
             # (num_time_steps - 1, num_stages, num_stages,) + shape
-            rows = np.einsum('ij...,k->ijk...', Y_arange, np.ones(num_stages)).flatten()
+            rows = np.einsum('ij...,k->ijk...', Y_arange, np.ones(num_stages, int)).flatten()
 
             cols = np.einsum('jk...,i->ijk...',
                 np.ones((num_stages, num_stages,) + shape, int), h_arange).flatten()
             self.declare_partials(Y_out_name, 'h_vec', rows=rows, cols=cols)
 
-            cols = np.einsum('ik...,j->ijk...', F_arange, np.ones(num_stages)).flatten()
+            cols = np.einsum('ik...,j->ijk...', F_arange, np.ones(num_stages, int)).flatten()
             self.declare_partials(Y_out_name, F_name, rows=rows, cols=cols)
 
             # -----------------
@@ -111,7 +111,7 @@ class VectorizedStageComp(ExplicitComponent):
                 + np.einsum('jk,i,ik...->ij...', glm_A, inputs['h_vec'], inputs[F_name]) \
                 + np.einsum('jk,ik...->ij...', glm_U, inputs[y_name][:-1, :, :])
 
-    def compute_partials(self, inputs, outputs, partials):
+    def compute_partials(self, inputs, partials):
         time_units = self.metadata['time_units']
         num_time_steps = self.metadata['num_time_steps']
         num_stages = self.metadata['num_stages']

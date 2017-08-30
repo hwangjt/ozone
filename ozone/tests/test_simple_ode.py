@@ -33,7 +33,7 @@ class Test(unittest.TestCase):
             prob.driver.options['tol'] = 1e-9
             prob.driver.options['disp'] = True
 
-            integrator.add_subsystem('dummy_comp', IndepVarComp('dummy_var', val=1.0))
+            integrator.add_subsystem('dummy_comp', IndepVarComp('dummy_var'))
             integrator.add_objective('dummy_comp.dummy_var')
 
         with suppress_stdout_stderr():

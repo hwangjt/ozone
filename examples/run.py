@@ -1,7 +1,7 @@
 import numpy as np
 import time
 
-from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp, view_model
+from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp, view_model, ExecComp
 
 from ozone.api import ODEFunction, ODEIntegrator
 from ozone.tests.ode_functions.simple_ode import NonlinearODEFunction, LinearODEFunction, \
@@ -9,7 +9,7 @@ from ozone.tests.ode_functions.simple_ode import NonlinearODEFunction, LinearODE
 from ozone.tests.ode_functions.cannonball import CannonballODEFunction
 
 
-num = 400
+num = 3
 
 t0 = 0.
 t1 = 1.e-2
@@ -18,19 +18,22 @@ initial_conditions = {'x': 0., 'y': 0., 'vx': 0.1, 'vy': 0.}
 
 times = np.linspace(t0, t1, num)
 
+scheme_name = 'ForwardEuler'
+scheme_name = 'RK4'
 scheme_name = 'ImplicitMidpoint'
-# scheme_name = 'AB2'
+# scheme_name = 'AB4'
 # scheme_name = 'BDF2'
 
 integrator_name = 'SAND'
 integrator_name = 'MDF'
-# integrator_name = 'TM'
+integrator_name = 'TM'
 
-# ode_function = NonlinearODEFunction()
+# ode_function = LinearODEFunction()
 ode_function = CannonballODEFunction()
 
 integrator = ODEIntegrator(ode_function, integrator_name, scheme_name,
-    times=times, initial_conditions=initial_conditions)
+    times=times, initial_conditions=initial_conditions,
+    dynamic_parameters={'g': np.linspace(9.80665, 9.80665, num).reshape((num, 1))})
 
 prob = Problem(integrator)
 
@@ -40,7 +43,7 @@ if integrator_name == 'SAND':
     prob.driver.options['tol'] = 1e-9
     prob.driver.options['disp'] = True
 
-    integrator.add_subsystem('dummy_comp', IndepVarComp('dummy_var', val=1.0))
+    integrator.add_subsystem('dummy_comp', IndepVarComp('dummy_var'))
     integrator.add_objective('dummy_comp.dummy_var')
 
 prob.setup()
@@ -49,6 +52,9 @@ prob.run_driver()
 time1 = time.time()
 # prob.check_partials(compact_print=True)
 # prob.check_partials(compact_print=False)
+
+view_model(prob)
+exit()
 
 np.set_printoptions(precision=10)
 
@@ -59,7 +65,6 @@ for key in exact_soln:
         np.linalg.norm(prob['state:%s' % key][-1] - exact_soln[key]))
 print('Runtime (s):', time1 - time0)
 # print(prob['starting:y'])
-# view_model(prob)
 
 import matplotlib.pyplot as plt
 plt.plot(prob['state:x'], prob['state:y'])

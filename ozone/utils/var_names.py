@@ -1,6 +1,6 @@
 # F Y y_old y_new Y_in Y_out
 # initial_conditions ode_inputs ode_states ode_outputs
-# ode_ICs params states outputs
+# ode_initial_conditions params states outputs
 
 def get_name(var_type, state_name, i_step=None, i_stage=None, j_stage=None):
     name = '{}:{}'.format(var_type, state_name)
