@@ -8,7 +8,7 @@ from ozone.methods_list import get_method
 
 
 def compute_convergence_order(num_times_vector, t0, t1, state_name,
-        ode_function, integrator_name, method_name, initial_conditions):
+        ode_function, formulation, method_name, initial_conditions):
 
     num = len(num_times_vector)
 
@@ -19,7 +19,7 @@ def compute_convergence_order(num_times_vector, t0, t1, state_name,
     for ind, num_times in enumerate(num_times_vector):
         times = np.linspace(t0, t1, num_times)
 
-        integrator = ODEIntegrator(ode_function, integrator_name, method_name,
+        integrator = ODEIntegrator(ode_function, formulation, method_name,
             times=times, initial_conditions=initial_conditions)
         prob = Problem(integrator)
 

@@ -24,20 +24,20 @@ method_name = 'ImplicitMidpoint'
 # method_name = 'AB4'
 # method_name = 'BDF2'
 
-integrator_name = 'optimizer-based'
-integrator_name = 'solver-based'
-integrator_name = 'time-marching'
+formulation = 'optimizer-based'
+formulation = 'solver-based'
+formulation = 'time-marching'
 
 # ode_function = LinearODEFunction()
 ode_function = CannonballODEFunction()
 
-integrator = ODEIntegrator(ode_function, integrator_name, method_name,
+integrator = ODEIntegrator(ode_function, formulation, method_name,
     times=times, initial_conditions=initial_conditions,
     dynamic_parameters={'g': np.linspace(9.80665, 9.80665, num).reshape((num, 1))})
 
 prob = Problem(integrator)
 
-if integrator_name == 'optimizer-based':
+if formulation == 'optimizer-based':
     prob.driver = ScipyOptimizer()
     prob.driver.options['optimizer'] = 'SLSQP'
     prob.driver.options['tol'] = 1e-9

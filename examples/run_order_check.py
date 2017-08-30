@@ -22,9 +22,9 @@ nums = [11, 16, 21, 26, 31, 36]
 # method_name = 'Lobatto4'
 method_name = 'RadauI5'
 
-# integrator_name = 'optimizer-based'
-integrator_name = 'solver-based'
-# integrator_name = 'time-marching'
+# formulation = 'optimizer-based'
+formulation = 'solver-based'
+# formulation = 'time-marching'
 
 t0 = 0.
 t1 = 1.
@@ -46,11 +46,11 @@ for i, num in enumerate(nums):
 
     y_true = np.array([ode_function.compute_exact_soln(initial_conditions, t0, t) for t in times])
 
-    integrator = ODEIntegrator(ode_function, integrator_name, method_name,
+    integrator = ODEIntegrator(ode_function, formulation, method_name,
         times=times, initial_conditions=initial_conditions)
     prob = Problem(integrator)
 
-    if integrator_name == 'optimizer-based':
+    if formulation == 'optimizer-based':
         prob.driver = ScipyOptimizer()
         prob.driver.options['optimizer'] = 'SLSQP'
         prob.driver.options['tol'] = 1e-9

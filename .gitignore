@@ -7,3 +7,4 @@
 *.out
 *visualization*
 *DS_Store*
+*_build*

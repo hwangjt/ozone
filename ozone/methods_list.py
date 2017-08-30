@@ -79,15 +79,34 @@ method_classes = {
 }
 
 
+family_names = [
+    'ExplicitRungeKutta',
+    'ImplicitRungeKutta',
+    'GaussLegendre',
+    'Lobatto',
+    'Radau',
+    'AB',
+    'AM',
+    'ABalt',
+    'AMalt',
+    'BDF',
+    'AdamsPEC',
+    'AdamsPECE',
+]
+
+
 method_families = {}
-method_families['Basic'] = [
+method_families['ExplicitRungeKutta'] = [
     'ForwardEuler',
-    'BackwardEuler',
     'ExplicitMidpoint',
-    'ImplicitMidpoint',
     'KuttaThirdOrder',
     'RK4',
     'RK6',
+]
+method_families['ImplicitRungeKutta'] = [
+    'BackwardEuler',
+    'ImplicitMidpoint',
+    'Trapezoidal',
 ]
 method_families['GaussLegendre'] = [
     'GaussLegendre2',
@@ -105,18 +124,27 @@ method_families['Radau'] = [
     'RadauII5',
 ]
 method_families['AB'] = [
-    'AB1',
     'AB2',
     'AB3',
     'AB4',
     'AB5',
 ]
 method_families['AM'] = [
-    'AM1',
     'AM2',
     'AM3',
     'AM4',
     'AM5',
+]
+method_families['ABalt'] = [
+    'ABalt2',
+    'ABalt3',
+    'ABalt4',
+    'ABalt5',
+]
+method_families['AMalt'] = [
+    'AMalt3',
+    'AMalt4',
+    'AMalt5',
 ]
 method_families['BDF'] = [
     'BDF1',

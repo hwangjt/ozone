@@ -24,7 +24,7 @@ nums = [21, 26, 31, 36]
 # nums = [5]
 # nums = [11, 21, 31, 41]
 
-integrator_names = ['time-marching', 'solver-based', 'optimizer-based']
+formulations = ['time-marching', 'solver-based', 'optimizer-based']
 
 colors = ['b', 'g', 'r', 'c', 'm', 'k']
 
@@ -40,18 +40,18 @@ for method_family_name, method_family in iteritems(method_families):
 
     method_name = method_family[1]
 
-    for j, integrator_name in enumerate(integrator_names):
+    for j, formulation in enumerate(formulations):
 
         step_sizes = np.zeros(len(nums))
         run_times = np.zeros(len(nums))
         for i, num in enumerate(nums):
             times = np.linspace(t0, t1, num)
 
-            integrator = ODEIntegrator(ode_function, integrator_name, method_name,
+            integrator = ODEIntegrator(ode_function, formulation, method_name,
                 times=times, initial_conditions=initial_conditions)
             prob = Problem(integrator)
 
-            if integrator_name == 'optimizer-based':
+            if formulation == 'optimizer-based':
                 prob.driver = ScipyOptimizer()
                 prob.driver.options['optimizer'] = 'SLSQP'
                 prob.driver.options['tol'] = 1e-9
@@ -77,8 +77,8 @@ for method_family_name, method_family in iteritems(method_families):
         )
 
     legend_entries = []
-    for integrator_name in integrator_names:
-        legend_entries.append(integrator_name)
+    for formulation in formulations:
+        legend_entries.append(formulation)
         legend_entries.append('linear')
 
     plt.title(method_name)

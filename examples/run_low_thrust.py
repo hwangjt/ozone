@@ -209,9 +209,9 @@ if __name__ == '__main__':
     # method_name = 'GaussLegendre4'
     # method_name = 'BDF2'
 
-    integrator_name = 'optimizer-based'
-    integrator_name = 'solver-based'
-    # integrator_name = 'time-marching'
+    formulation = 'optimizer-based'
+    formulation = 'solver-based'
+    # formulation = 'time-marching'
 
     prob = Problem()
 
@@ -224,7 +224,7 @@ if __name__ == '__main__':
     comp.add_design_var('b') #, lower=0., upper=2 * np.pi)
     prob.model.add_subsystem('inputs', comp, promotes=['*'])
 
-    group = ODEIntegrator(ode_function, integrator_name, method_name,
+    group = ODEIntegrator(ode_function, formulation, method_name,
         times=times, initial_conditions=initial_conditions)
     group.add_constraint('state:r', indices=[num-1], )
     prob.model.add_subsystem('integrator', group, promotes=['*'])

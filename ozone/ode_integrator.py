@@ -5,13 +5,51 @@ from ozone.utils.misc import _get_class
 from ozone.methods_list import get_method
 
 
-def ODEIntegrator(ode_function, integrator_name, method_name,
+def ODEIntegrator(ode_function, formulation, method_name,
         initial_conditions=None, static_parameters=None, dynamic_parameters=None,
         initial_time=None, final_time=None, normalized_times=None, times=None,
         **kwargs):
+    """
+    Create and return an OpenMDAO group containing the ODE integrator.
+
+    The returned group can be the model or a part of a larger model in OpenMDAO.
+
+    Parameters
+    ----------
+    ode_function : ODEFunction
+        The ODE function instance representing the 'f' in dy_dt = f(t, y, x).
+    formulation : str
+        Formulation for solving the ODE: 'time-marching', 'solver-based', or 'optimizer-based'.
+    method_name : str
+        The time integration method. The list of methods can be found in the documentation.
+    initial_conditions : dict or None
+        Optional dictionary of initial condition values keyed by state name.
+        If not given here, it must be connected from outside the integrator group.
+    static_parameters : dict or None
+        Optional dictionary of static parameter values keyed by parameter name.
+        If not given here, it must be connected from outside the integrator group.
+    dynamic_parameters : dict or None
+        Optional dictionary of static parameter values keyed by parameter name.
+        If not given here, it must be connected from outside the integrator group.
+    initial_time : float or None
+        Only required if times is not given and not connected from outside the integrator group.
+    final_time : float or None
+        Only required if times is not given and not connected from outside the integrator group.
+    normalized_times : np.ndarray[:]
+        Vector of times given if initial & final times are provided or connected from the outside.
+        If given, this vector is normalized to the [0, 1] interval.
+        Not necessary if times is provided.
+    times : np.ndarray[:]
+        Vector of times required if initial time, final time, and normalized_times are not given.
+
+    Returns
+    -------
+    Group
+        The OpenMDAO Group instance representing the requested integrator.
+    """
     method = get_method(method_name)
     explicit = method.explicit
-    integrator_class = get_integrator(integrator_name, explicit)
+    integrator_class = get_integrator(formulation, explicit)
 
     # ------------------------------------------------------------------------------------
     # time-related option
@@ -19,7 +57,7 @@ def ODEIntegrator(ode_function, integrator_name, method_name,
         'Either normalized_times or times must be provided'
 
     if normalized_times is not None:
-        assert isinstance(normalized_times, np.ndarray) and len(normalized_times) == 1, \
+        assert isinstance(normalized_times, np.ndarray) and len(normalized_times.shape) == 1, \
             'normalized_times must be a 1-D array'
 
     if times is not None:
@@ -82,8 +120,8 @@ def ODEIntegrator(ode_function, integrator_name, method_name,
 
     # ------------------------------------------------------------------------------------
 
-    if integrator_name == 'optimizer-based' or integrator_name == 'solver-based':
-        kwargs['formulation'] = integrator_name
+    if formulation == 'optimizer-based' or formulation == 'solver-based':
+        kwargs['formulation'] = formulation
 
     integrator = integrator_class(ode_function=ode_function, method=method,
         initial_conditions=initial_conditions,
@@ -95,7 +133,7 @@ def ODEIntegrator(ode_function, integrator_name, method_name,
     return integrator
 
 
-def get_integrator(integrator_name, explicit):
+def get_integrator(formulation, explicit):
     from ozone.integrators.explicit_tm_integrator import ExplicitTMIntegrator
     from ozone.integrators.implicit_tm_integrator import ImplicitTMIntegrator
     from ozone.integrators.vectorized_integrator import VectorizedIntegrator
@@ -105,4 +143,4 @@ def get_integrator(integrator_name, explicit):
         'solver-based': VectorizedIntegrator,
         'time-marching': ExplicitTMIntegrator if explicit else ImplicitTMIntegrator,
     }
-    return _get_class(integrator_name, integrator_classes, 'Integrator')
+    return _get_class(formulation, integrator_classes, 'Integrator')
