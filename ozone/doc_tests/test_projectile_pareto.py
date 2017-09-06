@@ -59,13 +59,6 @@ class Test(unittest.TestCase):
                 run_times.append(run_time)
                 names.append(method_name)
 
-        # ax.scatter(errors, run_times)
-        # for method_name, error, run_time in zip(names, errors, run_times):
-        #     ax.annotate(method_name, (error, run_time))
-        #
-        # ax.set_xscale('log')
-        # ax.set_yscale('log')
-
             plt.loglog(errors, run_times, 'o', color=colors[i])
             legend_entries.append(family_name)
 
@@ -76,7 +69,6 @@ class Test(unittest.TestCase):
         plt.ylabel('run time (s)')
         plt.legend(legend_entries)
         plt.show()
-        plt.savefig('john')
 
 
 if __name__ == '__main__':
