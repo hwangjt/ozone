@@ -6,13 +6,13 @@ matplotlib.use('Agg')
 
 class Test(unittest.TestCase):
 
-    def test(self):
+    def test(self, savefig=False):
         import numpy as np
         import matplotlib.pylab as plt
 
         from ozone.tests.ode_functions.simple_ode import LinearODEFunction, SimpleODEFunction, \
             NonlinearODEFunction
-        from ozone.utils.compute_order import compute_convergence_order, compute_ideal_error
+        from ozone.utils.run_utils import compute_convergence_order, compute_ideal_error
         from ozone.methods_list import family_names, method_families
 
         num_times_vector = np.array([10, 15, 20])
@@ -62,5 +62,8 @@ class Test(unittest.TestCase):
             plt.legend(legend_entries)
 
             print()
+
+        if savefig:
+            plt.savefig('order_plot.pdf')
 
         plt.show()

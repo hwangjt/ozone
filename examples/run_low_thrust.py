@@ -1,7 +1,7 @@
 import numpy as np
 import time
 
-from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp, view_model, ExecComp, pyOptSparseDriver, DefaultMultiVector
+from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp, view_model, ExecComp, pyOptSparseDriver
 
 from ozone.api import ODEFunction, ODEIntegrator
 
@@ -236,14 +236,14 @@ if __name__ == '__main__':
         comp = ExecComp('f = -mass')
         comp.add_objective('f')
         prob.model.add_subsystem('objective_comp', comp)
-        prob.model.connect('state:m', 'objective_comp.mass', src_indices=[num - 1])
+        prob.model.connect('state:m', 'objective_comp.mass', src_indices=[num - 1], flat_src_indices=True)
 
         comp = ConstraintComp(rf=final_conditions['r'], vf=final_conditions['v'])
         comp.add_constraint('con_r', equals=0.)
         comp.add_constraint('con_v', equals=0.)
         prob.model.add_subsystem('constraints_comp', comp)
-        prob.model.connect('state:r', 'constraints_comp.r', src_indices=np.arange(3*num - 3, 3*num))
-        prob.model.connect('state:v', 'constraints_comp.v', src_indices=np.arange(3*num - 3, 3*num))
+        prob.model.connect('state:r', 'constraints_comp.r', src_indices=np.arange(3*num - 3, 3*num), flat_src_indices=True)
+        prob.model.connect('state:v', 'constraints_comp.v', src_indices=np.arange(3*num - 3, 3*num), flat_src_indices=True)
     else:
         group.add_subsystem('dummy_comp', IndepVarComp('dummy_var'))
         group.add_objective('dummy_comp.dummy_var')
