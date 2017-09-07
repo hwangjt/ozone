@@ -9,7 +9,7 @@ from ozone.tests.ode_functions.simple_ode import NonlinearODEFunction, LinearODE
 from ozone.tests.ode_functions.cannonball import CannonballODEFunction
 
 
-num = 3
+num = 50
 
 t0 = 0.
 t1 = 1.e-2
@@ -26,7 +26,7 @@ method_name = 'ImplicitMidpoint'
 
 formulation = 'optimizer-based'
 formulation = 'solver-based'
-formulation = 'time-marching'
+# formulation = 'time-marching'
 
 # ode_function = LinearODEFunction()
 ode_function = CannonballODEFunction()
@@ -53,8 +53,8 @@ time1 = time.time()
 # prob.check_partials(compact_print=True)
 # prob.check_partials(compact_print=False)
 
-view_model(prob)
-exit()
+# view_model(prob)
+# exit()
 
 np.set_printoptions(precision=10)
 
