@@ -12,12 +12,13 @@ class Test(unittest.TestCase):
 
         from ozone.tests.ode_functions.simple_ode import LinearODEFunction, SimpleODEFunction, \
             NonlinearODEFunction
-        from ozone.utils.run_utils import compute_convergence_order, compute_ideal_error
+        from ozone.utils.run_utils import compute_runtime, compute_ideal_runtimes
         from ozone.methods_list import family_names, method_families
 
         num_times_vector = np.array([10, 15, 20])
+        num_times_vector = np.array([21, 26, 31, 36])
 
-        ode_function = SimpleODEFunction()
+        ode_function = LinearODEFunction()
 
         initial_conditions = {'y': 1.}
         t0 = 0.
@@ -25,7 +26,7 @@ class Test(unittest.TestCase):
 
         state_name = 'y'
 
-        formulation = 'solver-based'
+        formulations = ['time-marching', 'solver-based', 'optimizer-based']
 
         colors = ['b', 'g', 'r', 'c', 'm', 'k', 'y']
         plt.figure(figsize=(25, 25))
@@ -35,30 +36,30 @@ class Test(unittest.TestCase):
 
         for plot_index, family_name in enumerate(family_names):
             method_family = method_families[family_name]
+            method_name = method_family[1]
 
-            print(method_family)
+            print(method_family, method_name)
 
             plt.subplot(nrow, ncol, plot_index + 1)
 
             legend_entries = []
-            for j, method_name in enumerate(method_family):
 
-                errors_vector, step_sizes_vector, orders_vector, ideal_order = compute_convergence_order(
+            for j, formulation in enumerate(formulations):
+
+                step_sizes_vector, runtimes_vector = compute_runtime(
                     num_times_vector, t0, t1, state_name,
                     ode_function, formulation, method_name, initial_conditions)
 
-                ideal_step_sizes_vector, ideal_errors_vector = compute_ideal_error(
-                    step_sizes_vector, errors_vector, ideal_order)
+                ideal_step_sizes_vector, ideal_runtimes = compute_ideal_runtimes(
+                    step_sizes_vector, runtimes_vector)
 
-                plt.loglog(step_sizes_vector, errors_vector, colors[j] + 'o-')
-                plt.loglog(ideal_step_sizes_vector, ideal_errors_vector, colors[j] + ':')
+                plt.loglog(step_sizes_vector, runtimes_vector, colors[j] + 'o-')
+                plt.loglog(ideal_step_sizes_vector, ideal_runtimes, colors[j] + ':')
 
-                average_order = np.sum(orders_vector) / len(orders_vector)
+                print('({} time): '.format(formulation), runtimes_vector )
 
-                print('(Ideal, observed): ', ideal_order, average_order )
-
-                legend_entries.append(method_name)
-                legend_entries.append('order %s' % ideal_order)
+                legend_entries.append(formulation)
+                legend_entries.append('linear')
 
             irow = int(np.floor(plot_index / ncol))
             icol = plot_index % ncol
@@ -67,7 +68,7 @@ class Test(unittest.TestCase):
             if irow == nrow - 1:
                 plt.xlabel('step size')
             if icol == 0:
-                plt.ylabel('error')
+                plt.ylabel('computation time (s)')
             plt.legend(legend_entries)
 
             print()

@@ -37,7 +37,7 @@ def compute_runtime(num_times_vector, t0, t1, state_name,
             prob.run_driver()
             time1 = time.time()
 
-        step_sizes_vector[ind] = (t1 - t0) / (num - 1)
+        step_sizes_vector[ind] = (t1 - t0) / (num_times - 1)
         runtimes_vector[ind] = time1 - time0
 
     return step_sizes_vector, runtimes_vector

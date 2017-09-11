@@ -29,3 +29,9 @@ as design variables and constraints, respectively, in the optimization problem:
     \text{with respect to} & \quad y_1, y_2 \\
     \text{subject to} & \quad y_1 - y_0 - h f(t, y_1) = 0 \\
     & \quad y_2 - y_1 - h f(t, y_2) = 0 \\
+
+  .. toctree::
+    :maxdepth: 1
+    :titlesonly:
+
+    formulations/timing_plot
