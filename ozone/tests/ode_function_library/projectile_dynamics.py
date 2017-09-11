@@ -46,7 +46,7 @@ class ProjectileFunction(ODEFunction):
         self.declare_state('vx', shape=1, rate_path='dvx_dt', paths=['vx'])
         self.declare_state('vy', shape=1, rate_path='dvy_dt', paths=['vy'])
 
-    def compute_exact_solution(self, initial_conditions, t0, t):
+    def get_exact_solution(self, initial_conditions, t0, t):
         x0 = initial_conditions['x']
         y0 = initial_conditions['y']
         vx0 = initial_conditions['vx']
@@ -93,7 +93,7 @@ def run_projectile(method_name, formulation, num):
     run_time2 = time.time()
 
     final_y = prob['state:y'][-1, 0]
-    exact_final_y = ode_function.compute_exact_solution(initial_conditions, t0, t1)['y']
+    exact_final_y = ode_function.get_exact_solution(initial_conditions, t0, t1)['y']
 
     error = abs(exact_final_y - final_y)
     run_time = run_time2 - run_time1

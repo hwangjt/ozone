@@ -74,7 +74,7 @@ class CannonballODEFunction(ODEFunction):
         self.declare_dynamic_parameter('g', paths=['g'], units='m/s/s')
         self.declare_time(units='s')
 
-    def compute_exact_soln(self, initial_conditions, t0, t):
+    def get_exact_solution(self, initial_conditions, t0, t):
         # y' = -gt + a
         # y = -0.5 g t^2 + a t + b
 

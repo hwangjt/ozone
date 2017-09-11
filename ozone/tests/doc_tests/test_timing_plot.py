@@ -10,15 +10,15 @@ class Test(unittest.TestCase):
         import numpy as np
         import matplotlib.pylab as plt
 
-        from ozone.tests.ode_function_library.simple_ode import LinearODEFunction, SimpleODEFunction, \
-            NonlinearODEFunction
+        from ozone.tests.ode_function_library.simple_linear_ode import \
+            SimpleLinearODEFunction
         from ozone.utils.run_utils import compute_runtime, compute_ideal_runtimes
         from ozone.methods_list import family_names, method_families
 
         num_times_vector = np.array([10, 15, 20])
         num_times_vector = np.array([21, 26, 31, 36])
 
-        ode_function = LinearODEFunction()
+        ode_function = SimpleLinearODEFunction()
 
         initial_conditions = {'y': 1.}
         t0 = 0.

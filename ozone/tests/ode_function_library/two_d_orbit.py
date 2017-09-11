@@ -45,7 +45,7 @@ class TwoDOrbitFunction(ODEFunction):
         self.declare_state('velocity', rate_path='dvel_dt', paths='velocity', shape=2)
         self.declare_time('t')
 
-    def compute_exact_soln(self, initial_conditions, t0, t):
+    def get_exact_solution(self, initial_conditions, t0, t):
         # True solution: 2 / (2*C - t^2)
         # outputs['dy_dt'] = inputs['t'] * np.square(inputs['y'])
 

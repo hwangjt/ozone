@@ -10,14 +10,14 @@ class Test(unittest.TestCase):
         import numpy as np
         import matplotlib.pylab as plt
 
-        from ozone.tests.ode_function_library.simple_ode import \
-            LinearODEFunction, SimpleODEFunction, NonlinearODEFunction
+        from ozone.tests.ode_function_library.simple_homogeneous_ode import \
+            SimpleHomogeneousODEFunction
         from ozone.utils.run_utils import compute_convergence_order, compute_ideal_error
         from ozone.methods_list import family_names, method_families
 
         num_times_vector = np.array([10, 15, 20])
 
-        ode_function = SimpleODEFunction()
+        ode_function = SimpleHomogeneousODEFunction()
 
         initial_conditions = {'y': 1.}
         t0 = 0.

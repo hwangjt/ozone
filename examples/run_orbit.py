@@ -42,7 +42,7 @@ errs = np.zeros(len(nums))
 for i, num in enumerate(nums):
     times = np.linspace(t0, t1, num)
 
-    y_true = np.array([ode_function.compute_exact_soln(initial_conditions, t0, t) for t in times])
+    y_true = np.array([ode_function.get_exact_solution(initial_conditions, t0, t) for t in times])
 
     integrator = ODEIntegrator(ode_function, formulation, method_name,
         times=times, initial_conditions=initial_conditions)
@@ -62,7 +62,7 @@ for i, num in enumerate(nums):
     prob.run_driver()
 
     approx_y = prob['state:position'][-1]
-    true_y = ode_function.compute_exact_soln(initial_conditions, t0, t1)
+    true_y = ode_function.get_exact_solution(initial_conditions, t0, t1)
 
     errs[i] = np.linalg.norm(approx_y - true_y)
 

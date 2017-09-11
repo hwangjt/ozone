@@ -77,7 +77,7 @@ def compute_convergence_order(num_times_vector, t0, t1, state_name,
             prob.run_driver()
 
         approx_y = prob['state:%s' % state_name][-1][0]
-        true_y = ode_function.compute_exact_soln(initial_conditions, t0, t1)[state_name]
+        true_y = ode_function.get_exact_solution(initial_conditions, t0, t1)[state_name]
 
         errors_vector[ind] = np.linalg.norm(approx_y - true_y)
         step_sizes_vector[ind] = (t1 - t0) / (num_times - 1)

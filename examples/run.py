@@ -4,8 +4,6 @@ import time
 from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp, view_model, ExecComp
 
 from ozone.api import ODEFunction, ODEIntegrator
-from ozone.tests.ode_function_library.simple_ode import NonlinearODEFunction, LinearODEFunction, \
-    SimpleODEFunction
 from ozone.tests.ode_function_library.cannonball import CannonballODEFunction
 
 
@@ -58,11 +56,11 @@ time1 = time.time()
 
 np.set_printoptions(precision=10)
 
-exact_soln = ode_function.compute_exact_soln(initial_conditions, t0, t1)
+exact_solution = ode_function.get_exact_solution(initial_conditions, t0, t1)
 
-for key in exact_soln:
+for key in exact_solution:
     print('Error in state %s at final time:' % key,
-        np.linalg.norm(prob['state:%s' % key][-1] - exact_soln[key]))
+        np.linalg.norm(prob['state:%s' % key][-1] - exact_solution[key]))
 print('Runtime (s):', time1 - time0)
 # print(prob['starting:y'])
 

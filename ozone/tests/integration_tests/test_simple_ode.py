@@ -9,7 +9,8 @@ from parameterized import parameterized
 from openmdao.api import Problem, ScipyOptimizer, IndepVarComp
 
 from ozone.api import ODEIntegrator
-from ozone.tests.ode_function_library.simple_ode import LinearODEFunction, NonlinearODEFunction
+from ozone.tests.ode_function_library.simple_linear_ode import SimpleLinearODEFunction
+from ozone.tests.ode_function_library.simple_nonlinear_ode import SimpleNonlinearODEFunction
 from ozone.utils.suppress_printing import suppress_stdout_stderr
 
 
@@ -56,7 +57,7 @@ class Test(unittest.TestCase):
             'AdamsPEC2', 'AdamsPEC5',
             'AdamsPECE2', 'AdamsPECE5',
         ],  # method
-        [LinearODEFunction(), NonlinearODEFunction()],  # ODE Function
+        [SimpleLinearODEFunction(), SimpleNonlinearODEFunction()],  # ODE Function
         ['time-marching', 'solver-based', 'optimizer-based']
     ))
     def test_tm(self, method_name, ode_function, formulation):
@@ -71,7 +72,7 @@ class Test(unittest.TestCase):
         ['time-marching', 'solver-based', 'optimizer-based']
     ))
     def test_derivs(self, formulation):
-        ode_function = NonlinearODEFunction()
+        ode_function = SimpleNonlinearODEFunction()
         prob = self.run_ode(formulation, 'ForwardEuler', ode_function)
         with suppress_stdout_stderr():
             jac = prob.check_partials(compact_print=True)
