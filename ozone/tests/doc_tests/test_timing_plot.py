@@ -12,7 +12,7 @@ class Test(unittest.TestCase):
 
         from ozone.tests.ode_function_library.simple_linear_func import \
             SimpleLinearODEFunction
-        from ozone.utils.run_utils import compute_runtime, compute_ideal_runtimes
+        from ozone.utils.run_utils import compute_runtimes, compute_ideal_runtimes
         from ozone.methods_list import family_names, method_families
 
         num_times_vector = np.array([10, 15, 20])
@@ -46,8 +46,8 @@ class Test(unittest.TestCase):
 
             for j, formulation in enumerate(formulations):
 
-                step_sizes_vector, runtimes_vector = compute_runtime(
-                    num_times_vector, t0, t1, state_name,
+                step_sizes_vector, runtimes_vector = compute_runtimes(
+                    num_times_vector, t0, t1,
                     ode_function, formulation, method_name, initial_conditions)
 
                 ideal_step_sizes_vector, ideal_runtimes = compute_ideal_runtimes(

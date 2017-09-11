@@ -6,6 +6,7 @@ import matplotlib
 matplotlib.use('Agg')
 
 from ozone.api import ODEIntegrator
+from ozone.utils.run_utils import run_integration
 
 
 class OzoneODETestCase(unittest.TestCase):
@@ -13,28 +14,18 @@ class OzoneODETestCase(unittest.TestCase):
     def run_error_test(self):
         from openmdao.api import Problem
 
-        ode_function = self.ode_function_class()
-        initial_conditions, t0, t1 = ode_function.get_default_parameters()
-        exact_solution = ode_function.get_exact_solution(initial_conditions, t0, t1)
-
-        num = 100
-
-        times = np.linspace(t0, t1, num)
-
+        num_times = 100
         method_name = 'RK4'
         formulation = 'solver-based'
 
-        integrator = ODEIntegrator(ode_function, formulation, method_name,
-            times=times, initial_conditions=initial_conditions,
-        )
+        ode_function = self.ode_function_class()
+        initial_conditions, t0, t1 = ode_function.get_default_parameters()
 
-        prob = Problem(integrator)
-        prob.setup()
-        prob.run_model()
+        runtime, errors = run_integration(
+            num_times, t0, t1, initial_conditions, ode_function, formulation, method_name)
 
-        for key in exact_solution:
-            error = np.linalg.norm(prob['state:%s' % key][-1] - exact_solution[key])
-            self.assertTrue(error < 1e-2)
+        for key in errors:
+            self.assertTrue(errors[key] < 1e-2)
 
     def run_partials_test(self):
         from openmdao.api import Problem

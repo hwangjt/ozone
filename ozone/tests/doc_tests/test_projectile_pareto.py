@@ -10,18 +10,26 @@ class Test(unittest.TestCase):
         import numpy as np
         import matplotlib.pylab as plt
 
-        from ozone.tests.ode_function_library.projectile_dynamics import run_projectile
+        from ozone.tests.ode_function_library.projectile_dynamics_func import ProjectileFunction
         from ozone.methods_list import family_names, method_families
+        from ozone.utils.run_utils import run_integration
 
-        num = 100
+        num_times = 100
 
-        initial_conditions = {'y': 1.}
         t0 = 0.
         t1 = 1.
+        initial_conditions = {
+            'x': 0.,
+            'y': 0.,
+            'vx': 1.,
+            'vy': 1.,
+        }
 
         state_name = 'y'
 
         formulation = 'solver-based'
+
+        ode_function = ProjectileFunction()
 
         plt.figure(figsize=(25, 25))
         fig, ax = plt.subplots()
@@ -53,7 +61,10 @@ class Test(unittest.TestCase):
 
             for j, method_name in enumerate(method_family):
 
-                error, run_time = run_projectile(method_name, 'solver-based', num)
+                run_time, errors_ = run_integration(
+                    num_times, t0, t1, initial_conditions, ode_function, formulation, method_name)
+
+                error = errors_[state_name]
 
                 errors.append(error)
                 run_times.append(run_time)

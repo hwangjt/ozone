@@ -104,6 +104,8 @@ Simple linear ODE
   prob.run_model()
   
   plt.plot(prob['times'], prob['state:y'])
+  plt.xlabel('time (s)')
+  plt.ylabel('y')
   plt.show()
   
 ::

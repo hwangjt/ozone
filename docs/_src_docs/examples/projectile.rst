@@ -75,13 +75,15 @@ Projectile dynamics ODE
           return initial_conditions, t0, t1
   
       def get_exact_solution(self, initial_conditions, t0, t):
+          g = -9.81
+  
           x0 = initial_conditions['x']
           y0 = initial_conditions['y']
           vx0 = initial_conditions['vx']
           vy0 = initial_conditions['vy']
   
           x = x0 + vx0 * (t - t0)
-          y = y0 + vy0 * (t - t0) - 0.5 * g * (t - t0) ** 2
+          y = y0 + vy0 * (t - t0) + 0.5 * g * (t - t0) ** 2
           vx = vx0
           vy = vy0 + g * (t - t0)
           return {'x': x, 'y': y, 'vx': vx, 'vy': vy}
@@ -125,6 +127,8 @@ Projectile dynamics ODE
   prob.run_model()
   
   plt.plot(prob['state:x'], prob['state:y'])
+  plt.xlabel('x')
+  plt.ylabel('y')
   plt.show()
   
 ::

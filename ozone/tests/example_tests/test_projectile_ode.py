@@ -44,4 +44,6 @@ class TestCase(OzoneODETestCase):
         prob.run_model()
 
         plt.plot(prob['state:x'], prob['state:y'])
+        plt.xlabel('x')
+        plt.ylabel('y')
         plt.show()

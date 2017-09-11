@@ -9,3 +9,5 @@ ODEFunction
   .. automethod:: ozone.ode_function.ODEFunction.declare_state
   .. automethod:: ozone.ode_function.ODEFunction.declare_static_parameter
   .. automethod:: ozone.ode_function.ODEFunction.declare_dynamic_parameter
+  .. automethod:: ozone.ode_function.ODEFunction.get_default_parameters
+  .. automethod:: ozone.ode_function.ODEFunction.get_exact_solution

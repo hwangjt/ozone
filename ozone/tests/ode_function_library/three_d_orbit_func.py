@@ -22,7 +22,8 @@ class ThreeDOrbitFunction(ODEFunction):
         v_scal = 1e3  if 'a' not in self._system_init_kwargs else self._system_init_kwargs['v_scal']
 
         t0 = 0.
-        t1 = 348.795 * 24 * 36001
+        t1 = 3600
+        # t1 = 348.795 * 24 * 3600
 
         initial_conditions = {
             'r': np.array([ -140699693 , -51614428 , 980 ]) * 1e3 / r_scal,

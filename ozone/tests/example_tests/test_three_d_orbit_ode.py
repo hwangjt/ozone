@@ -47,4 +47,6 @@ class TestCase(OzoneODETestCase):
 
         au = 149597870.7 * 1e3 / r_scal
         plt.plot(prob['state:r'][:, 0] / au, prob['state:r'][:, 1] / au, '-o')
+        plt.xlabel('x')
+        plt.ylabel('y')
         plt.show()

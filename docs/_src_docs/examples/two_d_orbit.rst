@@ -116,6 +116,8 @@
   prob.run_model()
   
   plt.plot(prob['state:position'][:, 0], prob['state:position'][:, 1])
+  plt.xlabel('x')
+  plt.ylabel('y')
   plt.show()
   
 ::

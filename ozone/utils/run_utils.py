@@ -8,7 +8,38 @@ from ozone.utils.suppress_printing import nostdout
 from ozone.methods_list import get_method
 
 
-def compute_runtime(num_times_vector, t0, t1, state_name,
+def run_integration(num_times, t0, t1, initial_conditions, ode_function, formulation, method_name):
+    exact_solution = ode_function.get_exact_solution(initial_conditions, t0, t1)
+    times = np.linspace(t0, t1, num_times)
+
+    integrator = ODEIntegrator(ode_function, formulation, method_name,
+        times=times, initial_conditions=initial_conditions)
+    prob = Problem(integrator)
+
+    if formulation == 'optimizer-based':
+        prob.driver = ScipyOptimizer()
+        prob.driver.options['optimizer'] = 'SLSQP'
+        prob.driver.options['tol'] = 1e-9
+        prob.driver.options['disp'] = True
+
+        integrator.add_subsystem('dummy_comp', IndepVarComp('dummy_var', val=1.0))
+        integrator.add_objective('dummy_comp.dummy_var')
+
+    with nostdout():
+        prob.setup()
+        runtime0 = time.time()
+        prob.run_driver()
+        runtime1 = time.time()
+
+    runtime = runtime1 - runtime0
+    errors = {}
+    for key in exact_solution:
+        errors[key] = np.linalg.norm(prob['state:%s' % key][-1] - exact_solution[key])
+
+    return runtime, errors
+
+
+def compute_runtimes(num_times_vector, t0, t1,
         ode_function, formulation, method_name, initial_conditions):
     num = len(num_times_vector)
 
@@ -16,29 +47,11 @@ def compute_runtime(num_times_vector, t0, t1, state_name,
     runtimes_vector = np.zeros(num)
 
     for ind, num_times in enumerate(num_times_vector):
-        times = np.linspace(t0, t1, num_times)
-
-        integrator = ODEIntegrator(ode_function, formulation, method_name,
-            times=times, initial_conditions=initial_conditions)
-        prob = Problem(integrator)
-
-        if formulation == 'optimizer-based':
-            prob.driver = ScipyOptimizer()
-            prob.driver.options['optimizer'] = 'SLSQP'
-            prob.driver.options['tol'] = 1e-9
-            prob.driver.options['disp'] = True
-
-            integrator.add_subsystem('dummy_comp', IndepVarComp('dummy_var', val=1.0))
-            integrator.add_objective('dummy_comp.dummy_var')
-
-        with nostdout():
-            prob.setup()
-            time0 = time.time()
-            prob.run_driver()
-            time1 = time.time()
+        runtime, errors = run_integration(
+            num_times, t0, t1, initial_conditions, ode_function, formulation, method_name)
 
         step_sizes_vector[ind] = (t1 - t0) / (num_times - 1)
-        runtimes_vector[ind] = time1 - time0
+        runtimes_vector[ind] = runtime
 
     return step_sizes_vector, runtimes_vector
 
