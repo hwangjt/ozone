@@ -3,9 +3,8 @@ from scipy import sparse, linalg
 
 from openmdao.api import ExplicitComponent
 
-from ozone.api import ODEFunction
 
-class TwoDOrbit(ExplicitComponent):
+class TwoDOrbitSystem(ExplicitComponent):
 
     def initialize(self):
         self.metadata.declare('num', default=1, type_=int)
@@ -36,18 +35,3 @@ class TwoDOrbit(ExplicitComponent):
                                   [3*x*y, 2*y**2 - x**2]])
         num = self.metadata['num']
         partials['dvel_dt', 'position'] = linalg.block_diag(*(jac[..., i] for i in range(num)))
-
-class TwoDOrbitFunction(ODEFunction):
-
-    def initialize(self):
-        self.set_system(TwoDOrbit)
-        self.declare_state('position', rate_path='dpos_dt', paths='position', shape=2)
-        self.declare_state('velocity', rate_path='dvel_dt', paths='velocity', shape=2)
-        self.declare_time('t')
-
-    def get_exact_solution(self, initial_conditions, t0, t):
-        # True solution: 2 / (2*C - t^2)
-        # outputs['dy_dt'] = inputs['t'] * np.square(inputs['y'])
-
-        ecc = 1 - initial_conditions['position'][0]
-        return np.array([-1 - ecc, 0])
