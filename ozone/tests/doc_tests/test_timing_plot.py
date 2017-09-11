@@ -10,7 +10,7 @@ class Test(unittest.TestCase):
         import numpy as np
         import matplotlib.pylab as plt
 
-        from ozone.tests.ode_function_library.simple_linear_ode import \
+        from ozone.tests.ode_function_library.simple_linear_func import \
             SimpleLinearODEFunction
         from ozone.utils.run_utils import compute_runtime, compute_ideal_runtimes
         from ozone.methods_list import family_names, method_families

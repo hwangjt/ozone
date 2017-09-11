@@ -1,5 +1,5 @@
 from ozone.utils.test_utils import OzoneODETestCase
-from ozone.tests.ode_function_library.simple_linear_ode import SimpleLinearODEFunction
+from ozone.tests.ode_function_library.simple_linear_func import SimpleLinearODEFunction
 
 
 class TestCase(OzoneODETestCase):

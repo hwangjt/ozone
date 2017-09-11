@@ -64,7 +64,7 @@ the states, parameters, variable shapes, etc.
 .. code-block:: python
 
   from ozone.api import ODEFunction
-  from ozone.tests.ode_function_library.getting_started_ode_system import GettingStartedODESystem
+  from ozone.tests.ode_function_library.getting_started_ode_sys import GettingStartedODESystem
   
   
   class GettingStartedODEFunction(ODEFunction):
@@ -92,7 +92,7 @@ The run script, resulting terminal output, and resulting plot are shown below.
   from openmdao.api import Problem
   
   from ozone.api import ODEIntegrator
-  from ozone.tests.ode_function_library.getting_started_ode_function \
+  from ozone.tests.ode_function_library.getting_started_ode_func \
       import GettingStartedODEFunction
   
   # Instantiate our ODE function; use the solver-based formulation;

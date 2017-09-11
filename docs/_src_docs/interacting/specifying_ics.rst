@@ -17,7 +17,7 @@ when calling :code:`ODEIntegrator`:
   from openmdao.api import Problem
   
   from ozone.api import ODEIntegrator
-  from ozone.tests.ode_function_library.getting_started_ode_function \
+  from ozone.tests.ode_function_library.getting_started_ode_func \
       import GettingStartedODEFunction
   
   ode_function = GettingStartedODEFunction()
@@ -58,7 +58,7 @@ they must be connected from an external component:
   from openmdao.api import Problem, IndepVarComp
   
   from ozone.api import ODEIntegrator
-  from ozone.tests.ode_function_library.getting_started_ode_function \
+  from ozone.tests.ode_function_library.getting_started_ode_func \
       import GettingStartedODEFunction
   
   ode_function = GettingStartedODEFunction()

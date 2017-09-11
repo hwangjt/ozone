@@ -10,7 +10,7 @@ class Test(unittest.TestCase):
         import numpy as np
         import matplotlib.pylab as plt
 
-        from ozone.tests.ode_function_library.simple_homogeneous_ode import \
+        from ozone.tests.ode_function_library.simple_homogeneous_func import \
             SimpleHomogeneousODEFunction
         from ozone.utils.run_utils import compute_convergence_order, compute_ideal_error
         from ozone.methods_list import family_names, method_families

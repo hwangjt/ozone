@@ -13,7 +13,7 @@ class Test(unittest.TestCase):
         from openmdao.api import Problem
 
         from ozone.api import ODEIntegrator
-        from ozone.tests.ode_function_library.getting_started_ode_function \
+        from ozone.tests.ode_function_library.getting_started_ode_func \
             import GettingStartedODEFunction
 
         # Instantiate our ODE function; use the solver-based formulation;
@@ -46,7 +46,7 @@ class Test(unittest.TestCase):
         from openmdao.api import Problem, ScipyOptimizer, IndepVarComp, ExecComp
 
         from ozone.api import ODEIntegrator
-        from ozone.tests.ode_function_library.getting_started_oc_function \
+        from ozone.tests.ode_function_library.getting_started_oc_func \
             import GettingStartedOCFunction
 
         num = 21

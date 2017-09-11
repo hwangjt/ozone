@@ -59,7 +59,7 @@ for i, num in enumerate(nums):
 
     prob.setup()
     # prob['coupled_group.vectorized_step_comp.y:y'] = y_true.reshape((num, 1 ,1))
-    prob.run_driver()
+    print(prob.run_model())
 
     approx_y = prob['state:position'][-1]
     true_y = ode_function.get_exact_solution(initial_conditions, t0, t1)

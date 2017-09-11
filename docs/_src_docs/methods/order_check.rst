@@ -8,7 +8,7 @@ The output table is shown below.
 
   import numpy as np
   
-  from ozone.tests.ode_function_library.simple_ode import NonlinearODEFunction
+  from ozone.tests.ode_function_library.simple_nonlinear_func import SimpleNonlinearODEFunction
   from ozone.utils.run_utils import compute_convergence_order
   
   
@@ -16,7 +16,7 @@ The output table is shown below.
   method_name = 'ImplicitMidpoint'
   formulation = 'solver-based'
   
-  ode_function = NonlinearODEFunction()
+  ode_function = SimpleNonlinearODEFunction()
   state_name = 'y'
   initial_conditions = {'y': 1.}
   t0 = 0.
