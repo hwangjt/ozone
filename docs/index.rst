@@ -44,6 +44,7 @@ Documentation
    _src_docs/interacting
    _src_docs/methods
    _src_docs/formulations
+   _src_docs/examples
 
 Indices and tables
 ==================

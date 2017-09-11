@@ -1,10 +1,10 @@
 from ozone.utils.test_utils import OzoneODETestCase
-from ozone.tests.ode_function_library.two_d_orbit_func import TwoDOrbitFunction
+from ozone.tests.ode_function_library.projectile_dynamics_func import ProjectileFunction
 
 
 class TestCase(OzoneODETestCase):
 
-    ode_function_class = TwoDOrbitFunction
+    ode_function_class = ProjectileFunction
 
     def test(self):
         self.run_error_test()
@@ -15,17 +15,18 @@ class TestCase(OzoneODETestCase):
         import matplotlib.pyplot as plt
         from openmdao.api import Problem
         from ozone.api import ODEIntegrator
-        from ozone.tests.ode_function_library.two_d_orbit_func import TwoDOrbitFunction
+        from ozone.tests.ode_function_library.projectile_dynamics_func import ProjectileFunction
 
-        ode_function = TwoDOrbitFunction()
+        ode_function = ProjectileFunction()
 
-        ecc = 1 / 2
+        t0 = 0.
+        t1 = 1.
         initial_conditions = {
-            'position': np.array([1 - ecc, 0]),
-            'velocity': np.array([0, np.sqrt((1+ecc) / (1 - ecc))])
+            'x': 0.,
+            'y': 0.,
+            'vx': 1.,
+            'vy': 1.,
         }
-        t0 = 0. * np.pi
-        t1 = 1. * np.pi
 
         num = 100
 
@@ -42,5 +43,5 @@ class TestCase(OzoneODETestCase):
         prob.setup()
         prob.run_model()
 
-        plt.plot(prob['state:position'][:, 0], prob['state:position'][:, 1])
+        plt.plot(prob['state:x'], prob['state:y'])
         plt.show()

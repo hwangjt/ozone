@@ -182,7 +182,7 @@ class ConstraintComp(ExplicitComponent):
 
 
 if __name__ == '__main__':
-    num = 100
+    num = 40
     t0 = 0.
     t1 = 348.795 * 24 * 3600
     times = np.linspace(t0, t1, num)
@@ -206,11 +206,11 @@ if __name__ == '__main__':
     method_name = 'ImplicitMidpoint'
     # method_name = 'ExplicitMidpoint'
     # method_name = 'AM4'
-    # method_name = 'GaussLegendre4'
+    method_name = 'GaussLegendre4'
     # method_name = 'BDF2'
 
     formulation = 'optimizer-based'
-    formulation = 'solver-based'
+    # formulation = 'solver-based'
     # formulation = 'time-marching'
 
     prob = Problem()
@@ -239,8 +239,8 @@ if __name__ == '__main__':
         prob.model.connect('state:m', 'objective_comp.mass', src_indices=[num - 1], flat_src_indices=True)
 
         comp = ConstraintComp(rf=final_conditions['r'], vf=final_conditions['v'])
-        comp.add_constraint('con_r', equals=0.)
-        comp.add_constraint('con_v', equals=0.)
+        comp.add_constraint('con_r', equals=0., vectorize_derivs=True)
+        comp.add_constraint('con_v', equals=0., vectorize_derivs=True)
         prob.model.add_subsystem('constraints_comp', comp)
         prob.model.connect('state:r', 'constraints_comp.r', src_indices=np.arange(3*num - 3, 3*num), flat_src_indices=True)
         prob.model.connect('state:v', 'constraints_comp.v', src_indices=np.arange(3*num - 3, 3*num), flat_src_indices=True)
