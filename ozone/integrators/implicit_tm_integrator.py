@@ -57,10 +57,11 @@ class ImplicitTMIntegrator(Integrator):
 
             comp = self._create_ode(num_stages)
             group.add_subsystem('ode_comp', comp)
-            self.connect('time_comp.stage_times',
-                ['.'.join((group_new_name + '.ode_comp', t)) for t in
-                ode_function._time_options['paths']],
-                src_indices=i_step * (num_stages) + np.arange(num_stages))
+            if ode_function._time_options['paths']:
+                self.connect('time_comp.stage_times',
+                    ['.'.join((group_new_name + '.ode_comp', t)) for t in
+                    ode_function._time_options['paths']],
+                    src_indices=i_step * (num_stages) + np.arange(num_stages))
 
             if len(static_parameters) > 0:
                 self._connect_multiple(

@@ -65,14 +65,16 @@ class VectorizedIntegrator(Integrator):
 
         comp = self._create_ode((num_times - 1) * num_stages)
         integration_group.add_subsystem('ode_comp', comp)
-        self.connect(
-            'time_comp.stage_times',
-            ['.'.join(('integration_group.ode_comp', t)) for t in ode_function._time_options['paths']],
-        )
+        if ode_function._time_options['paths']:
+            self.connect(
+                'time_comp.stage_times',
+                ['.'.join(('integration_group.ode_comp', t)) for t in ode_function._time_options['paths']],
+            )
         if len(static_parameters) > 0:
             self._connect_multiple(
                 self._get_static_parameter_names('static_parameter_comp', 'out'),
                 self._get_static_parameter_names('integration_group.ode_comp', 'paths'),
+                [0] * self._get_stage_norm_times()
             )
         if len(dynamic_parameters) > 0:
             self._connect_multiple(
@@ -132,6 +134,8 @@ class VectorizedIntegrator(Integrator):
             src_indices_from_ode.append(
                 np.arange((num_times - 1) * num_stages * size).reshape(
                     (num_times - 1, num_stages,) + shape ))
+
+        src_indices_to_ode = np.array(src_indices_to_ode).squeeze()
 
         self._connect_multiple(
             self._get_state_names('vectorized_step_comp', 'y'),
