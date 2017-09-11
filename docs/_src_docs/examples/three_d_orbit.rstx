@@ -1,0 +1,17 @@
+3-D orbit ODE
+=============
+
+1. ODE system
+-------------
+
+.. embed-module :: ozone.tests.ode_function_library.three_d_orbit_sys
+
+2. ODEFunction
+--------------
+
+.. embed-module :: ozone.tests.ode_function_library.three_d_orbit_func
+
+3. Run script and output
+------------------------
+
+.. embed-test-print-plot :: ozone.tests.example_tests.test_three_d_orbit_ode , TestCase , test_doc , 80
