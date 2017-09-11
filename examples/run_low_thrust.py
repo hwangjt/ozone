@@ -1,7 +1,7 @@
 import numpy as np
 import time
 
-from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp, view_model, ExecComp, pyOptSparseDriver, DefaultMultiVector
+from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp, view_model, ExecComp, pyOptSparseDriver
 
 from ozone.api import ODEFunction, ODEIntegrator
 
@@ -200,18 +200,18 @@ if __name__ == '__main__':
 
     ode_function = MyODEFunction()
 
-    # scheme_name = 'ForwardEuler'
-    scheme_name = 'BackwardEuler'
-    scheme_name = 'RK4'
-    scheme_name = 'ImplicitMidpoint'
-    # scheme_name = 'ExplicitMidpoint'
-    # scheme_name = 'AM4'
-    # scheme_name = 'GaussLegendre4'
-    # scheme_name = 'BDF2'
+    # method_name = 'ForwardEuler'
+    method_name = 'BackwardEuler'
+    method_name = 'RK4'
+    method_name = 'ImplicitMidpoint'
+    # method_name = 'ExplicitMidpoint'
+    # method_name = 'AM4'
+    # method_name = 'GaussLegendre4'
+    # method_name = 'BDF2'
 
-    integrator_name = 'SAND'
-    integrator_name = 'MDF'
-    # integrator_name = 'TM'
+    formulation = 'optimizer-based'
+    formulation = 'solver-based'
+    # formulation = 'time-marching'
 
     prob = Problem()
 
@@ -224,7 +224,7 @@ if __name__ == '__main__':
     comp.add_design_var('b') #, lower=0., upper=2 * np.pi)
     prob.model.add_subsystem('inputs', comp, promotes=['*'])
 
-    group = ODEIntegrator(ode_function, integrator_name, scheme_name,
+    group = ODEIntegrator(ode_function, formulation, method_name,
         times=times, initial_conditions=initial_conditions)
     group.add_constraint('state:r', indices=[num-1], )
     prob.model.add_subsystem('integrator', group, promotes=['*'])
@@ -236,14 +236,14 @@ if __name__ == '__main__':
         comp = ExecComp('f = -mass')
         comp.add_objective('f')
         prob.model.add_subsystem('objective_comp', comp)
-        prob.model.connect('state:m', 'objective_comp.mass', src_indices=[num - 1])
+        prob.model.connect('state:m', 'objective_comp.mass', src_indices=[num - 1], flat_src_indices=True)
 
         comp = ConstraintComp(rf=final_conditions['r'], vf=final_conditions['v'])
         comp.add_constraint('con_r', equals=0.)
         comp.add_constraint('con_v', equals=0.)
         prob.model.add_subsystem('constraints_comp', comp)
-        prob.model.connect('state:r', 'constraints_comp.r', src_indices=np.arange(3*num - 3, 3*num))
-        prob.model.connect('state:v', 'constraints_comp.v', src_indices=np.arange(3*num - 3, 3*num))
+        prob.model.connect('state:r', 'constraints_comp.r', src_indices=np.arange(3*num - 3, 3*num), flat_src_indices=True)
+        prob.model.connect('state:v', 'constraints_comp.v', src_indices=np.arange(3*num - 3, 3*num), flat_src_indices=True)
     else:
         group.add_subsystem('dummy_comp', IndepVarComp('dummy_var'))
         group.add_objective('dummy_comp.dummy_var')

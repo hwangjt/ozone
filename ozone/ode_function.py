@@ -9,22 +9,9 @@ from openmdao.utils.options_dictionary import OptionsDictionary
 
 class ODEFunction(object):
     """
-    Define an ODE of the form y' = f(t, x, y).
+    Base class for required user-defined ode function.
 
-    Attributes
-    ----------
-    _system_class : System
-        OpenMDAO Group or Component class defining our ODE.
-    _system_init_kwargs : dict
-        Dictionary of kwargs that should be passed in when instantiating system_class.
-    _time_options : OptionsDictionary
-        Options for the time or time-like variable.
-    _states : dict of OptionsDictionary
-        Dictionary of options dictionaries for each state.
-    _static_parameters : dict of OptionsDictionary
-        Dictionary of options dictionaries for each static parameter.
-    _dynamic_parameters : dict of OptionsDictionary
-        Dictionary of options dictionaries for each dynamic parameter.
+    Define an ODE of the form y' = f(t, x, y).
     """
 
     def __init__(self, **kwargs):

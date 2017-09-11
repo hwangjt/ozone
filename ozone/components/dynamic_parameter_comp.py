@@ -20,14 +20,14 @@ class DynamicParameterComp(ExplicitComponent):
         normalized_times = self.metadata['normalized_times']
         stage_norm_times = self.metadata['stage_norm_times']
 
-        num_time_steps = len(normalized_times)
+        num_times = len(normalized_times)
         num_stage_times = len(stage_norm_times)
 
         data0, rows0, cols0 = get_sparse_linear_spline(normalized_times, stage_norm_times)
         nnz = len(data0)
 
         self.mtx = scipy.sparse.csc_matrix((data0, (rows0, cols0)),
-            shape=(num_stage_times, num_time_steps))
+            shape=(num_stage_times, num_times))
 
         for parameter_name, parameter in iteritems(self.metadata['dynamic_parameters']):
             size = np.prod(parameter['shape'])
@@ -37,7 +37,7 @@ class DynamicParameterComp(ExplicitComponent):
             out_name = get_name('out', parameter_name)
 
             self.add_input(in_name,
-                shape=(num_time_steps,) + shape,
+                shape=(num_times,) + shape,
                 units=parameter['units'])
 
             self.add_output(out_name,

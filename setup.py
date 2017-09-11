@@ -11,7 +11,7 @@ setup(name='ozone',
         'ozone',
         'ozone/components',
         'ozone/integrators',
-        'ozone/schemes',
+        'ozone/methods',
         'ozone/utils',
     ],
     install_requires=[

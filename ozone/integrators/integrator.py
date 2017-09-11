@@ -4,26 +4,25 @@ import numpy as np
 from openmdao.api import Group, IndepVarComp
 from six import iteritems
 
-import ozone.schemes.scheme as schemes
+import ozone.methods.method as methods
 from ozone.components.time_comp import TimeComp
 from ozone.components.starting_comp import StartingComp
 from ozone.components.static_parameter_comp import StaticParameterComp
 from ozone.components.dynamic_parameter_comp import DynamicParameterComp
-from ozone.schemes.scheme import GLMScheme
-from ozone.schemes.runge_kutta import RK4
+from ozone.methods.method import GLMMethod
 from ozone.ode_function import ODEFunction
 from ozone.utils.var_names import get_name
-from ozone.utils.misc import get_scheme
+from ozone.methods_list import get_method
 
 
 class Integrator(Group):
     """
-    The base class for all integration schemes.
+    The base class for all integrators.
     """
 
     def initialize(self):
         self.metadata.declare('ode_function', type_=ODEFunction, required=True)
-        self.metadata.declare('scheme', default=RK4(), type_=GLMScheme)
+        self.metadata.declare('method', type_=GLMMethod, required=True)
         self.metadata.declare('starting_coeffs', type_=(np.ndarray, type(None)))
 
         self.metadata.declare('initial_conditions', type_=(dict, type(None)))
@@ -37,7 +36,7 @@ class Integrator(Group):
 
     def setup(self):
         ode_function = self.metadata['ode_function']
-        scheme = self.metadata['scheme']
+        method = self.metadata['method']
         starting_coeffs = self.metadata['starting_coeffs']
 
         initial_conditions = self.metadata['initial_conditions']
@@ -47,9 +46,9 @@ class Integrator(Group):
         initial_time = self.metadata['initial_time']
         final_time = self.metadata['final_time']
 
-        num_step_vars = scheme.num_values
+        num_step_vars = method.num_values
 
-        has_starting_method = scheme.starting_method is not None
+        has_starting_method = method.starting_method is not None
         is_starting_method = starting_coeffs is not None
 
         states = ode_function._states
@@ -65,15 +64,15 @@ class Integrator(Group):
         # ------------------------------------------------------------------------------------
         # Check starting_coeffs
         if is_starting_method:
-            # (num_starting, num_time_steps, num_step_vars,)
+            # (num_starting, num_times, num_step_vars,)
             assert len(starting_coeffs.shape) == 3, \
                 'starting_coeffs must be a rank-3 array, but its rank is %i' \
                 % len(starting_coeffs.shape)
-            assert starting_coeffs.shape[1:] == (len(my_norm_times), scheme.num_values), \
-                'starting_coeffs must have shape (num_starting, num_time_steps, num_step_vars,).' \
+            assert starting_coeffs.shape[1:] == (len(my_norm_times), method.num_values), \
+                'starting_coeffs must have shape (num_starting, num_times, num_step_vars,).' \
                 + 'It has shape %i x %i x %i, but it should have shape (? x %i x %i)' % (
                     starting_coeffs.shape[0], starting_coeffs.shape[1], starting_coeffs.shape[2],
-                    len(my_norm_times), scheme.num_values
+                    len(my_norm_times), method.num_values
                 )
 
         # ------------------------------------------------------------------------------------
@@ -164,10 +163,10 @@ class Integrator(Group):
         if not has_starting_method:
             starting_system = StartingComp(states=states, num_step_vars=num_step_vars)
         else:
-            starting_scheme_name, starting_coeffs, starting_time_steps = scheme.starting_method
-            scheme = get_scheme(starting_scheme_name)
+            starting_method_name, starting_coeffs, starting_times = method.starting_method
+            method = get_method(starting_method_name)
 
-            starting_system = self.__class__(ode_function=ode_function, scheme=scheme,
+            starting_system = self.__class__(ode_function=ode_function, method=method,
                 normalized_times=starting_norm_times, all_norm_times=all_norm_times,
                 starting_coeffs=starting_coeffs,
             )
@@ -228,27 +227,27 @@ class Integrator(Group):
         return ode_function._system_class(num=num, **ode_function._system_init_kwargs)
 
     def _get_meta(self):
-        scheme = self.metadata['scheme']
+        method = self.metadata['method']
         normalized_times = self.metadata['normalized_times']
 
-        has_starting_method = scheme.starting_method is not None
+        has_starting_method = method.starting_method is not None
 
         if has_starting_method:
-            start_time_index = scheme.starting_method[2]
+            start_time_index = method.starting_method[2]
         else:
             start_time_index = 0
 
         return normalized_times[:start_time_index+1], normalized_times[start_time_index:]
 
-    def _get_scheme(self):
-        scheme = self.metadata['scheme']
+    def _get_method(self):
+        method = self.metadata['method']
 
-        return scheme.A, scheme.B, scheme.U, scheme.V, scheme.num_stages, scheme.num_values
+        return method.A, method.B, method.U, method.V, method.num_stages, method.num_values
 
     def _get_stage_norm_times(self):
         starting_norm_times, my_norm_times = self._get_meta()
 
-        abscissa = self.metadata['scheme'].abscissa
+        abscissa = self.metadata['method'].abscissa
 
         repeated_times1 = np.repeat(my_norm_times[:-1], len(abscissa))
         repeated_times2 = np.repeat(my_norm_times[1:], len(abscissa))

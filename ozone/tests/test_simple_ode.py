@@ -18,16 +18,16 @@ class Test(unittest.TestCase):
     def setUp(self):
         pass
 
-    def run_ode(self, integrator_name, scheme_name, ode_function):
+    def run_ode(self, formulation, method_name, ode_function):
         times = np.linspace(0., 1.e-2, 7)
         y0 = -1.
 
-        integrator = ODEIntegrator(ode_function, integrator_name, scheme_name,
+        integrator = ODEIntegrator(ode_function, formulation, method_name,
             times=times, initial_conditions={'y': y0},)
 
         prob = Problem(integrator)
 
-        if integrator_name == 'SAND':
+        if formulation == 'optimizer-based':
             prob.driver = ScipyOptimizer()
             prob.driver.options['optimizer'] = 'SLSQP'
             prob.driver.options['tol'] = 1e-9
@@ -42,8 +42,8 @@ class Test(unittest.TestCase):
 
         return prob
 
-    def compute_diff(self, integrator_name, scheme_name, ode_function, y_ref):
-        y = self.run_ode(integrator_name, scheme_name, ode_function)['state:y']
+    def compute_diff(self, formulation, method_name, ode_function, y_ref):
+        y = self.run_ode(formulation, method_name, ode_function)['state:y']
 
         return np.linalg.norm(y - y_ref) / np.linalg.norm(y_ref)
 
@@ -55,24 +55,24 @@ class Test(unittest.TestCase):
             'BDF2', 'BDF3', 'BDF4', 'BDF5', 'BDF6',
             'AdamsPEC2', 'AdamsPEC5',
             'AdamsPECE2', 'AdamsPECE5',
-        ],  # scheme
+        ],  # method
         [LinearODEFunction(), NonlinearODEFunction()],  # ODE Function
-        ['TM', 'MDF', 'SAND']
+        ['time-marching', 'solver-based', 'optimizer-based']
     ))
-    def test_tm(self, scheme_name, ode_function, integrator_name):
+    def test_tm(self, method_name, ode_function, formulation):
 
-        y_ref = self.run_ode('TM', scheme_name, ode_function)['state:y']
-        diff = self.compute_diff(integrator_name, scheme_name, ode_function, y_ref)
-        print('%20s %5s %16.9e' % (scheme_name, integrator_name, diff))
+        y_ref = self.run_ode('time-marching', method_name, ode_function)['state:y']
+        diff = self.compute_diff(formulation, method_name, ode_function, y_ref)
+        print('%20s %5s %16.9e' % (method_name, formulation, diff))
         self.assertTrue(diff < 1e-10, 'Error when integrating with %s %s' % (
-            integrator_name, scheme_name))
+            formulation, method_name))
 
     @parameterized.expand(product(
-        ['TM', 'MDF', 'SAND']
+        ['time-marching', 'solver-based', 'optimizer-based']
     ))
-    def test_derivs(self, integrator_name):
+    def test_derivs(self, formulation):
         ode_function = NonlinearODEFunction()
-        prob = self.run_ode(integrator_name, 'ForwardEuler', ode_function)
+        prob = self.run_ode(formulation, 'ForwardEuler', ode_function)
         with suppress_stdout_stderr():
             jac = prob.check_partials(compact_print=True)
         for comp_name, jac_comp in iteritems(jac):
@@ -92,7 +92,7 @@ class Test(unittest.TestCase):
                     # print('%16.9e %16.9e %5s %s %s' % (
                     #     jac_partial['rel error'].forward,
                     #     jac_partial['rel error'].reverse,
-                    #     integrator_name, comp_name, partial_name,
+                    #     formulation, comp_name, partial_name,
                     # ))
                     self.assertTrue(rel_fwd < 1e-3 or abs_fwd < 1e-3)
                     self.assertTrue(rel_rev < 1e-3 or abs_rev < 1e-3)

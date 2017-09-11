@@ -9,7 +9,7 @@ from ozone.tests.ode_functions.simple_ode import NonlinearODEFunction, LinearODE
 from ozone.tests.ode_functions.cannonball import CannonballODEFunction
 
 
-num = 3
+num = 50
 
 t0 = 0.
 t1 = 1.e-2
@@ -18,26 +18,26 @@ initial_conditions = {'x': 0., 'y': 0., 'vx': 0.1, 'vy': 0.}
 
 times = np.linspace(t0, t1, num)
 
-scheme_name = 'ForwardEuler'
-scheme_name = 'RK4'
-scheme_name = 'ImplicitMidpoint'
-# scheme_name = 'AB4'
-# scheme_name = 'BDF2'
+method_name = 'ForwardEuler'
+method_name = 'RK4'
+method_name = 'ImplicitMidpoint'
+# method_name = 'AB4'
+# method_name = 'BDF2'
 
-integrator_name = 'SAND'
-integrator_name = 'MDF'
-integrator_name = 'TM'
+formulation = 'optimizer-based'
+formulation = 'solver-based'
+# formulation = 'time-marching'
 
 # ode_function = LinearODEFunction()
 ode_function = CannonballODEFunction()
 
-integrator = ODEIntegrator(ode_function, integrator_name, scheme_name,
+integrator = ODEIntegrator(ode_function, formulation, method_name,
     times=times, initial_conditions=initial_conditions,
     dynamic_parameters={'g': np.linspace(9.80665, 9.80665, num).reshape((num, 1))})
 
 prob = Problem(integrator)
 
-if integrator_name == 'SAND':
+if formulation == 'optimizer-based':
     prob.driver = ScipyOptimizer()
     prob.driver.options['optimizer'] = 'SLSQP'
     prob.driver.options['tol'] = 1e-9
@@ -53,8 +53,8 @@ time1 = time.time()
 # prob.check_partials(compact_print=True)
 # prob.check_partials(compact_print=False)
 
-view_model(prob)
-exit()
+# view_model(prob)
+# exit()
 
 np.set_printoptions(precision=10)
 

@@ -13,17 +13,17 @@ from ozone.utils.var_names import get_name
 
 class ExplicitTMIntegrator(Integrator):
     """
-    Integrate an explicit scheme with a time-marching approach.
+    Integrate an explicit method with a time-marching approach.
     """
 
     def setup(self):
         super(ExplicitTMIntegrator, self).setup()
 
         ode_function = self.metadata['ode_function']
-        scheme = self.metadata['scheme']
+        method = self.metadata['method']
         starting_coeffs = self.metadata['starting_coeffs']
 
-        has_starting_method = scheme.starting_method is not None
+        has_starting_method = method.starting_method is not None
         is_starting_method = starting_coeffs is not None
 
         states = ode_function._states
@@ -33,16 +33,16 @@ class ExplicitTMIntegrator(Integrator):
 
         starting_norm_times, my_norm_times = self._get_meta()
 
-        glm_A, glm_B, glm_U, glm_V, num_stages, num_step_vars = self._get_scheme()
+        glm_A, glm_B, glm_U, glm_V, num_stages, num_step_vars = self._get_method()
 
-        num_time_steps = len(my_norm_times)
-        num_stages = scheme.num_stages
-        num_step_vars = scheme.num_values
+        num_times = len(my_norm_times)
+        num_stages = method.num_stages
+        num_step_vars = method.num_values
 
-        glm_A = scheme.A
-        glm_B = scheme.B
-        glm_U = scheme.U
-        glm_V = scheme.V
+        glm_A = method.A
+        glm_B = method.B
+        glm_U = method.U
+        glm_V = method.V
 
         # ------------------------------------------------------------------------------------
 
@@ -153,8 +153,8 @@ class ExplicitTMIntegrator(Integrator):
                 promotes_outputs.append(starting_name)
 
         comp = TMOutputComp(
-            states=states, num_starting_time_steps=len(starting_norm_times),
-            num_my_time_steps=len(my_norm_times), num_step_vars=num_step_vars,
+            states=states, num_starting_times=len(starting_norm_times),
+            num_my_times=len(my_norm_times), num_step_vars=num_step_vars,
             starting_coeffs=starting_coeffs)
         self.add_subsystem('output_comp', comp, promotes_outputs=promotes_outputs)
         if has_starting_method:

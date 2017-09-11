@@ -14,7 +14,7 @@ class VectorizedStep2Comp(ExplicitComponent):
     def initialize(self):
         self.metadata.declare('states', type_=dict, required=True)
         self.metadata.declare('time_units', type_=(str, type(None)), required=True)
-        self.metadata.declare('num_time_steps', type_=int, required=True)
+        self.metadata.declare('num_times', type_=int, required=True)
         self.metadata.declare('num_stages', type_=int, required=True)
         self.metadata.declare('num_step_vars', type_=int, required=True)
         self.metadata.declare('glm_B', type_=np.ndarray, required=True)
@@ -22,7 +22,7 @@ class VectorizedStep2Comp(ExplicitComponent):
 
     def setup(self):
         time_units = self.metadata['time_units']
-        num_time_steps = self.metadata['num_time_steps']
+        num_times = self.metadata['num_times']
         num_stages = self.metadata['num_stages']
         num_step_vars = self.metadata['num_step_vars']
         glm_B = self.metadata['glm_B']
@@ -37,10 +37,10 @@ class VectorizedStep2Comp(ExplicitComponent):
         self.num_F_dict = {}
         self.num_y_dict = {}
 
-        h_arange = np.arange(num_time_steps - 1)
-        num_h = num_time_steps - 1
+        h_arange = np.arange(num_times - 1)
+        num_h = num_times - 1
 
-        self.add_input('h_vec', shape=(num_time_steps - 1), units=time_units)
+        self.add_input('h_vec', shape=(num_times - 1), units=time_units)
 
         for state_name, state in iteritems(self.metadata['states']):
             size = np.prod(state['shape'])
@@ -54,11 +54,11 @@ class VectorizedStep2Comp(ExplicitComponent):
 
             y0_arange = np.arange(num_step_vars * size).reshape((num_step_vars,) + shape)
 
-            F_arange = np.arange((num_time_steps - 1) * num_stages * size).reshape(
-                (num_time_steps - 1, num_stages,) + shape)
+            F_arange = np.arange((num_times - 1) * num_stages * size).reshape(
+                (num_times - 1, num_stages,) + shape)
 
-            y_arange = np.arange(num_time_steps * num_step_vars * size).reshape(
-                (num_time_steps, num_step_vars,) + shape)
+            y_arange = np.arange(num_times * num_step_vars * size).reshape(
+                (num_times, num_step_vars,) + shape)
 
             num_y0 = np.prod(y0_arange.shape)
             num_F = np.prod(F_arange.shape)
@@ -71,11 +71,11 @@ class VectorizedStep2Comp(ExplicitComponent):
                 units=state['units'])
 
             self.add_input(F_name,
-                shape=(num_time_steps - 1, num_stages,) + shape,
+                shape=(num_times - 1, num_stages,) + shape,
                 units=get_rate_units(state['units'], time_units))
 
             self.add_output(y_name,
-                shape=(num_time_steps, num_step_vars,) + shape,
+                shape=(num_times, num_step_vars,) + shape,
                 units=state['units'])
 
             # --------------------------------------------------------------------------------
@@ -90,9 +90,9 @@ class VectorizedStep2Comp(ExplicitComponent):
             cols = np.arange(num_y)
             data_list.append(data); rows_list.append(rows); cols_list.append(cols)
 
-            # V blocks: (num_time_steps - 1) x num_step_var x num_step_var x ...
+            # V blocks: (num_times - 1) x num_step_var x num_step_var x ...
             data = np.einsum('jk,i...->ijk...',
-                -glm_V, np.ones((num_time_steps - 1,) + shape)).flatten()
+                -glm_V, np.ones((num_times - 1,) + shape)).flatten()
             rows = np.einsum('ij...,k->ijk...',
                 y_arange[1:, :, :], np.ones(num_step_vars, int)).flatten()
             cols = np.einsum('ik...,j->ijk...',
@@ -131,9 +131,9 @@ class VectorizedStep2Comp(ExplicitComponent):
 
             # --------------------------------------------------------------------------------
 
-            # B blocks: (num_time_steps - 1) x num_step_vars x num_stage x ...
+            # B blocks: (num_times - 1) x num_step_vars x num_stage x ...
             data = np.einsum('jk,i...->ijk...',
-                glm_B, np.ones((num_time_steps - 1,) + shape)).flatten()
+                glm_B, np.ones((num_times - 1,) + shape)).flatten()
             rows = np.einsum('ij...,k->ijk...',
                 y_arange[1:, :, :], np.ones(num_stages, int)).flatten()
             cols = np.einsum('ik...,j->ijk...',
@@ -144,7 +144,7 @@ class VectorizedStep2Comp(ExplicitComponent):
                 shape=(num_y, num_F))
 
     def compute(self, inputs, outputs):
-        num_time_steps = self.metadata['num_time_steps']
+        num_times = self.metadata['num_times']
         num_stages = self.metadata['num_stages']
         num_step_vars = self.metadata['num_step_vars']
 
@@ -167,12 +167,12 @@ class VectorizedStep2Comp(ExplicitComponent):
             vec = mtx_hf.dot(vec)
             vec = mtx_lu.solve(vec)
 
-            outputs[y_name] = vec.reshape((num_time_steps, num_step_vars,) + shape)
+            outputs[y_name] = vec.reshape((num_times, num_step_vars,) + shape)
 
             outputs[y_name][0, :, :] -= inputs[y0_name]
 
     def compute_jacvec_product(self, inputs, outputs, d_inputs, d_outputs, mode):
-        num_time_steps = self.metadata['num_time_steps']
+        num_times = self.metadata['num_times']
         num_stages = self.metadata['num_stages']
         num_step_vars = self.metadata['num_step_vars']
 
@@ -202,7 +202,7 @@ class VectorizedStep2Comp(ExplicitComponent):
                         vec = mtx_lu.solve(vec)
 
                         d_outputs[y_name] += vec.reshape(
-                            (num_time_steps, num_step_vars,) + shape)
+                            (num_times, num_step_vars,) + shape)
 
                     if 'h_vec' in d_inputs:
                         vec = mtx_h.dot(d_inputs['h_vec']) * inputs[F_name].flatten()
@@ -210,7 +210,7 @@ class VectorizedStep2Comp(ExplicitComponent):
                         vec = mtx_lu.solve(vec)
 
                         d_outputs[y_name] += vec.reshape(
-                            (num_time_steps, num_step_vars,) + shape)
+                            (num_times, num_step_vars,) + shape)
 
             # ------------------------------------------------------------------------------
 
@@ -225,7 +225,7 @@ class VectorizedStep2Comp(ExplicitComponent):
 
                     if F_name in d_inputs:
                         d_inputs[F_name] += (mtx_h.dot(inputs['h_vec']) * vec).reshape(
-                            (num_time_steps - 1, num_stages,) + shape)
+                            (num_times - 1, num_stages,) + shape)
 
                     if 'h_vec' in d_inputs:
                         d_inputs['h_vec'] += mtx_h.T.dot(vec * inputs[F_name].flatten())
