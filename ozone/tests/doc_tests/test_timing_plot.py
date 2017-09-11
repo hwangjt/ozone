@@ -10,7 +10,7 @@ class Test(unittest.TestCase):
         import numpy as np
         import matplotlib.pylab as plt
 
-        from ozone.tests.ode_functions.simple_ode import LinearODEFunction, SimpleODEFunction, \
+        from ozone.tests.ode_function_library.simple_ode import LinearODEFunction, SimpleODEFunction, \
             NonlinearODEFunction
         from ozone.utils.run_utils import compute_runtime, compute_ideal_runtimes
         from ozone.methods_list import family_names, method_families
@@ -74,3 +74,10 @@ class Test(unittest.TestCase):
             print()
 
         plt.show()
+
+
+if __name__ == '__main__':
+    import matplotlib.pylab as plt
+
+    Test().test()
+    plt.savefig('timing_plot.pdf')

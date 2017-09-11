@@ -3,7 +3,7 @@ import numpy as np
 from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp
 
 from ozone.api import ODEFunction, ODEIntegrator
-from ozone.tests.ode_functions.two_d_orbit import TwoDOrbitFunction
+from ozone.tests.ode_function_library.two_d_orbit import TwoDOrbitFunction
 
 
 ode_function = TwoDOrbitFunction()

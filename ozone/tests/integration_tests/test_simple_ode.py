@@ -9,7 +9,7 @@ from parameterized import parameterized
 from openmdao.api import Problem, ScipyOptimizer, IndepVarComp
 
 from ozone.api import ODEIntegrator
-from ozone.tests.ode_functions.simple_ode import LinearODEFunction, NonlinearODEFunction
+from ozone.tests.ode_function_library.simple_ode import LinearODEFunction, NonlinearODEFunction
 from ozone.utils.suppress_printing import suppress_stdout_stderr
 
 

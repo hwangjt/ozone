@@ -1,5 +1,5 @@
 from ozone.api import ODEFunction
-from ozone.doc_tests.ode_functions.getting_started_ode_system import GettingStartedODESystem
+from ozone.tests.ode_function_library.getting_started_ode_system import GettingStartedODESystem
 
 
 class GettingStartedODEFunction(ODEFunction):

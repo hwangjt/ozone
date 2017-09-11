@@ -30,7 +30,7 @@ Here, we use the 6th order Gauss--Legendre collocation method with 20 time steps
 
 Here, our ODE function is defined by a single OpenMDAO system, an :code:`ExplicitComponent`.
 
-.. embed-module :: ozone.doc_tests.ode_functions.getting_started_oc_system
+.. embed-module :: ozone.tests.ode_function_library.getting_started_oc_system
 
 2. Defining the ODE function class
 ----------------------------------
@@ -38,7 +38,7 @@ Here, our ODE function is defined by a single OpenMDAO system, an :code:`Explici
 Here, we define the :code:`ODEFunction`, where we declare the 3 states and the control variable,
 which is called a parameter in :code:`ODEFunction`.
 
-.. embed-module :: ozone.doc_tests.ode_functions.getting_started_oc_function
+.. embed-module :: ozone.tests.ode_function_library.getting_started_oc_function
 
 3. Building the integration model and running
 ---------------------------------------------
@@ -46,4 +46,4 @@ which is called a parameter in :code:`ODEFunction`.
 Here, we pass call :code:`ODEIntegrator` to build our integration model and run it.
 The run script and resulting plot are shown below.
 
-.. embed-test-plot :: ozone.doc_tests.test_getting_started , Test , test_oc , 80
+.. embed-test-plot :: ozone.tests.doc_tests.test_getting_started , Test , test_oc , 80

@@ -10,7 +10,7 @@ class Test(unittest.TestCase):
         import numpy as np
         import matplotlib.pylab as plt
 
-        from ozone.doc_tests.ode_functions.projectile_dynamics import run_projectile
+        from ozone.tests.ode_function_library.projectile_dynamics import run_projectile
         from ozone.methods_list import family_names, method_families
 
         num = 100

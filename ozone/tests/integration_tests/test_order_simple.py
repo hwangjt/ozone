@@ -4,7 +4,7 @@ from itertools import product
 from parameterized import parameterized
 
 from ozone.api import ODEIntegrator
-from ozone.tests.ode_functions.simple_ode import SimpleODEFunction
+from ozone.tests.ode_function_library.simple_ode import SimpleODEFunction
 from ozone.utils.run_utils import compute_convergence_order, compute_ideal_error
 from ozone.methods_list import method_classes, method_families
 

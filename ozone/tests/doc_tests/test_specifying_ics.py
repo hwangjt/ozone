@@ -13,23 +13,19 @@ class Test(unittest.TestCase):
         from openmdao.api import Problem
 
         from ozone.api import ODEIntegrator
-        from ozone.doc_tests.ode_functions.getting_started_oc_function \
-            import GettingStartedOCFunction
+        from ozone.tests.ode_function_library.getting_started_ode_function \
+            import GettingStartedODEFunction
 
-        num = 101
-
-        ode_function = GettingStartedOCFunction()
+        ode_function = GettingStartedODEFunction()
         formulation = 'solver-based'
         method_name = 'RK4'
-        times = np.linspace(0., 3., num)
-        initial_conditions = {'x': 0., 'y': 0., 'v': 0.}
+        times = np.linspace(0., 3., 101)
 
-        # Here, the dynamic parameter array is passed in
-        dynamic_parameters = {'theta': np.zeros((num, 1))}
+        # Here, initial_conditions is passed in.
+        initial_conditions = {'y': 1.}
 
         integrator = ODEIntegrator(ode_function, formulation, method_name,
-            times=times, initial_conditions=initial_conditions,
-            dynamic_parameters=dynamic_parameters)
+            times=times, initial_conditions=initial_conditions)
 
         prob = Problem(model=integrator)
         prob.setup(check=False)
@@ -47,26 +43,22 @@ class Test(unittest.TestCase):
         from openmdao.api import Problem, IndepVarComp
 
         from ozone.api import ODEIntegrator
-        from ozone.doc_tests.ode_functions.getting_started_oc_function \
-            import GettingStartedOCFunction
+        from ozone.tests.ode_function_library.getting_started_ode_function \
+            import GettingStartedODEFunction
 
-        num = 101
-
-        ode_function = GettingStartedOCFunction()
+        ode_function = GettingStartedODEFunction()
         formulation = 'solver-based'
         method_name = 'RK4'
-        times = np.linspace(0., 3., num)
-        initial_conditions = {'x': 0., 'y': 0., 'v': 0.}
+        times = np.linspace(0., 3., 101)
 
         integrator = ODEIntegrator(ode_function, formulation, method_name,
-            times=times, initial_conditions=initial_conditions)
+            times=times)
 
-        # Below, the parameter is connected from an external component.
+        # Below, the initial condition is connected from an external component.
         prob = Problem()
-        prob.model.add_subsystem('parameter_comp',
-            IndepVarComp('theta', val=0., shape=(num, 1)))
+        prob.model.add_subsystem('initial_conditions_comp', IndepVarComp('y0', 1.))
         prob.model.add_subsystem('integrator_group', integrator)
-        prob.model.connect('parameter_comp.theta', 'integrator_group.dynamic_parameter:theta')
+        prob.model.connect('initial_conditions_comp.y0', 'integrator_group.initial_condition:y')
         prob.setup(check=False)
         prob.run_model()
 

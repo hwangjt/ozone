@@ -4,9 +4,9 @@ import time
 from openmdao.api import ExplicitComponent, Problem, ScipyOptimizer, IndepVarComp, view_model, ExecComp
 
 from ozone.api import ODEFunction, ODEIntegrator
-from ozone.tests.ode_functions.simple_ode import NonlinearODEFunction, LinearODEFunction, \
+from ozone.tests.ode_function_library.simple_ode import NonlinearODEFunction, LinearODEFunction, \
     SimpleODEFunction
-from ozone.tests.ode_functions.cannonball import CannonballODEFunction
+from ozone.tests.ode_function_library.cannonball import CannonballODEFunction
 
 
 num = 50

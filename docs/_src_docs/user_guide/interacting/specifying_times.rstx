@@ -12,7 +12,7 @@ This first way is the simplest approach and is sufficient if the initial and fin
 do not change during optimization.
 As shown below, we provide the :code:`times` argument when calling :code:`ODEIntegrator`.
 
-.. embed-test-plot :: ozone.doc_tests.test_specifying_times , Test , test_times , 80
+.. embed-test-plot :: ozone.tests.doc_tests.test_specifying_times , Test , test_times , 80
 
 2. Normalized times with fixed initial and final times
 ------------------------------------------------------
@@ -21,7 +21,7 @@ Alternatively, we can specify the initial time, final time, and relative positio
 In this case, we provide the :code:`initial_time`, :code:`final_time`, and :code:`normalized_times`
 arguments when calling :code:`ODEIntegrator`:
 
-.. embed-test-plot :: ozone.doc_tests.test_specifying_times , Test , test_normalized_dict , 80
+.. embed-test-plot :: ozone.tests.doc_tests.test_specifying_times , Test , test_normalized_dict , 80
 
 3. Normalized times with variable initial and final times
 ---------------------------------------------------------
@@ -30,4 +30,4 @@ If the initial and/or final time changes during optimization, we can connect one
 an external component that computes the initial and/or final time as an output.
 Here is an example where both are connected externally.
 
-.. embed-test-plot :: ozone.doc_tests.test_specifying_times , Test , test_normalized_connected , 80
+.. embed-test-plot :: ozone.tests.doc_tests.test_specifying_times , Test , test_normalized_connected , 80

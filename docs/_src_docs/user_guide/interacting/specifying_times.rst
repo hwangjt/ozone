@@ -20,7 +20,7 @@ As shown below, we provide the :code:`times` argument when calling :code:`ODEInt
   from openmdao.api import Problem
   
   from ozone.api import ODEIntegrator
-  from ozone.doc_tests.ode_functions.getting_started_ode_function \
+  from ozone.tests.ode_function_library.getting_started_ode_function \
       import GettingStartedODEFunction
   
   ode_function = GettingStartedODEFunction()
@@ -62,7 +62,7 @@ arguments when calling :code:`ODEIntegrator`:
   from openmdao.api import Problem
   
   from ozone.api import ODEIntegrator
-  from ozone.doc_tests.ode_functions.getting_started_ode_function \
+  from ozone.tests.ode_function_library.getting_started_ode_function \
       import GettingStartedODEFunction
   
   ode_function = GettingStartedODEFunction()
@@ -107,7 +107,7 @@ Here is an example where both are connected externally.
   from openmdao.api import Problem, IndepVarComp
   
   from ozone.api import ODEIntegrator
-  from ozone.doc_tests.ode_functions.getting_started_ode_function \
+  from ozone.tests.ode_function_library.getting_started_ode_function \
       import GettingStartedODEFunction
   
   ode_function = GettingStartedODEFunction()
