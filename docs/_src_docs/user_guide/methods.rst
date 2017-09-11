@@ -7,3 +7,4 @@ Integration methods
 
   methods/methods_list
   methods/order_plot
+  methods/order_check

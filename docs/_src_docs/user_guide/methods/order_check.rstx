@@ -1,0 +1,7 @@
+Manually checking convergence order
+===================================
+
+Here is a script for manually checking convergence order for a given method and a given problem.
+The output table is shown below.
+
+.. embed-test-print :: ozone.tests.doc_tests.test_order_check , Test , test
