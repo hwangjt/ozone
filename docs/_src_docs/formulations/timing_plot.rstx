@@ -1,0 +1,6 @@
+Comparison between formulations
+===============================
+
+ODE integration time (s) versus step size:
+
+.. embed-plot :: ozone.tests.doc_tests.test_timing_plot , Test , test , 40

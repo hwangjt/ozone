@@ -175,7 +175,7 @@ class VectorizedIntegrator(Integrator):
             )
             for state_name, state in iteritems(states):
                 integration_group.add_constraint('vectorized_stagestep_comp.Y_out:%s' % state_name,
-                    equals=0.,
+                    equals=0., vectorize_derivs=True,
                 )
 
         if has_starting_method:

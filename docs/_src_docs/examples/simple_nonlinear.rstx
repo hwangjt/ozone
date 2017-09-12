@@ -1,0 +1,17 @@
+Simple nonlinear ODE
+====================
+
+1. ODE system
+-------------
+
+.. embed-module :: ozone.tests.ode_function_library.simple_nonlinear_sys
+
+2. ODEFunction
+--------------
+
+.. embed-module :: ozone.tests.ode_function_library.simple_nonlinear_func
+
+3. Run script and output
+------------------------
+
+.. embed-test-print-plot :: ozone.tests.example_tests.test_simple_nonlinear_ode , TestCase , test_doc , 80

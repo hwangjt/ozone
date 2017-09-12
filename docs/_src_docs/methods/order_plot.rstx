@@ -1,0 +1,4 @@
+Convergence order
+=================
+
+.. embed-plot :: ozone.tests.doc_tests.test_order_plot , Test , test , 40

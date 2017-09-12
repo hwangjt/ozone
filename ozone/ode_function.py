@@ -210,3 +210,33 @@ class ODEFunction(object):
             options['units'] = units
 
         self._dynamic_parameters[name] = options
+
+    def get_default_parameters(self):
+        """
+        Optional method to provide default parameters; used for testing.
+
+        Returns
+        -------
+        dict
+            Dictionary of initial conditions keyed by state name.
+        float
+            Integration start time.
+        float
+            Integration end time.
+        """
+        pass
+
+    def get_exact_solution(self, initial_conditions, t0, t):
+        """
+        Optional method to compute the exact solution at time t given initial conditions at t0.
+
+        Parameters
+        ----------
+        initial_conditions : dict
+            Dictionary of initial conditions keyed by state name.
+        t0 : float
+            Integration start time.
+        t : float
+            Time at which the exact solution is desired.
+        """
+        pass

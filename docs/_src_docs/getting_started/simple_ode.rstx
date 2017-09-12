@@ -1,0 +1,39 @@
+A simple ODE example
+====================
+
+We illustrate how to use ozone with the help of a simple example,
+
+.. math ::
+  y' = -y , \qquad y(0) = 1 .
+
+We integrate from :math:`t=0` to :math:`t=3` using 100 time steps of the 4th order Runge--Kutta (RK4) method.
+We use the :code:`solver-based` formulation, which means the 100 time steps and the intermediate stages
+of the RK4 method are formulated as a nonlinear system of size ~400.
+
+Building and solving an ODE in ozone consists of 3 steps.
+
+1. Defining the system
+----------------------
+
+Here, we define the OpenMDAO system that computes the
+:math:`\mathbf f(t, \mathbf y)` function (in this case, :math:`-y`).
+In this case, the system will be of type, :code:`ExplicitComponent`,
+which is a unit of code that computes its outputs explicitly from its inputs.
+
+.. embed-module :: ozone.tests.ode_function_library.getting_started_ode_sys
+
+2. Defining the ODE function class
+----------------------------------
+
+Here, we define the :code:`ODEFunction`, where we declare
+the states, parameters, variable shapes, etc.
+
+.. embed-module :: ozone.tests.ode_function_library.getting_started_ode_func
+
+3. Building the integration model and running
+---------------------------------------------
+
+Here, we pass call :code:`ODEIntegrator` to build our integration model and run it.
+The run script, resulting terminal output, and resulting plot are shown below.
+
+.. embed-test-print-plot :: ozone.tests.doc_tests.test_getting_started , Test , test_ode , 80

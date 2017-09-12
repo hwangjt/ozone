@@ -39,11 +39,12 @@ Documentation
    :maxdepth: 2
    :titlesonly:
 
-   _src_docs/user_guide/getting_started
-   _src_docs/user_guide/api
-   _src_docs/user_guide/interacting
-   _src_docs/user_guide/methods
-   _src_docs/user_guide/formulations
+   _src_docs/getting_started
+   _src_docs/api
+   _src_docs/interacting
+   _src_docs/methods
+   _src_docs/formulations
+   _src_docs/examples
 
 Indices and tables
 ==================

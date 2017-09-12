@@ -1,0 +1,33 @@
+Specifying times
+================
+
+When calling :code:`ODEIntegrator`, there are three general ways of specifying the integration times.
+
+1. Absolute times
+-----------------
+
+The first way is to specify the actual times values instead of
+specifying the initial time, final time, and time spacing separately.
+This first way is the simplest approach and is sufficient if the initial and final times
+do not change during optimization.
+As shown below, we provide the :code:`times` argument when calling :code:`ODEIntegrator`.
+
+.. embed-test-plot :: ozone.tests.doc_tests.test_specifying_times , Test , test_times , 80
+
+2. Normalized times with fixed initial and final times
+------------------------------------------------------
+
+Alternatively, we can specify the initial time, final time, and relative positions of the times as a vector.
+In this case, we provide the :code:`initial_time`, :code:`final_time`, and :code:`normalized_times`
+arguments when calling :code:`ODEIntegrator`:
+
+.. embed-test-plot :: ozone.tests.doc_tests.test_specifying_times , Test , test_normalized_dict , 80
+
+3. Normalized times with variable initial and final times
+---------------------------------------------------------
+
+If the initial and/or final time changes during optimization, we can connect one or both from
+an external component that computes the initial and/or final time as an output.
+Here is an example where both are connected externally.
+
+.. embed-test-plot :: ozone.tests.doc_tests.test_specifying_times , Test , test_normalized_connected , 80

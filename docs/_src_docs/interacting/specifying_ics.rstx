@@ -1,0 +1,20 @@
+Specifying initial conditions
+=============================
+
+When calling :code:`ODEIntegrator`, there are two ways of specifying the initial conditions.
+
+1. Fixed initial conditions
+---------------------------
+
+If the initial conditions are fixed, the simplest way to specify them is to pass them in
+when calling :code:`ODEIntegrator`:
+
+.. embed-test-plot :: ozone.tests.doc_tests.test_specifying_ics , Test , test_fixed , 80
+
+2. Variable initial conditions
+------------------------------
+
+If the initial conditions vary during optimization,
+they must be connected from an external component:
+
+.. embed-test-plot :: ozone.tests.doc_tests.test_specifying_ics , Test , test_variable , 80
