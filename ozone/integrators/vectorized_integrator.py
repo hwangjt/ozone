@@ -74,7 +74,7 @@ class VectorizedIntegrator(Integrator):
             self._connect_multiple(
                 self._get_static_parameter_names('static_parameter_comp', 'out'),
                 self._get_static_parameter_names('integration_group.ode_comp', 'paths'),
-                [0] * self._get_stage_norm_times()
+                [np.array([0] * self._get_stage_norm_times(), np.int)]
             )
         if len(dynamic_parameters) > 0:
             self._connect_multiple(
