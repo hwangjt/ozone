@@ -150,6 +150,6 @@ The run script, resulting terminal output, and resulting plot are shown below.
   NL: NLBGS 23 ; 1.0648684e-11 2.01240674e-13
   NL: NLBGS Converged
   
-.. figure:: simple_ode.png
+.. figure:: simple_ode_Test_test_ode.png
   :scale: 80 %
   :align: center

@@ -43,7 +43,7 @@ As shown below, we provide the :code:`times` argument when calling :code:`ODEInt
   plt.ylabel('y')
   plt.show()
   
-.. figure:: specifying_times.png
+.. figure:: specifying_times_Test_test_times.png
   :scale: 80 %
   :align: center
 
@@ -88,7 +88,7 @@ arguments when calling :code:`ODEIntegrator`:
   plt.ylabel('y')
   plt.show()
   
-.. figure:: specifying_times.png
+.. figure:: specifying_times_Test_test_normalized_dict.png
   :scale: 80 %
   :align: center
 
@@ -136,6 +136,6 @@ Here is an example where both are connected externally.
   plt.ylabel('y')
   plt.show()
   
-.. figure:: specifying_times.png
+.. figure:: specifying_times_Test_test_normalized_connected.png
   :scale: 80 %
   :align: center

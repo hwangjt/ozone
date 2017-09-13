@@ -252,6 +252,6 @@
   NL: NLBGS 2 ; 0.000231493407 2.52704438e-13
   NL: NLBGS Converged
   
-.. figure:: three_d_orbit.png
+.. figure:: three_d_orbit_TestCase_test_doc.png
   :scale: 80 %
   :align: center

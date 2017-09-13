@@ -199,6 +199,6 @@ The run script and resulting plot are shown below.
   plt.ylabel('y')
   plt.show()
   
-.. figure:: simple_oc.png
+.. figure:: simple_oc_Test_test_oc.png
   :scale: 80 %
   :align: center

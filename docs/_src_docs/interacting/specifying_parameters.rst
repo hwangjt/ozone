@@ -45,7 +45,7 @@ when calling :code:`ODEIntegrator`:
   plt.ylabel('y')
   plt.show()
   
-.. figure:: specifying_parameters.png
+.. figure:: specifying_parameters_Test_test_fixed.png
   :scale: 80 %
   :align: center
 
@@ -91,6 +91,6 @@ they must be connected from an external component:
   plt.ylabel('y')
   plt.show()
   
-.. figure:: specifying_parameters.png
+.. figure:: specifying_parameters_Test_test_variable.png
   :scale: 80 %
   :align: center
