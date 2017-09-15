@@ -60,7 +60,7 @@ class ExplicitTMIntegrator(Integrator):
 
                 self.connect('time_comp.stage_times',
                              ['.'.join((ode_comp_name, t)) for t in
-                              ode_function._time_options['paths']],
+                              ode_function._time_options['targets']],
                              src_indices=i_step * (num_stages) + i_stage
                              )
 
@@ -75,7 +75,7 @@ class ExplicitTMIntegrator(Integrator):
                 for j_stage in range(i_stage):
                     ode_comp_tmp_name = 'integration_group.ode_comp_%i_%i' % (i_step, j_stage)
                     self._connect_multiple(
-                        self._get_state_names(ode_comp_tmp_name, 'rate_path'),
+                        self._get_state_names(ode_comp_tmp_name, 'rate_source'),
                         self._get_state_names(stage_comp_name, 'F', i_step=i_step, i_stage=i_stage, j_stage=j_stage),
                     )
 
@@ -83,13 +83,13 @@ class ExplicitTMIntegrator(Integrator):
                 integration_group.add_subsystem(ode_comp_name.split('.')[1], comp)
                 self._connect_multiple(
                     self._get_state_names(stage_comp_name, 'Y', i_step=i_step, i_stage=i_stage),
-                    self._get_state_names(ode_comp_name, 'paths'),
+                    self._get_state_names(ode_comp_name, 'targets'),
                 )
 
                 if len(static_parameters) > 0:
                     self._connect_multiple(
                         self._get_static_parameter_names('static_parameter_comp', 'out'),
-                        self._get_static_parameter_names(ode_comp_name, 'paths'),
+                        self._get_static_parameter_names(ode_comp_name, 'targets'),
                     )
                 if len(dynamic_parameters) > 0:
                     src_indices_list = []
@@ -103,7 +103,7 @@ class ExplicitTMIntegrator(Integrator):
                         src_indices_list.append(src_indices)
                     self._connect_multiple(
                         self._get_dynamic_parameter_names('dynamic_parameter_comp', 'out'),
-                        self._get_dynamic_parameter_names(ode_comp_name, 'paths'),
+                        self._get_dynamic_parameter_names(ode_comp_name, 'targets'),
                         src_indices_list,
                     )
 
@@ -117,7 +117,7 @@ class ExplicitTMIntegrator(Integrator):
             for j_stage in range(num_stages):
                 ode_comp_tmp_name = 'integration_group.ode_comp_%i_%i' % (i_step, j_stage)
                 self._connect_multiple(
-                    self._get_state_names(ode_comp_tmp_name, 'rate_path'),
+                    self._get_state_names(ode_comp_tmp_name, 'rate_source'),
                     self._get_state_names(step_comp_new_name, 'F', i_step=i_step, j_stage=j_stage),
                 )
 

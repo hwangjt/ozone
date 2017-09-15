@@ -170,9 +170,9 @@
       def initialize(self, system_init_kwargs=None):
           self.set_system(ThreeDOrbitSystem, system_init_kwargs=system_init_kwargs)
   
-          self.declare_state('r', 'r_dot', paths='r', shape=3)
-          self.declare_state('v', 'v_dot', paths='v', shape=3)
-          self.declare_state('m', 'm_dot', paths='m', shape=1)
+          self.declare_state('r', 'r_dot', targets='r', shape=3)
+          self.declare_state('v', 'v_dot', targets='v', shape=3)
+          self.declare_state('m', 'm_dot', targets='m', shape=1)
   
           self.declare_dynamic_parameter('d', 'd', shape=1)
           self.declare_dynamic_parameter('a', 'a', shape=1)

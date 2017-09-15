@@ -47,8 +47,8 @@ Simple homogeneous ODE
   
       def initialize(self, system_init_kwargs=None):
           self.set_system(SimpleHomogeneousODESystem, system_init_kwargs=system_init_kwargs)
-          self.declare_state('y', rate_path='dy_dt', paths='y')
-          self.declare_time('t')
+          self.declare_state('y', 'dy_dt', targets='y')
+          self.declare_time(targets='t')
   
       def get_default_parameters(self):
           t0 = 0.

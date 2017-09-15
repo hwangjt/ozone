@@ -58,10 +58,10 @@ Projectile dynamics ODE
       def initialize(self, system_init_kwargs=None):
           self.set_system(ProjectileSystem, system_init_kwargs)
   
-          self.declare_state('x', shape=1, rate_path='dx_dt')
-          self.declare_state('y', shape=1, rate_path='dy_dt')
-          self.declare_state('vx', shape=1, rate_path='dvx_dt', paths=['vx'])
-          self.declare_state('vy', shape=1, rate_path='dvy_dt', paths=['vy'])
+          self.declare_state('x', 'dx_dt', shape=1)
+          self.declare_state('y', 'dy_dt', shape=1)
+          self.declare_state('vx', 'dvx_dt', shape=1, targets=['vx'])
+          self.declare_state('vy', 'dvy_dt', shape=1, targets=['vy'])
   
       def get_default_parameters(self):
           t0 = 0.

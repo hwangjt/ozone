@@ -116,12 +116,12 @@ which is called a parameter in :code:`ODEFunction`.
           self.set_system(GettingStartedOCSystem, system_init_kwargs)
   
           # We have 3 states: x, y, v
-          self.declare_state('x', shape=1, rate_path='dx_dt', paths=['x'])
-          self.declare_state('y', shape=1, rate_path='dy_dt', paths=['y'])
-          self.declare_state('v', shape=1, rate_path='dv_dt', paths=['v'])
+          self.declare_state('x', 'dx_dt', shape=1, targets=['x'])
+          self.declare_state('y', 'dy_dt', shape=1, targets=['y'])
+          self.declare_state('v', 'dv_dt', shape=1, targets=['v'])
   
           # We declare theta as a dynamic parameter as we will declare it as a control later.
-          self.declare_dynamic_parameter('theta', ['theta'], shape=1)
+          self.declare_dynamic_parameter('theta', 'theta', shape=1)
   
 
 3. Building the integration model and running

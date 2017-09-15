@@ -75,7 +75,7 @@ the states, parameters, variable shapes, etc.
           # Here, we declare that we have one state variable called 'y', which has shape 1.
           # We also specify the name/path for the 'f' for 'y', which is 'dy_dt'
           # and the name/path for the input to 'f' for 'y', which is 'y'.
-          self.declare_state('y', shape=1, rate_path='dy_dt', paths=['y'])
+          self.declare_state('y', 'dy_dt', shape=1, targets=['y'])
   
 
 3. Building the integration model and running

@@ -53,8 +53,8 @@ Simple linear ODE
   
       def initialize(self):
           self.set_system(SimpleLinearODESystem)
-          self.declare_state('y', rate_path='dy_dt', paths='y')
-          self.declare_time('t')
+          self.declare_state('y', 'dy_dt', targets='y')
+          self.declare_time(targets='t')
   
       def get_default_parameters(self):
           t0 = 0.

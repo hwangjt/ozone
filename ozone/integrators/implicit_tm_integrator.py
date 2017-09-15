@@ -59,13 +59,13 @@ class ImplicitTMIntegrator(Integrator):
             group.add_subsystem('ode_comp', comp)
             self.connect('time_comp.stage_times',
                 ['.'.join((group_new_name + '.ode_comp', t)) for t in
-                ode_function._time_options['paths']],
+                ode_function._time_options['targets']],
                 src_indices=i_step * (num_stages) + np.arange(num_stages))
 
             if len(static_parameters) > 0:
                 self._connect_multiple(
                     self._get_static_parameter_names('static_parameter_comp', 'out'),
-                    self._get_static_parameter_names(group_new_name + '.ode_comp', 'paths'),
+                    self._get_static_parameter_names(group_new_name + '.ode_comp', 'targets'),
                 )
             if len(dynamic_parameters) > 0:
                 src_indices_list = []
@@ -79,7 +79,7 @@ class ImplicitTMIntegrator(Integrator):
                     src_indices_list.append(src_indices)
                 self._connect_multiple(
                     self._get_dynamic_parameter_names('dynamic_parameter_comp', 'out'),
-                    self._get_dynamic_parameter_names(group_new_name + '.ode_comp', 'paths'),
+                    self._get_dynamic_parameter_names(group_new_name + '.ode_comp', 'targets'),
                     src_indices_list,
                 )
 
@@ -100,18 +100,18 @@ class ImplicitTMIntegrator(Integrator):
             self.connect('time_comp.h_vec', group_new_name + '.step_comp.h', src_indices=i_step)
 
             self._connect_multiple(
-                self._get_state_names(group_new_name + '.ode_comp', 'rate_path'),
+                self._get_state_names(group_new_name + '.ode_comp', 'rate_source'),
                 self._get_state_names(group_new_name + '.step_comp', 'F', i_step=i_step),
             )
 
             self._connect_multiple(
-                self._get_state_names(group_new_name + '.ode_comp', 'rate_path'),
+                self._get_state_names(group_new_name + '.ode_comp', 'rate_source'),
                 self._get_state_names(group_new_name + '.stage_comp', 'F', i_step=i_step),
             )
 
             self._connect_multiple(
                 self._get_state_names(group_new_name + '.stage_comp', 'Y', i_step=i_step),
-                self._get_state_names(group_new_name + '.ode_comp', 'paths'),
+                self._get_state_names(group_new_name + '.ode_comp', 'targets'),
             )
 
             if i_step == 0:

@@ -67,17 +67,17 @@ class VectorizedIntegrator(Integrator):
         integration_group.add_subsystem('ode_comp', comp)
         self.connect(
             'time_comp.stage_times',
-            ['.'.join(('integration_group.ode_comp', t)) for t in ode_function._time_options['paths']],
+            ['.'.join(('integration_group.ode_comp', t)) for t in ode_function._time_options['targets']],
         )
         if len(static_parameters) > 0:
             self._connect_multiple(
                 self._get_static_parameter_names('static_parameter_comp', 'out'),
-                self._get_static_parameter_names('integration_group.ode_comp', 'paths'),
+                self._get_static_parameter_names('integration_group.ode_comp', 'targets'),
             )
         if len(dynamic_parameters) > 0:
             self._connect_multiple(
                 self._get_dynamic_parameter_names('dynamic_parameter_comp', 'out'),
-                self._get_dynamic_parameter_names('integration_group.ode_comp', 'paths'),
+                self._get_dynamic_parameter_names('integration_group.ode_comp', 'targets'),
             )
 
         comp = VectorizedStageStepComp(states=states, time_units=time_units,
@@ -139,12 +139,12 @@ class VectorizedIntegrator(Integrator):
         )
 
         self._connect_multiple(
-            self._get_state_names('integration_group.ode_comp', 'rate_path'),
+            self._get_state_names('integration_group.ode_comp', 'rate_source'),
             self._get_state_names('vectorized_step_comp', 'F'),
             src_indices_from_ode,
         )
         self._connect_multiple(
-            self._get_state_names('integration_group.ode_comp', 'rate_path'),
+            self._get_state_names('integration_group.ode_comp', 'rate_source'),
             self._get_state_names('integration_group.vectorized_stagestep_comp', 'F'),
             src_indices_from_ode,
         )
@@ -152,7 +152,7 @@ class VectorizedIntegrator(Integrator):
         if formulation == 'solver-based':
             self._connect_multiple(
                 self._get_state_names('integration_group.vectorized_stagestep_comp', 'Y_out'),
-                self._get_state_names('integration_group.ode_comp', 'paths'),
+                self._get_state_names('integration_group.ode_comp', 'targets'),
                 src_indices_to_ode,
             )
             self._connect_multiple(
@@ -162,7 +162,7 @@ class VectorizedIntegrator(Integrator):
         elif formulation == 'optimizer-based':
             self._connect_multiple(
                 self._get_state_names('integration_group.desvars_comp', 'Y'),
-                self._get_state_names('integration_group.ode_comp', 'paths'),
+                self._get_state_names('integration_group.ode_comp', 'targets'),
                 src_indices_to_ode,
             )
             self._connect_multiple(

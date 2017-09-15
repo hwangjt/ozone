@@ -27,7 +27,7 @@ class ODEFunction(object):
         self._system_init_kwargs = {}
 
         time_options = OptionsDictionary()
-        time_options.declare('paths', default=[], type_=Iterable)
+        time_options.declare('targets', default=[], type_=Iterable)
         time_options.declare('units', default=None, type_=(string_types, type(None)))
 
         self._time_options = time_options
@@ -63,28 +63,28 @@ class ODEFunction(object):
         if system_init_kwargs is not None:
             self._system_init_kwargs = system_init_kwargs
 
-    def declare_time(self, paths=None, units=None):
+    def declare_time(self, targets=None, units=None):
         """
-        Specify the paths and units of time or the time-like variable.
+        Specify the targets and units of time or the time-like variable.
 
         Parameters
         ----------
-        paths : string_types or Iterable or None
+        targets : string_types or Iterable or None
             Targets for the time or time-like variable within the ODE, or None if no models
             are explicitly time-dependent. Default is None.
         units : str or None
             Units for the integration variable within the ODE. Default is None.
         """
-        if isinstance(paths, string_types):
-            self._time_options['paths'] = [paths]
-        elif isinstance(paths, Iterable):
-            self._time_options['paths'] = paths
-        elif paths is not None:
-            raise ValueError('paths must be of type string_types or Iterable or None')
+        if isinstance(targets, string_types):
+            self._time_options['targets'] = [targets]
+        elif isinstance(targets, Iterable):
+            self._time_options['targets'] = targets
+        elif targets is not None:
+            raise ValueError('targets must be of type string_types or Iterable or None')
         if units is not None:
             self._time_options['units'] = units
 
-    def declare_state(self, name, rate_path, paths=None, shape=None, units=None):
+    def declare_state(self, name, rate_source, targets=None, shape=None, units=None):
         """
         Add an ODE state variable.
 
@@ -93,10 +93,10 @@ class ODEFunction(object):
         name : str
             The name of the state variable as seen by the driver. This variable will
             exist as an interface to the ODE.
-        rate_path : str
+        rate_source : str
             The path to the variable within the ODE which represents the derivative of
             the state variable w.r.t. the variable of integration.
-        paths : string_types or Iterable or None
+        targets : string_types or Iterable or None
             Paths to inputs in the ODE to which the incoming value of the state variable
             needs to be connected.
         shape : int or tuple or None
@@ -109,19 +109,19 @@ class ODEFunction(object):
 
         options = OptionsDictionary()
         options.declare('name', type_=string_types)
-        options.declare('rate_path', type_=string_types)
-        options.declare('paths', default=[], type_=Iterable)
+        options.declare('rate_source', type_=string_types)
+        options.declare('targets', default=[], type_=Iterable)
         options.declare('shape', default=(1,), type_=tuple)
         options.declare('units', default=None, type_=string_types)
 
         options['name'] = name
-        options['rate_path'] = rate_path
-        if isinstance(paths, string_types):
-            options['paths'] = [paths]
-        elif isinstance(paths, Iterable):
-            options['paths'] = paths
-        elif paths is not None:
-            raise ValueError('paths must be of type string_types or Iterable or None')
+        options['rate_source'] = rate_source
+        if isinstance(targets, string_types):
+            options['targets'] = [targets]
+        elif isinstance(targets, Iterable):
+            options['targets'] = targets
+        elif targets is not None:
+            raise ValueError('targets must be of type string_types or Iterable or None')
         if np.isscalar(shape):
             options['shape'] = (shape,)
         elif isinstance(shape, Iterable):
@@ -133,7 +133,7 @@ class ODEFunction(object):
 
         self._states[name] = options
 
-    def declare_static_parameter(self, name, paths, shape=None, units=None):
+    def declare_static_parameter(self, name, targets, shape=None, units=None):
         """
         Declare an input to the ODE.
 
@@ -142,8 +142,8 @@ class ODEFunction(object):
         name : str
             The name of the state variable as seen by the driver. This variable will
             exist as an interface to the ODE.
-        paths : string_types or Iterable or None
-            Paths to inputs in the ODE to which the incoming value of the state variable
+        targets : string_types or Iterable or None
+            Paths to inputs in the ODE to which the incoming value of the static parameter
             needs to be connected.
         shape : int or tuple or None
             Shape of the parameter.
@@ -155,12 +155,17 @@ class ODEFunction(object):
 
         options = OptionsDictionary()
         options.declare('name', type_=string_types)
-        options.declare('paths', default=[], type_=Iterable)
+        options.declare('targets', default=[], type_=Iterable)
         options.declare('shape', default=(1,), type_=tuple)
         options.declare('units', default=None, type_=string_types)
 
         options['name'] = name
-        options['paths'] = paths
+        if isinstance(targets, string_types):
+            options['targets'] = [targets]
+        elif isinstance(targets, Iterable):
+            options['targets'] = targets
+        elif targets is not None:
+            raise ValueError('targets must be of type string_types or Iterable or None')
         if np.isscalar(shape):
             options['shape'] = (shape,)
         elif isinstance(shape, Iterable):
@@ -172,7 +177,7 @@ class ODEFunction(object):
 
         self._static_parameters[name] = options
 
-    def declare_dynamic_parameter(self, name, paths, shape=None, units=None):
+    def declare_dynamic_parameter(self, name, targets, shape=None, units=None):
         """
         Declare an input to the ODE.
 
@@ -181,8 +186,8 @@ class ODEFunction(object):
         name : str
             The name of the state variable as seen by the driver. This variable will
             exist as an interface to the ODE.
-        paths : string_types or Iterable or None
-            Paths to inputs in the ODE to which the incoming value of the state variable
+        targets : string_types or Iterable or None
+            Paths to inputs in the ODE to which the incoming value of the dynamic parameter
             needs to be connected.
         shape : int or tuple or None
             Shape of the parameter.
@@ -194,12 +199,17 @@ class ODEFunction(object):
 
         options = OptionsDictionary()
         options.declare('name', type_=string_types)
-        options.declare('paths', default=[], type_=Iterable)
+        options.declare('targets', default=[], type_=Iterable)
         options.declare('shape', default=(1,), type_=tuple)
         options.declare('units', default=None, type_=string_types)
 
         options['name'] = name
-        options['paths'] = paths
+        if isinstance(targets, string_types):
+            options['targets'] = [targets]
+        elif isinstance(targets, Iterable):
+            options['targets'] = targets
+        elif targets is not None:
+            raise ValueError('targets must be of type string_types or Iterable or None')
         if np.isscalar(shape):
             options['shape'] = (shape,)
         elif isinstance(shape, Iterable):

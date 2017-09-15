@@ -8,9 +8,9 @@ class TwoDOrbitFunction(ODEFunction):
 
     def initialize(self):
         self.set_system(TwoDOrbitSystem)
-        self.declare_state('position', rate_path='dpos_dt', paths='position', shape=2)
-        self.declare_state('velocity', rate_path='dvel_dt', paths='velocity', shape=2)
-        self.declare_time('t')
+        self.declare_state('position', 'dpos_dt', targets='position', shape=2)
+        self.declare_state('velocity', 'dvel_dt', targets='velocity', shape=2)
+        self.declare_time(targets='t')
 
     def get_default_parameters(self):
         ecc = 1 / 2

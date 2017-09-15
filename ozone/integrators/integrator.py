@@ -202,10 +202,10 @@ class Integrator(Group):
 
         names_list = []
         for variable_name, variable in iteritems(variables_dict):
-            if type_ == 'rate_path':
-                names = '{}.{}'.format(comp, variable['rate_path'])
-            elif type_ == 'paths':
-                names = ['{}.{}'.format(comp, tgt) for tgt in variable['paths']]
+            if type_ == 'rate_source':
+                names = '{}.{}'.format(comp, variable['rate_source'])
+            elif type_ == 'targets':
+                names = ['{}.{}'.format(comp, tgt) for tgt in variable['targets']]
             else:
                 names = '{}.{}'.format(comp, get_name(
                     type_, variable_name, i_step=i_step, i_stage=i_stage, j_stage=j_stage))

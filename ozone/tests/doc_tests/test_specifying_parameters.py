@@ -74,3 +74,7 @@ class Test(unittest.TestCase):
         plt.xlabel('t')
         plt.ylabel('y')
         plt.show()
+
+
+if __name__ == '__main__':
+    unittest.main()
