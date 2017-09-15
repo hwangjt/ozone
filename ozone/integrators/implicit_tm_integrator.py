@@ -57,15 +57,17 @@ class ImplicitTMIntegrator(Integrator):
 
             comp = self._create_ode(num_stages)
             group.add_subsystem('ode_comp', comp)
-            self.connect('time_comp.stage_times',
-                ['.'.join((group_new_name + '.ode_comp', t)) for t in
-                ode_function._time_options['paths']],
-                src_indices=i_step * (num_stages) + np.arange(num_stages))
+            if ode_function._time_options['paths']:
+                self.connect('time_comp.stage_times',
+                    ['.'.join((group_new_name + '.ode_comp', t)) for t in
+                    ode_function._time_options['paths']],
+                    src_indices=i_step * (num_stages) + np.arange(num_stages))
 
             if len(static_parameters) > 0:
                 self._connect_multiple(
                     self._get_static_parameter_names('static_parameter_comp', 'out'),
                     self._get_static_parameter_names(group_new_name + '.ode_comp', 'paths'),
+                    src_indices_list=[[0] * num_stages for _ in range(len(static_parameters))]
                 )
             if len(dynamic_parameters) > 0:
                 src_indices_list = []
@@ -76,7 +78,7 @@ class ImplicitTMIntegrator(Integrator):
                     arange = np.arange(((len(my_norm_times) - 1) * num_stages * size)).reshape(
                         ((len(my_norm_times) - 1, num_stages,) + shape))
                     src_indices = arange[i_step, :, :]
-                    src_indices_list.append(src_indices)
+                    src_indices_list.append(src_indices.flat)
                 self._connect_multiple(
                     self._get_dynamic_parameter_names('dynamic_parameter_comp', 'out'),
                     self._get_dynamic_parameter_names(group_new_name + '.ode_comp', 'paths'),

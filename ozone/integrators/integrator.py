@@ -205,7 +205,8 @@ class Integrator(Group):
             if type_ == 'rate_path':
                 names = '{}.{}'.format(comp, variable['rate_path'])
             elif type_ == 'paths':
-                names = ['{}.{}'.format(comp, tgt) for tgt in variable['paths']]
+                names = ['{}.{}'.format(comp, tgt) for tgt in variable['paths']] \
+                    if variable['paths'] else []
             else:
                 names = '{}.{}'.format(comp, get_name(
                     type_, variable_name, i_step=i_step, i_stage=i_stage, j_stage=j_stage))
@@ -224,7 +225,7 @@ class Integrator(Group):
 
     def _create_ode(self, num):
         ode_function = self.metadata['ode_function']
-        return ode_function._system_class(num=num, **ode_function._system_init_kwargs)
+        return ode_function._system_class(num_nodes=num, **ode_function._system_init_kwargs)
 
     def _get_meta(self):
         method = self.metadata['method']
