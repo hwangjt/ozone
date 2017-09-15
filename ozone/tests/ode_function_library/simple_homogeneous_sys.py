@@ -6,11 +6,11 @@ from openmdao.api import ExplicitComponent
 class SimpleHomogeneousODESystem(ExplicitComponent):
 
     def initialize(self):
-        self.metadata.declare('num', default=1, type_=int)
+        self.metadata.declare('num_nodes', default=1, type_=int)
         self.metadata.declare('a', default=1., type_=(int, float))
 
     def setup(self):
-        num = self.metadata['num']
+        num = self.metadata['num_nodes']
 
         self.add_input('y', shape=(num, 1))
         self.add_input('t', shape=num)

@@ -129,13 +129,13 @@ class VectorizedIntegrator(Integrator):
 
             src_indices_to_ode.append(
                 np.arange((num_times - 1) * num_stages * size).reshape(
-                    ((num_times - 1) * num_stages,) + shape ))
+                    ((num_times - 1) * num_stages,) + shape))
 
             src_indices_from_ode.append(
                 np.arange((num_times - 1) * num_stages * size).reshape(
-                    (num_times - 1, num_stages,) + shape ))
+                    (num_times - 1, num_stages,) + shape))
 
-        src_indices_to_ode = np.array(src_indices_to_ode).squeeze()
+        src_indices_to_ode = [np.array(idx).squeeze() for idx in src_indices_to_ode]
 
         self._connect_multiple(
             self._get_state_names('vectorized_step_comp', 'y'),
