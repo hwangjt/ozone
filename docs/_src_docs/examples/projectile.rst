@@ -144,6 +144,6 @@ Projectile dynamics ODE
   NL: NLBGS 2 ; 0 0
   NL: NLBGS Converged
   
-.. figure:: projectile.png
+.. figure:: projectile_TestCase_test_doc.png
   :scale: 80 %
   :align: center

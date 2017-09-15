@@ -158,6 +158,6 @@
   NL: NLBGS 29 ; 2.20646826e-11 2.9575069e-13
   NL: NLBGS Converged
   
-.. figure:: two_d_orbit.png
+.. figure:: two_d_orbit_TestCase_test_doc.png
   :scale: 80 %
   :align: center

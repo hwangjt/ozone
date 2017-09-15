@@ -135,6 +135,6 @@ Simple nonlinear ODE
   NL: NLBGS 17 ; 2.62811994e-12 1.6174857e-13
   NL: NLBGS Converged
   
-.. figure:: simple_nonlinear.png
+.. figure:: simple_nonlinear_TestCase_test_doc.png
   :scale: 80 %
   :align: center

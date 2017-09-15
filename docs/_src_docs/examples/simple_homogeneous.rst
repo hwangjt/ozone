@@ -125,6 +125,6 @@ Simple homogeneous ODE
   NL: NLBGS 15 ; 2.73466584e-12 2.38020592e-13
   NL: NLBGS Converged
   
-.. figure:: simple_homogeneous.png
+.. figure:: simple_homogeneous_TestCase_test_doc.png
   :scale: 80 %
   :align: center

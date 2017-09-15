@@ -132,6 +132,6 @@ Simple linear ODE
   NL: NLBGS 15 ; 1.68904109e-11 1.87132231e-13
   NL: NLBGS Converged
   
-.. figure:: simple_linear.png
+.. figure:: simple_linear_TestCase_test_doc.png
   :scale: 80 %
   :align: center
