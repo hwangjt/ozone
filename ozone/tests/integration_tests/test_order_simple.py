@@ -24,8 +24,9 @@ class Test(unittest.TestCase):
 
         self.formulation = 'solver-based'
 
-    def test(self, method_name):
     @parameterized.expand(method_classes.keys())
+    def test(self, method_name):
+
         errors_vector, step_sizes_vector, orders_vector, ideal_order = compute_convergence_order(
             self.num_times_vector, self.t0, self.t1, self.state_name,
             self.ode_function, self.formulation, method_name, self.initial_conditions)
