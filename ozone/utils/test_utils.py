@@ -19,7 +19,7 @@ class OzoneODETestCase(unittest.TestCase):
         formulation = 'solver-based'
 
         ode_function = self.ode_function_class()
-        initial_conditions, t0, t1 = ode_function.get_default_parameters()
+        initial_conditions, t0, t1 = ode_function.get_test_parameters()
 
         runtime, errors = run_integration(
             num_times, t0, t1, initial_conditions, ode_function, formulation, method_name)
@@ -31,7 +31,7 @@ class OzoneODETestCase(unittest.TestCase):
         from openmdao.api import Problem
 
         ode_function = self.ode_function_class()
-        initial_conditions, t0, t1 = ode_function.get_default_parameters()
+        initial_conditions, t0, t1 = ode_function.get_test_parameters()
         exact_solution = ode_function.get_exact_solution(initial_conditions, t0, t1)
 
         num = 10

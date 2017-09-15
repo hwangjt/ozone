@@ -56,7 +56,7 @@ Simple linear ODE
           self.declare_state('y', 'dy_dt', targets='y')
           self.declare_time(targets='t')
   
-      def get_default_parameters(self):
+      def get_test_parameters(self):
           t0 = 0.
           t1 = 1.
           initial_conditions = {'y': 1.}

@@ -15,7 +15,7 @@ class ProjectileFunction(ODEFunction):
         self.declare_state('vx', 'dvx_dt', shape=1, targets=['vx'])
         self.declare_state('vy', 'dvy_dt', shape=1, targets=['vy'])
 
-    def get_default_parameters(self):
+    def get_test_parameters(self):
         t0 = 0.
         t1 = 1.
         initial_conditions = {

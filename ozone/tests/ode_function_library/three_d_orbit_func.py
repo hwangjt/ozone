@@ -13,11 +13,11 @@ class ThreeDOrbitFunction(ODEFunction):
         self.declare_state('v', 'v_dot', targets='v', shape=3)
         self.declare_state('m', 'm_dot', targets='m', shape=1)
 
-        self.declare_dynamic_parameter('d', 'd', shape=1)
-        self.declare_dynamic_parameter('a', 'a', shape=1)
-        self.declare_dynamic_parameter('b', 'b', shape=1)
+        self.declare_parameter('d', 'd', shape=1)
+        self.declare_parameter('a', 'a', shape=1)
+        self.declare_parameter('b', 'b', shape=1)
 
-    def get_default_parameters(self):
+    def get_test_parameters(self):
         r_scal = 1e12 if 'a' not in self._system_init_kwargs else self._system_init_kwargs['r_scal']
         v_scal = 1e3  if 'a' not in self._system_init_kwargs else self._system_init_kwargs['v_scal']
 

@@ -121,7 +121,7 @@ which is called a parameter in :code:`ODEFunction`.
           self.declare_state('v', 'dv_dt', shape=1, targets=['v'])
   
           # We declare theta as a dynamic parameter as we will declare it as a control later.
-          self.declare_dynamic_parameter('theta', 'theta', shape=1)
+          self.declare_parameter('theta', 'theta', shape=1)
   
 
 3. Building the integration model and running

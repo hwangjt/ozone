@@ -64,7 +64,7 @@
           self.declare_state('velocity', 'dvel_dt', targets='velocity', shape=2)
           self.declare_time(targets='t')
   
-      def get_default_parameters(self):
+      def get_test_parameters(self):
           ecc = 1 / 2
           initial_conditions = {
               'position': np.array([1 - ecc, 0]),
