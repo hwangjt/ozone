@@ -67,9 +67,10 @@ class ImplicitTMIntegrator(Integrator):
                 self._connect_multiple(
                     self._get_static_parameter_names('static_parameter_comp', 'out'),
                     self._get_static_parameter_names(group_new_name + '.ode_comp', 'paths'),
+                    src_indices_list=[[0] * num_stages]
                 )
             if len(dynamic_parameters) > 0:
-                src_indices_list = []
+                src_indices_list = [[]]
                 for parameter_name, value in iteritems(dynamic_parameters):
                     size = np.prod(value['shape'])
                     shape = value['shape']
@@ -77,7 +78,7 @@ class ImplicitTMIntegrator(Integrator):
                     arange = np.arange(((len(my_norm_times) - 1) * num_stages * size)).reshape(
                         ((len(my_norm_times) - 1, num_stages,) + shape))
                     src_indices = arange[i_step, :, :]
-                    src_indices_list.append(src_indices)
+                    src_indices_list[0].extend(src_indices.flat)
                 self._connect_multiple(
                     self._get_dynamic_parameter_names('dynamic_parameter_comp', 'out'),
                     self._get_dynamic_parameter_names(group_new_name + '.ode_comp', 'paths'),
