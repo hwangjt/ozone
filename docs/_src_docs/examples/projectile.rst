@@ -14,12 +14,12 @@ Projectile dynamics ODE
   class ProjectileSystem(ExplicitComponent):
   
       def initialize(self):
-          self.metadata.declare('num', default=1, type_=int)
+          self.metadata.declare('num_nodes', default=1, type_=int)
   
           self.g = -9.81
   
       def setup(self):
-          num = self.metadata['num']
+          num = self.metadata['num_nodes']
   
           self.add_input('vx', shape=(num, 1))
           self.add_input('vy', shape=(num, 1))

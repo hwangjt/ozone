@@ -34,10 +34,10 @@ which is a unit of code that computes its outputs explicitly from its inputs.
           # which is necessary to vectorize our ODE function.
           # All states, state rates, and dynamic parameters
           # must be of shape[num,...].
-          self.metadata.declare('num', default=1, type_=int)
+          self.metadata.declare('num_nodes', default=1, type_=int)
   
       def setup(self):
-          num = self.metadata['num']
+          num = self.metadata['num_nodes']
   
           # Our 'f' depends only on y, which is a scalar, so y's shape is (num, 1).
           self.add_input('y', shape=(num, 1))

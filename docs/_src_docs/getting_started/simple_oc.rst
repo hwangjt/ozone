@@ -44,13 +44,13 @@ Here, our ODE function is defined by a single OpenMDAO system, an :code:`Explici
           # which is necessary to vectorize our ODE function.
           # All states, state rates, and dynamic parameters
           # must be of shape[num,...].
-          self.metadata.declare('num', default=1, type_=int)
+          self.metadata.declare('num_nodes', default=1, type_=int)
   
           # We make the acceleration due to gravity a parameter for illustration.
           self.metadata.declare('g', default=1., type_=(int, float))
   
       def setup(self):
-          num = self.metadata['num']
+          num = self.metadata['num_nodes']
           g = self.metadata['g']
   
           # Our dynamics depend on theta, x, y, and v.

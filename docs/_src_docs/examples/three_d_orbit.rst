@@ -14,12 +14,12 @@
   class ThreeDOrbitSystem(ExplicitComponent):
   
       def initialize(self):
-          self.metadata.declare('num', default=1, type_=int)
+          self.metadata.declare('num_nodes', default=1, type_=int)
           self.metadata.declare('r_scal', default=1e12, type_=(int, float))
           self.metadata.declare('v_scal', default=1e3, type_=(int, float))
   
       def setup(self):
-          num = self.metadata['num']
+          num = self.metadata['num_nodes']
           r_scal = self.metadata['r_scal']
           v_scal = self.metadata['v_scal']
   
@@ -70,7 +70,7 @@
           self.declare_partials('m_dot', 'd', val=-Tmax_N / c_m_s, rows=rows, cols=cols)
   
       def compute(self, inputs, outputs):
-          num = self.metadata['num']
+          num = self.metadata['num_nodes']
           r_scal = self.metadata['r_scal']
           v_scal = self.metadata['v_scal']
   
@@ -104,7 +104,7 @@
           outputs['m_dot'][:, 0] = -Tmax_N / c_m_s * d
   
       def compute_partials(self, inputs, partials):
-          num = self.metadata['num']
+          num = self.metadata['num_nodes']
           r_scal = self.metadata['r_scal']
           v_scal = self.metadata['v_scal']
   

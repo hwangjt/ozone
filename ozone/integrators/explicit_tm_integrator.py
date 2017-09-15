@@ -58,11 +58,12 @@ class ExplicitTMIntegrator(Integrator):
                 stage_comp_name = 'integration_group.stage_comp_%i_%i' % (i_step, i_stage)
                 ode_comp_name = 'integration_group.ode_comp_%i_%i' % (i_step, i_stage)
 
-                self.connect('time_comp.stage_times',
-                             ['.'.join((ode_comp_name, t)) for t in
-                              ode_function._time_options['targets']],
-                             src_indices=i_step * (num_stages) + i_stage
-                             )
+                if ode_function._time_options['targets']:
+                    self.connect('time_comp.stage_times',
+                        ['.'.join((ode_comp_name, t)) for t in
+                        ode_function._time_options['targets']],
+                        src_indices=i_step * (num_stages) + i_stage
+                    )
 
                 comp = ExplicitTMStageComp(
                     states=states, time_units=time_units,
