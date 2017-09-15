@@ -67,7 +67,7 @@ class ImplicitTMIntegrator(Integrator):
                 self._connect_multiple(
                     self._get_static_parameter_names('static_parameter_comp', 'out'),
                     self._get_static_parameter_names(group_new_name + '.ode_comp', 'paths'),
-                    src_indices_list=[[0] * num_stages]
+                    src_indices_list=[[0] * num_stages for _ in range(len(static_parameters))]
                 )
             if len(dynamic_parameters) > 0:
                 src_indices_list = []
