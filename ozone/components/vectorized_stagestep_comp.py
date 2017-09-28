@@ -88,6 +88,12 @@ class VectorizedStageStepComp(ExplicitComponent):
 
             # -----------------
 
+            self.declare_partials(Y_out_name, 'h_vec')
+            self.declare_partials(Y_out_name, y0_name)
+            self.declare_partials(Y_out_name, F_name)
+
+            # -----------------
+
             ones = -np.ones((num_times - 1) * num_stages * size)
             arange = np.arange((num_times - 1) * num_stages * size)
             self.declare_partials(Y_out_name, Y_in_name, val=ones, rows=arange, cols=arange)

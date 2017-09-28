@@ -16,6 +16,7 @@ class SimpleLinearODESystem(ExplicitComponent):
         self.add_output('dy_dt', shape=(num, 1))
 
         self.declare_partials('dy_dt', 'y', val=np.eye(num))
+        self.declare_partials('dy_dt', 't')
 
         self.eye = np.eye(num)
 
