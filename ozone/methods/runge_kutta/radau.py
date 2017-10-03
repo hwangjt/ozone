@@ -1,3 +1,5 @@
+from __future__ import division
+
 import numpy as np
 
 from ozone.methods.runge_kutta.runge_kutta import RungeKutta

@@ -19,7 +19,7 @@ class TestCase(OzoneODETestCase):
 
         ode_function = TwoDOrbitFunction()
 
-        ecc = 1 / 2
+        ecc = 1. / 2.
         initial_conditions = {
             'position': np.array([1 - ecc, 0]),
             'velocity': np.array([0, np.sqrt((1+ecc) / (1 - ecc))])
