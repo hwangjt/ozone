@@ -8,42 +8,42 @@
 
   import numpy as np
   from scipy import sparse, linalg
-  
+
   from openmdao.api import ExplicitComponent
-  
-  
+
+
   class TwoDOrbitSystem(ExplicitComponent):
-  
+
       def initialize(self):
           self.metadata.declare('num_nodes', default=1, type_=int)
-  
+
       def setup(self):
           num = self.metadata['num_nodes']
-  
+
           self.add_input('position', shape=(num, 2))
           self.add_input('velocity', shape=(num, 2))
           self.add_input('t', shape=(num, 1))
           self.add_output('dpos_dt', shape=(num, 2))
           self.add_output('dvel_dt', shape=(num, 2))
-  
+
           # self.declare_partials('dy_dt', 'y', val=np.eye(num))
           self.declare_partials('*', '*', dependent=False)
           self.declare_partials('dpos_dt', 'velocity', val=sparse.block_diag([np.eye(2) for _ in range(num)]))
           self.declare_partials('dvel_dt', 'position', dependent=True)
-  
+
       def compute(self, inputs, outputs):
           outputs['dpos_dt'] = inputs['velocity']
           attraction = np.linalg.norm(inputs['position'], axis=-1) ** 3
           outputs['dvel_dt'] = -inputs['position'] / attraction[..., None]
-  
+
       def compute_partials(self, inputs, partials):
           x, y = inputs['position'][..., 0], inputs['position'][..., 1]
-          scale = (x**2 + y**2) ** (5/2)
+          scale = (x**2 + y**2) ** (5./2.)
           jac = 1/scale * np.array([[2*x**2 - y**2, 3*x*y],
                                     [3*x*y, 2*y**2 - x**2]])
           num = self.metadata['num_nodes']
           partials['dvel_dt', 'position'] = linalg.block_diag(*(jac[..., i] for i in range(num)))
-  
+
 
 2. ODEFunction
 --------------
@@ -51,21 +51,21 @@
 .. code-block:: python
 
   import numpy as np
-  
+
   from ozone.api import ODEFunction
   from ozone.tests.ode_function_library.two_d_orbit_sys import TwoDOrbitSystem
-  
-  
+
+
   class TwoDOrbitFunction(ODEFunction):
-  
+
       def initialize(self):
           self.set_system(TwoDOrbitSystem)
           self.declare_state('position', 'dpos_dt', targets='position', shape=2)
           self.declare_state('velocity', 'dvel_dt', targets='velocity', shape=2)
           self.declare_time(targets='t')
-  
+
       def get_test_parameters(self):
-          ecc = 1 / 2
+          ecc = 1. / 2.
           initial_conditions = {
               'position': np.array([1 - ecc, 0]),
               'velocity': np.array([0, np.sqrt((1+ecc) / (1 - ecc))])
@@ -73,11 +73,11 @@
           t0 = 0. * np.pi
           t1 = 1. * np.pi
           return initial_conditions, t0, t1
-  
+
       def get_exact_solution(self, initial_conditions, t0, t):
           ecc = 1 - initial_conditions['position'][0]
           return {'position': np.array([-1 - ecc, 0])}
-  
+
 
 3. Run script and output
 ------------------------
@@ -89,40 +89,40 @@
   from openmdao.api import Problem
   from ozone.api import ODEIntegrator
   from ozone.tests.ode_function_library.two_d_orbit_func import TwoDOrbitFunction
-  
+
   ode_function = TwoDOrbitFunction()
-  
-  ecc = 1 / 2
+
+  ecc = 1. / 2.
   initial_conditions = {
       'position': np.array([1 - ecc, 0]),
       'velocity': np.array([0, np.sqrt((1+ecc) / (1 - ecc))])
   }
   t0 = 0. * np.pi
   t1 = 1. * np.pi
-  
+
   num = 100
-  
+
   times = np.linspace(t0, t1, num)
-  
+
   method_name = 'RK4'
   formulation = 'solver-based'
-  
+
   integrator = ODEIntegrator(ode_function, formulation, method_name,
       times=times, initial_conditions=initial_conditions,
   )
-  
+
   prob = Problem(integrator)
   prob.setup()
   prob.run_model()
-  
+
   plt.plot(prob['state:position'][:, 0], prob['state:position'][:, 1])
   plt.xlabel('x')
   plt.ylabel('y')
   plt.show()
-  
+
 ::
 
-  
+
   =================
   integration_group
   =================
@@ -157,7 +157,7 @@
   NL: NLBGS 28 ; 1.28706974e-10 1.7251631e-12
   NL: NLBGS 29 ; 2.20646826e-11 2.9575069e-13
   NL: NLBGS Converged
-  
+
 .. figure:: two_d_orbit_TestCase_test_doc.png
   :scale: 80 %
   :align: center
