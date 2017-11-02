@@ -12,11 +12,11 @@ from ozone.utils.var_names import get_name
 class VectorizedOutputComp(ExplicitComponent):
 
     def initialize(self):
-        self.metadata.declare('states', type_=dict, required=True)
-        self.metadata.declare('num_starting_times', type_=int, required=True)
-        self.metadata.declare('num_my_times', type_=int, required=True)
-        self.metadata.declare('num_step_vars', type_=int, required=True)
-        self.metadata.declare('starting_coeffs', type_=(np.ndarray, type(None)))
+        self.metadata.declare('states', types=dict)
+        self.metadata.declare('num_starting_times', types=int)
+        self.metadata.declare('num_my_times', types=int)
+        self.metadata.declare('num_step_vars', types=int)
+        self.metadata.declare('starting_coeffs', types=np.ndarray, allow_none=True)
 
     def setup(self):
         num_starting_times = self.metadata['num_starting_times']

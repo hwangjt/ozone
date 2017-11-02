@@ -10,10 +10,10 @@ class GettingStartedOCSystem(ExplicitComponent):
         # which is necessary to vectorize our ODE function.
         # All states, state rates, and dynamic parameters
         # must be of shape[num,...].
-        self.metadata.declare('num_nodes', default=1, type_=int)
+        self.metadata.declare('num_nodes', default=1, types=int)
 
         # We make the acceleration due to gravity a parameter for illustration.
-        self.metadata.declare('g', default=1., type_=(int, float))
+        self.metadata.declare('g', default=1., types=(int, float))
 
     def setup(self):
         num = self.metadata['num_nodes']

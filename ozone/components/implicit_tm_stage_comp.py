@@ -11,13 +11,13 @@ from ozone.utils.units import get_rate_units
 class ImplicitTMStageComp(ExplicitComponent):
 
     def initialize(self):
-        self.metadata.declare('states', type_=dict, required=True)
-        self.metadata.declare('time_units', type_=(str, type(None)), required=True)
-        self.metadata.declare('num_stages', type_=int, required=True)
-        self.metadata.declare('num_step_vars', type_=int, required=True)
-        self.metadata.declare('glm_A', type_=np.ndarray, required=True)
-        self.metadata.declare('glm_U', type_=np.ndarray, required=True)
-        self.metadata.declare('i_step', type_=int, required=True)
+        self.metadata.declare('states', types=dict)
+        self.metadata.declare('time_units', types=str, allow_none=True)
+        self.metadata.declare('num_stages', types=int)
+        self.metadata.declare('num_step_vars', types=int)
+        self.metadata.declare('glm_A', types=np.ndarray)
+        self.metadata.declare('glm_U', types=np.ndarray)
+        self.metadata.declare('i_step', types=int)
 
     def setup(self):
         time_units = self.metadata['time_units']

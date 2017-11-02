@@ -6,7 +6,7 @@ from openmdao.api import ExplicitComponent
 class SimpleNonlinearODESystem(ExplicitComponent):
 
     def initialize(self):
-        self.metadata.declare('num_nodes', default=1, type_=int)
+        self.metadata.declare('num_nodes', default=1, types=int)
 
     def setup(self):
         num = self.metadata['num_nodes']

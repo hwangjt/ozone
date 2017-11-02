@@ -10,7 +10,7 @@ class GettingStartedODESystem(ExplicitComponent):
         # which is necessary to vectorize our ODE function.
         # All states, state rates, and dynamic parameters
         # must be of shape[num,...].
-        self.metadata.declare('num_nodes', default=1, type_=int)
+        self.metadata.declare('num_nodes', default=1, types=int)
 
     def setup(self):
         num = self.metadata['num_nodes']

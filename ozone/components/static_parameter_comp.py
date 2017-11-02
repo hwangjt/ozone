@@ -12,7 +12,7 @@ from ozone.utils.sparse_linear_spline import get_sparse_linear_spline
 class StaticParameterComp(ExplicitComponent):
 
     def initialize(self):
-        self.metadata.declare('static_parameters', type_=dict, required=True)
+        self.metadata.declare('static_parameters', types=dict)
 
     def setup(self):
         for parameter_name, parameter in iteritems(self.metadata['static_parameters']):
