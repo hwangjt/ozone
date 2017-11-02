@@ -12,8 +12,8 @@ from ozone.utils.var_names import get_name
 class StartingComp(ExplicitComponent):
 
     def initialize(self):
-        self.metadata.declare('states', type_=dict, required=True)
-        self.metadata.declare('num_step_vars', type_=int, required=True)
+        self.metadata.declare('states', types=dict)
+        self.metadata.declare('num_step_vars', types=int)
 
     def setup(self):
         num_step_vars = self.metadata['num_step_vars']

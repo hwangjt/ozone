@@ -12,9 +12,9 @@ from ozone.utils.sparse_linear_spline import get_sparse_linear_spline
 class DynamicParameterComp(ExplicitComponent):
 
     def initialize(self):
-        self.metadata.declare('dynamic_parameters', type_=dict, required=True)
-        self.metadata.declare('normalized_times', type_=np.ndarray, required=True)
-        self.metadata.declare('stage_norm_times', type_=np.ndarray, required=True)
+        self.metadata.declare('dynamic_parameters', types=dict)
+        self.metadata.declare('normalized_times', types=np.ndarray)
+        self.metadata.declare('stage_norm_times', types=np.ndarray)
 
     def setup(self):
         normalized_times = self.metadata['normalized_times']

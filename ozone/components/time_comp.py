@@ -10,10 +10,10 @@ from openmdao.api import ExplicitComponent
 class TimeComp(ExplicitComponent):
 
     def initialize(self):
-        self.metadata.declare('time_units', type_=(str, type(None)), required=True)
-        self.metadata.declare('normalized_times', type_=np.ndarray, required=True)
-        self.metadata.declare('my_norm_times', type_=np.ndarray, required=True)
-        self.metadata.declare('stage_norm_times', type_=np.ndarray, required=True)
+        self.metadata.declare('time_units', types=str, allow_none=True)
+        self.metadata.declare('normalized_times', types=np.ndarray)
+        self.metadata.declare('my_norm_times', types=np.ndarray)
+        self.metadata.declare('stage_norm_times', types=np.ndarray)
 
     def setup(self):
         time_units = self.metadata['time_units']

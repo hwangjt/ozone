@@ -21,18 +21,18 @@ class Integrator(Group):
     """
 
     def initialize(self):
-        self.metadata.declare('ode_function', type_=ODEFunction, required=True)
-        self.metadata.declare('method', type_=GLMMethod, required=True)
-        self.metadata.declare('starting_coeffs', type_=(np.ndarray, type(None)))
+        self.metadata.declare('ode_function', types=ODEFunction)
+        self.metadata.declare('method', types=GLMMethod)
+        self.metadata.declare('starting_coeffs', types=np.ndarray, allow_none=True, default=None)
 
-        self.metadata.declare('initial_conditions', type_=(dict, type(None)))
-        self.metadata.declare('static_parameters', type_=(dict, type(None)))
-        self.metadata.declare('dynamic_parameters', type_=(dict, type(None)))
+        self.metadata.declare('initial_conditions', types=dict, allow_none=True, default=None)
+        self.metadata.declare('static_parameters', types=dict, allow_none=True, default=None)
+        self.metadata.declare('dynamic_parameters', types=dict, allow_none=True, default=None)
 
-        self.metadata.declare('initial_time')
-        self.metadata.declare('final_time')
-        self.metadata.declare('normalized_times', type_=np.ndarray, required=True)
-        self.metadata.declare('all_norm_times', type_=np.ndarray, required=True)
+        self.metadata.declare('initial_time', default=None)
+        self.metadata.declare('final_time', default=None)
+        self.metadata.declare('normalized_times', types=np.ndarray)
+        self.metadata.declare('all_norm_times', types=np.ndarray)
 
     def setup(self):
         ode_function = self.metadata['ode_function']

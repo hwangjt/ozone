@@ -27,8 +27,8 @@ class ODEFunction(object):
         self._system_init_kwargs = {}
 
         time_options = OptionsDictionary()
-        time_options.declare('targets', default=[], type_=Iterable)
-        time_options.declare('units', default=None, type_=(string_types, type(None)))
+        time_options.declare('targets', default=[], types=Iterable)
+        time_options.declare('units', default=None, types=string_types, allow_none=True)
 
         self._time_options = time_options
         self._states = {}
@@ -108,11 +108,11 @@ class ODEFunction(object):
             raise ValueError('State {0} has already been declared.'.format(name))
 
         options = OptionsDictionary()
-        options.declare('name', type_=string_types)
-        options.declare('rate_source', type_=string_types)
-        options.declare('targets', default=[], type_=Iterable)
-        options.declare('shape', default=(1,), type_=tuple)
-        options.declare('units', default=None, type_=string_types)
+        options.declare('name', types=string_types)
+        options.declare('rate_source', types=string_types)
+        options.declare('targets', default=[], types=Iterable)
+        options.declare('shape', default=(1,), types=tuple)
+        options.declare('units', default=None, types=string_types, allow_none=True)
 
         options['name'] = name
         options['rate_source'] = rate_source
@@ -179,10 +179,10 @@ class ODEFunction(object):
             raise ValueError('static parameter {0} has already been declared.'.format(name))
 
         options = OptionsDictionary()
-        options.declare('name', type_=string_types)
-        options.declare('targets', default=[], type_=Iterable)
-        options.declare('shape', default=(1,), type_=tuple)
-        options.declare('units', default=None, type_=string_types)
+        options.declare('name', types=string_types)
+        options.declare('targets', default=[], types=Iterable)
+        options.declare('shape', default=(1,), types=tuple)
+        options.declare('units', default=None, types=string_types, allow_none=True)
 
         options['name'] = name
         if isinstance(targets, string_types):
@@ -222,10 +222,10 @@ class ODEFunction(object):
             raise ValueError('Dynamic parameter {0} has already been declared.'.format(name))
 
         options = OptionsDictionary()
-        options.declare('name', type_=string_types)
-        options.declare('targets', default=[], type_=Iterable)
-        options.declare('shape', default=(1,), type_=tuple)
-        options.declare('units', default=None, type_=string_types)
+        options.declare('name', types=string_types)
+        options.declare('targets', default=[], types=Iterable)
+        options.declare('shape', default=(1,), types=tuple)
+        options.declare('units', default=None, types=string_types, allow_none=True)
 
         options['name'] = name
         if isinstance(targets, string_types):

@@ -6,9 +6,9 @@ from openmdao.api import ExplicitComponent
 class ThreeDOrbitSystem(ExplicitComponent):
 
     def initialize(self):
-        self.metadata.declare('num_nodes', default=1, type_=int)
-        self.metadata.declare('r_scal', default=1e12, type_=(int, float))
-        self.metadata.declare('v_scal', default=1e3, type_=(int, float))
+        self.metadata.declare('num_nodes', default=1, types=int)
+        self.metadata.declare('r_scal', default=1e12, types=(int, float))
+        self.metadata.declare('v_scal', default=1e3, types=(int, float))
 
     def setup(self):
         num = self.metadata['num_nodes']
