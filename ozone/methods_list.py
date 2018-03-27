@@ -85,11 +85,11 @@ family_names = [
     'GaussLegendre',
     'Lobatto',
     'Radau',
+    'BDF',
     'AB',
     'AM',
     'ABalt',
     'AMalt',
-    'BDF',
     'AdamsPEC',
     'AdamsPECE',
 ]
