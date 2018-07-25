@@ -34,7 +34,11 @@ class suppress_stdout_stderr(object):
 
 
 class DummyFile(object):
-    def write(self, x): pass
+    def write(self, x):
+        pass
+
+    def flush(self):
+        pass
 
 @contextlib.contextmanager
 def nostdout():

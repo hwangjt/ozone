@@ -12,21 +12,21 @@ from ozone.utils.units import get_rate_units
 class VectorizedStep2Comp(ExplicitComponent):
 
     def initialize(self):
-        self.metadata.declare('states', types=dict)
-        self.metadata.declare('time_units', types=str, allow_none=True)
-        self.metadata.declare('num_times', types=int)
-        self.metadata.declare('num_stages', types=int)
-        self.metadata.declare('num_step_vars', types=int)
-        self.metadata.declare('glm_B', types=np.ndarray)
-        self.metadata.declare('glm_V', types=np.ndarray)
+        self.options.declare('states', types=dict)
+        self.options.declare('time_units', types=str, allow_none=True)
+        self.options.declare('num_times', types=int)
+        self.options.declare('num_stages', types=int)
+        self.options.declare('num_step_vars', types=int)
+        self.options.declare('glm_B', types=np.ndarray)
+        self.options.declare('glm_V', types=np.ndarray)
 
     def setup(self):
-        time_units = self.metadata['time_units']
-        num_times = self.metadata['num_times']
-        num_stages = self.metadata['num_stages']
-        num_step_vars = self.metadata['num_step_vars']
-        glm_B = self.metadata['glm_B']
-        glm_V = self.metadata['glm_V']
+        time_units = self.options['time_units']
+        num_times = self.options['num_times']
+        num_stages = self.options['num_stages']
+        num_step_vars = self.options['num_step_vars']
+        glm_B = self.options['glm_B']
+        glm_V = self.options['glm_V']
 
         self.mtx_lu_dict = {}
         self.mtx_y0_dict = {}
@@ -42,7 +42,7 @@ class VectorizedStep2Comp(ExplicitComponent):
 
         self.add_input('h_vec', shape=(num_times - 1), units=time_units)
 
-        for state_name, state in iteritems(self.metadata['states']):
+        for state_name, state in iteritems(self.options['states']):
             size = np.prod(state['shape'])
             shape = state['shape']
 
@@ -144,11 +144,11 @@ class VectorizedStep2Comp(ExplicitComponent):
                 shape=(num_y, num_F))
 
     def compute(self, inputs, outputs):
-        num_times = self.metadata['num_times']
-        num_stages = self.metadata['num_stages']
-        num_step_vars = self.metadata['num_step_vars']
+        num_times = self.options['num_times']
+        num_stages = self.options['num_stages']
+        num_step_vars = self.options['num_step_vars']
 
-        for state_name, state in iteritems(self.metadata['states']):
+        for state_name, state in iteritems(self.options['states']):
             size = np.prod(state['shape'])
             shape = state['shape']
 
@@ -172,11 +172,11 @@ class VectorizedStep2Comp(ExplicitComponent):
             outputs[y_name][0, :, :] -= inputs[y0_name]
 
     def compute_jacvec_product(self, inputs, outputs, d_inputs, d_outputs, mode):
-        num_times = self.metadata['num_times']
-        num_stages = self.metadata['num_stages']
-        num_step_vars = self.metadata['num_step_vars']
+        num_times = self.options['num_times']
+        num_stages = self.options['num_stages']
+        num_step_vars = self.options['num_step_vars']
 
-        for state_name, state in iteritems(self.metadata['states']):
+        for state_name, state in iteritems(self.options['states']):
             size = np.prod(state['shape'])
             shape = state['shape']
 

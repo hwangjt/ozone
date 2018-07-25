@@ -9,10 +9,10 @@ from openmdao.api import ExplicitComponent
 class TwoDOrbitSystem(ExplicitComponent):
 
     def initialize(self):
-        self.metadata.declare('num_nodes', default=1, types=int)
+        self.options.declare('num_nodes', default=1, types=int)
 
     def setup(self):
-        num = self.metadata['num_nodes']
+        num = self.options['num_nodes']
 
         self.add_input('position', shape=(num, 2))
         self.add_input('velocity', shape=(num, 2))
@@ -35,5 +35,5 @@ class TwoDOrbitSystem(ExplicitComponent):
         scale = (x**2 + y**2) ** (5/2)
         jac = 1/scale * np.array([[2*x**2 - y**2, 3*x*y],
                                   [3*x*y, 2*y**2 - x**2]])
-        num = self.metadata['num_nodes']
+        num = self.options['num_nodes']
         partials['dvel_dt', 'position'] = linalg.block_diag(*(jac[..., i] for i in range(num)))

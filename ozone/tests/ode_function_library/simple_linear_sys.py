@@ -6,10 +6,10 @@ from openmdao.api import ExplicitComponent
 class SimpleLinearODESystem(ExplicitComponent):
 
     def initialize(self):
-        self.metadata.declare('num_nodes', default=1, types=int)
+        self.options.declare('num_nodes', default=1, types=int)
 
     def setup(self):
-        num = self.metadata['num_nodes']
+        num = self.options['num_nodes']
 
         self.add_input('y', shape=(num, 1))
         self.add_input('t', shape=num)

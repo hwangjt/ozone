@@ -6,14 +6,14 @@ from openmdao.api import ExplicitComponent
 class ThreeDOrbitSystem(ExplicitComponent):
 
     def initialize(self):
-        self.metadata.declare('num_nodes', default=1, types=int)
-        self.metadata.declare('r_scal', default=1e12, types=(int, float))
-        self.metadata.declare('v_scal', default=1e3, types=(int, float))
+        self.options.declare('num_nodes', default=1, types=int)
+        self.options.declare('r_scal', default=1e12, types=(int, float))
+        self.options.declare('v_scal', default=1e3, types=(int, float))
 
     def setup(self):
-        num = self.metadata['num_nodes']
-        r_scal = self.metadata['r_scal']
-        v_scal = self.metadata['v_scal']
+        num = self.options['num_nodes']
+        r_scal = self.options['r_scal']
+        v_scal = self.options['v_scal']
 
         g_m_s2 = 9.80665 # m/s^2
         Isp_s = 2000 # s
@@ -62,9 +62,9 @@ class ThreeDOrbitSystem(ExplicitComponent):
         self.declare_partials('m_dot', 'd', val=-Tmax_N / c_m_s, rows=rows, cols=cols)
 
     def compute(self, inputs, outputs):
-        num = self.metadata['num_nodes']
-        r_scal = self.metadata['r_scal']
-        v_scal = self.metadata['v_scal']
+        num = self.options['num_nodes']
+        r_scal = self.options['r_scal']
+        v_scal = self.options['v_scal']
 
         c_m_s = self.c_m_s
         u_m3_s2 = self.u_m3_s2
@@ -96,9 +96,9 @@ class ThreeDOrbitSystem(ExplicitComponent):
         outputs['m_dot'][:, 0] = -Tmax_N / c_m_s * d
 
     def compute_partials(self, inputs, partials):
-        num = self.metadata['num_nodes']
-        r_scal = self.metadata['r_scal']
-        v_scal = self.metadata['v_scal']
+        num = self.options['num_nodes']
+        r_scal = self.options['r_scal']
+        v_scal = self.options['v_scal']
 
         u_m3_s2 = self.u_m3_s2
         Tmax_N = self.Tmax_N

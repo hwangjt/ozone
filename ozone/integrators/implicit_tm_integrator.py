@@ -1,7 +1,7 @@
 import numpy as np
 from six import iteritems
 
-from openmdao.api import Group, IndepVarComp, NewtonSolver, DirectSolver, DenseJacobian
+from openmdao.api import Group, IndepVarComp, NewtonSolver, DirectSolver
 
 from ozone.integrators.integrator import Integrator
 from ozone.components.starting_comp import StartingComp
@@ -19,9 +19,9 @@ class ImplicitTMIntegrator(Integrator):
     def setup(self):
         super(ImplicitTMIntegrator, self).setup()
 
-        ode_function = self.metadata['ode_function']
-        method = self.metadata['method']
-        starting_coeffs = self.metadata['starting_coeffs']
+        ode_function = self.options['ode_function']
+        method = self.options['method']
+        starting_coeffs = self.options['starting_coeffs']
 
         has_starting_method = method.starting_method is not None
         is_starting_method = starting_coeffs is not None
@@ -50,7 +50,7 @@ class ImplicitTMIntegrator(Integrator):
         self.add_subsystem('integration_group', integration_group)
 
         for i_step in range(len(my_norm_times) - 1):
-            group = Group()
+            group = Group(assembled_jac_type='dense')
             group_old_name = 'integration_group.step_%i' % (i_step - 1)
             group_new_name = 'integration_group.step_%i' % i_step
             integration_group.add_subsystem(group_new_name.split('.')[1], group)
@@ -136,8 +136,7 @@ class ImplicitTMIntegrator(Integrator):
                 )
 
             group.nonlinear_solver = NewtonSolver(iprint=2, maxiter=100)
-            group.linear_solver = DirectSolver()
-            group.jacobian = DenseJacobian()
+            group.linear_solver = DirectSolver(assemble_jac=True)
 
         promotes = []
         promotes.extend([get_name('state', state_name) for state_name in states])
