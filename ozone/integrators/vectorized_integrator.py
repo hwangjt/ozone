@@ -1,7 +1,7 @@
 import numpy as np
 from six import iteritems
 
-from openmdao.api import Group, IndepVarComp, NewtonSolver, DirectSolver, DenseJacobian, ScipyIterativeSolver, LinearBlockGS, NonlinearBlockGS, PetscKSP
+from openmdao.api import Group, IndepVarComp, NewtonSolver, DirectSolver, ScipyIterativeSolver, LinearBlockGS, NonlinearBlockGS, PetscKSP
 
 from ozone.integrators.integrator import Integrator
 from ozone.components.vectorized_step_comp import VectorizedStepComp
@@ -18,15 +18,15 @@ class VectorizedIntegrator(Integrator):
     def initialize(self):
         super(VectorizedIntegrator, self).initialize()
 
-        self.metadata.declare('formulation', default='solver-based', values=['solver-based', 'optimizer-based'])
+        self.options.declare('formulation', default='solver-based', values=['solver-based', 'optimizer-based'])
 
     def setup(self):
         super(VectorizedIntegrator, self).setup()
 
-        ode_function = self.metadata['ode_function']
-        method = self.metadata['method']
-        starting_coeffs = self.metadata['starting_coeffs']
-        formulation = self.metadata['formulation']
+        ode_function = self.options['ode_function']
+        method = self.options['method']
+        starting_coeffs = self.options['starting_coeffs']
+        formulation = self.options['formulation']
 
         has_starting_method = method.starting_method is not None
         is_starting_method = starting_coeffs is not None
@@ -44,7 +44,7 @@ class VectorizedIntegrator(Integrator):
 
         # ------------------------------------------------------------------------------------
 
-        integration_group = Group()
+        integration_group = Group(assembled_jac_type='dense')
         self.add_subsystem('integration_group', integration_group)
 
         if formulation == 'optimizer-based':
@@ -180,7 +180,7 @@ class VectorizedIntegrator(Integrator):
                 )
 
         if has_starting_method:
-            self.starting_system.metadata['formulation'] = self.metadata['formulation']
+            self.starting_system.options['formulation'] = self.options['formulation']
 
         if formulation == 'solver-based':
             if 1:
@@ -191,5 +191,4 @@ class VectorizedIntegrator(Integrator):
             if 1:
                 integration_group.linear_solver = LinearBlockGS(iprint=1, maxiter=40, atol=1e-14, rtol=1e-12)
             else:
-                integration_group.linear_solver = DirectSolver(iprint=1)
-                integration_group.jacobian = DenseJacobian()
+                integration_group.linear_solver = DirectSolver(assemble_jac=True, iprint=1)

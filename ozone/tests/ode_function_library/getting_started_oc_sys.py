@@ -10,14 +10,14 @@ class GettingStartedOCSystem(ExplicitComponent):
         # which is necessary to vectorize our ODE function.
         # All states, state rates, and dynamic parameters
         # must be of shape[num,...].
-        self.metadata.declare('num_nodes', default=1, types=int)
+        self.options.declare('num_nodes', default=1, types=int)
 
         # We make the acceleration due to gravity a parameter for illustration.
-        self.metadata.declare('g', default=1., types=(int, float))
+        self.options.declare('g', default=1., types=(int, float))
 
     def setup(self):
-        num = self.metadata['num_nodes']
-        g = self.metadata['g']
+        num = self.options['num_nodes']
+        g = self.options['g']
 
         # Our dynamics depend on theta, x, y, and v.
         # They are all of scalars, so the overall shape is (num, 1).
@@ -43,7 +43,7 @@ class GettingStartedOCSystem(ExplicitComponent):
         self.declare_partials('dv_dt', 'theta', rows=np.arange(num), cols=np.arange(num))
 
     def compute(self, inputs, outputs):
-        g = self.metadata['g']
+        g = self.options['g']
 
         # This component computes dy_dt = -y.
         outputs['dx_dt'] = inputs['v'] * np.sin(inputs['theta'])
@@ -51,7 +51,7 @@ class GettingStartedOCSystem(ExplicitComponent):
         outputs['dv_dt'] = g * np.cos(inputs['theta'])
 
     def compute_partials(self, inputs, partials):
-        g = self.metadata['g']
+        g = self.options['g']
 
         theta = inputs['theta'][:, 0]
         v = inputs['v'][:, 0]

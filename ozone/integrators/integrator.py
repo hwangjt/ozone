@@ -21,30 +21,30 @@ class Integrator(Group):
     """
 
     def initialize(self):
-        self.metadata.declare('ode_function', types=ODEFunction)
-        self.metadata.declare('method', types=GLMMethod)
-        self.metadata.declare('starting_coeffs', types=np.ndarray, allow_none=True, default=None)
+        self.options.declare('ode_function', types=ODEFunction)
+        self.options.declare('method', types=GLMMethod)
+        self.options.declare('starting_coeffs', types=np.ndarray, allow_none=True, default=None)
 
-        self.metadata.declare('initial_conditions', types=dict, allow_none=True, default=None)
-        self.metadata.declare('static_parameters', types=dict, allow_none=True, default=None)
-        self.metadata.declare('dynamic_parameters', types=dict, allow_none=True, default=None)
+        self.options.declare('initial_conditions', types=dict, allow_none=True, default=None)
+        self.options.declare('static_parameters', types=dict, allow_none=True, default=None)
+        self.options.declare('dynamic_parameters', types=dict, allow_none=True, default=None)
 
-        self.metadata.declare('initial_time', default=None)
-        self.metadata.declare('final_time', default=None)
-        self.metadata.declare('normalized_times', types=np.ndarray)
-        self.metadata.declare('all_norm_times', types=np.ndarray)
+        self.options.declare('initial_time', default=None)
+        self.options.declare('final_time', default=None)
+        self.options.declare('normalized_times', types=np.ndarray)
+        self.options.declare('all_norm_times', types=np.ndarray)
 
     def setup(self):
-        ode_function = self.metadata['ode_function']
-        method = self.metadata['method']
-        starting_coeffs = self.metadata['starting_coeffs']
+        ode_function = self.options['ode_function']
+        method = self.options['method']
+        starting_coeffs = self.options['starting_coeffs']
 
-        initial_conditions = self.metadata['initial_conditions']
-        given_static_parameters = self.metadata['static_parameters']
-        given_dynamic_parameters = self.metadata['dynamic_parameters']
+        initial_conditions = self.options['initial_conditions']
+        given_static_parameters = self.options['static_parameters']
+        given_dynamic_parameters = self.options['dynamic_parameters']
 
-        initial_time = self.metadata['initial_time']
-        final_time = self.metadata['final_time']
+        initial_time = self.options['initial_time']
+        final_time = self.options['final_time']
 
         num_step_vars = method.num_values
 
@@ -58,8 +58,8 @@ class Integrator(Group):
 
         starting_norm_times, my_norm_times = self._get_meta()
         stage_norm_times = self._get_stage_norm_times()
-        all_norm_times = self.metadata['all_norm_times']
-        normalized_times = self.metadata['normalized_times']
+        all_norm_times = self.options['all_norm_times']
+        normalized_times = self.options['normalized_times']
 
         # ------------------------------------------------------------------------------------
         # Check starting_coeffs
@@ -194,11 +194,11 @@ class Integrator(Group):
 
     def _get_names(self, variable_type, comp, type_, i_step=None, i_stage=None, j_stage=None):
         if variable_type == 'states':
-            variables_dict = self.metadata['ode_function']._states
+            variables_dict = self.options['ode_function']._states
         elif variable_type == 'static_parameters':
-            variables_dict = self.metadata['ode_function']._static_parameters
+            variables_dict = self.options['ode_function']._static_parameters
         elif variable_type == 'dynamic_parameters':
-            variables_dict = self.metadata['ode_function']._dynamic_parameters
+            variables_dict = self.options['ode_function']._dynamic_parameters
 
         names_list = []
         for variable_name, variable in iteritems(variables_dict):
@@ -224,12 +224,12 @@ class Integrator(Group):
                 self.connect(srcs, tgts, src_indices=src_indices, flat_src_indices=True)
 
     def _create_ode(self, num):
-        ode_function = self.metadata['ode_function']
+        ode_function = self.options['ode_function']
         return ode_function._system_class(num_nodes=num, **ode_function._system_init_kwargs)
 
     def _get_meta(self):
-        method = self.metadata['method']
-        normalized_times = self.metadata['normalized_times']
+        method = self.options['method']
+        normalized_times = self.options['normalized_times']
 
         has_starting_method = method.starting_method is not None
 
@@ -241,14 +241,14 @@ class Integrator(Group):
         return normalized_times[:start_time_index+1], normalized_times[start_time_index:]
 
     def _get_method(self):
-        method = self.metadata['method']
+        method = self.options['method']
 
         return method.A, method.B, method.U, method.V, method.num_stages, method.num_values
 
     def _get_stage_norm_times(self):
         starting_norm_times, my_norm_times = self._get_meta()
 
-        abscissa = self.metadata['method'].abscissa
+        abscissa = self.options['method'].abscissa
 
         repeated_times1 = np.repeat(my_norm_times[:-1], len(abscissa))
         repeated_times2 = np.repeat(my_norm_times[1:], len(abscissa))
