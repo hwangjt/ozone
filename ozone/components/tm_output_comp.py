@@ -92,8 +92,8 @@ class TMOutputComp(ExplicitComponent):
                 y_name = get_name('y', state_name, i_step=i_step)
 
                 data = np.ones(size)
-                rows = state_arange[i_step + num_starting_times - 1, :]
-                cols = y_arange[0, :]
+                rows = (state_arange[i_step + num_starting_times - 1, :]).flatten()
+                cols = (y_arange[0, :]).flatten()
 
                 self.declare_partials(out_state_name, y_name, val=data, rows=rows, cols=cols)
 
