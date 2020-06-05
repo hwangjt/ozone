@@ -58,8 +58,16 @@ class DynamicParameterComp(ExplicitComponent):
             self.declare_partials(out_name, in_name, val=data, rows=rows, cols=cols)
 
     def compute(self, inputs, outputs):
+        normalized_times = self.options['normalized_times']
+        stage_norm_times = self.options['stage_norm_times']
+
+        num_times = len(normalized_times)
+        num_stage_times = len(stage_norm_times)
+
         for parameter_name, parameter in iteritems(self.options['dynamic_parameters']):
+            size = np.prod(parameter['shape'])
+            shape = parameter['shape']
             in_name = get_name('in', parameter_name)
             out_name = get_name('out', parameter_name)
 
-            outputs[out_name] = self.mtx.dot(inputs[in_name])
+            outputs[out_name] = self.mtx.dot(inputs[in_name].reshape((num_times, size))).reshape((num_stage_times,) + shape)
