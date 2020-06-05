@@ -100,7 +100,7 @@ class ExplicitTMIntegrator(Integrator):
 
                         arange = np.arange(((len(my_norm_times) - 1) * num_stages * size)).reshape(
                             ((len(my_norm_times) - 1, num_stages,) + shape))
-                        src_indices = arange[i_step, i_stage, :]
+                        src_indices = arange[i_step, i_stage, :].reshape((1,) + shape)
                         src_indices_list.append(src_indices)
                     self._connect_multiple(
                         self._get_dynamic_parameter_names('dynamic_parameter_comp', 'out'),
